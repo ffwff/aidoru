@@ -3,19 +3,13 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 import sys
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        QMainWindow.__init__(self)
+class MiniPlayer(QWidget):
 
-        self.setMinimumSize(QSize(300, 475))
-        self.setWindowTitle("Hello world")
 
-        centralWidget = QWidget(self)
-        centralWidget.setStyleSheet("""
-QWidget {
-    background: #fff;
-    color: #000;
-}
+    def __init__(self, parent=None, microMode=False):
+        QWidget.__init__(self, parent)
+
+        self.setStyleSheet("""
 QSlider{
 margin-top:-6px;
 }
@@ -34,47 +28,50 @@ QSlider::handle:horizontal {
     border-radius: 100%;
 }
 """)
-        self.setCentralWidget(centralWidget)
         vboxLayout = QVBoxLayout(self)
         vboxLayout.setContentsMargins(0, 0, 0, 0)
         vboxLayout.setSpacing(0)
-        centralWidget.setLayout(vboxLayout)
+        self.setLayout(vboxLayout)
 
         # song info
-        coverLabelContainer = QWidget(self)
-        coverLabelContainer.setStyleSheet("background: #000;")
-        coverLabelContainerL = QHBoxLayout(self)
-        coverLabelContainerL.setSpacing(0)
-        coverLabelContainerL.setContentsMargins(0, 0, 0, 0)
-        coverLabelContainer.setLayout(coverLabelContainerL)
-        vboxLayout.addWidget(coverLabelContainer)
-
-        coverLabelContainerL.addStretch()
-        coverLabel = QLabel(coverLabelContainer)
-        coverLabel.setPixmap(QPixmap.fromImage(QImage("./cover.jpg")).scaledToWidth(300, Qt.SmoothTransformation))
-        coverLabel.setMinimumSize(QSize(300, 300))
-        coverLabel.setMaximumSize(QSize(300, 300))
-        coverLabelContainerL.addWidget(coverLabel)
-        coverLabelContainerL.addStretch()
-
         slider = QSlider(Qt.Horizontal, self)
         slider.setMinimum(0)
         slider.setMaximum(1024)
         slider.setValue(512)
         slider.setTracking(True)
-        vboxLayout.addWidget(slider)
 
-        vboxLayout.addStretch()
-
-        albumLabel = QLabel("Album title", self)
-        albumLabel.setStyleSheet("font-size: 16px; margin-bottom: 5px;")
+        albumLabel = QLabel("Album title")
         albumLabel.setAlignment(Qt.AlignCenter)
-        vboxLayout.addWidget(albumLabel)
 
-        artistLabel = QLabel("Artist name", self)
-        artistLabel.setStyleSheet("font-size: 12px; margin-bottom: 15px;")
-        artistLabel.setAlignment(Qt.AlignCenter)
-        vboxLayout.addWidget(artistLabel)
+        if not microMode:
+            artistLabel = QLabel("Artist name")
+            artistLabel.setAlignment(Qt.AlignCenter)
+
+        if microMode:
+            vboxLayout.addWidget(slider)
+        else:
+            coverLabelContainer = QWidget(self)
+            coverLabelContainer.setStyleSheet("background: #000;")
+            coverLabelContainerL = QHBoxLayout(self)
+            coverLabelContainerL.setSpacing(0)
+            coverLabelContainerL.setContentsMargins(0, 0, 0, 0)
+            coverLabelContainer.setLayout(coverLabelContainerL)
+
+            coverLabelContainerL.addStretch()
+            coverLabel = QLabel(coverLabelContainer)
+            coverLabel.setPixmap(QPixmap.fromImage(QImage("./cover.jpg")).scaledToWidth(300, Qt.SmoothTransformation))
+            coverLabel.setMinimumSize(QSize(300, 300))
+            coverLabel.setMaximumSize(QSize(300, 300))
+            coverLabelContainerL.addWidget(coverLabel)
+            coverLabelContainerL.addStretch()
+            vboxLayout.addWidget(coverLabelContainer)
+
+            vboxLayout.addWidget(slider)
+            vboxLayout.addStretch()
+            vboxLayout.addWidget(albumLabel)
+            albumLabel.setStyleSheet("font-size: 16px; margin-bottom: 5px;")
+            vboxLayout.addWidget(artistLabel)
+            artistLabel.setStyleSheet("font-size: 12px; margin-bottom: 15px;")
 
         # buttons
         buttonsWidget = QWidget(self)
@@ -90,20 +87,43 @@ QPushButton {
         buttonsLayout = QHBoxLayout(self)
         buttonsWidget.setLayout(buttonsLayout)
         vboxLayout.addWidget(buttonsWidget)
-        buttonsLayout.addStretch()
 
         backButton = QPushButton(QIcon.fromTheme("media-skip-backward"), "", self)
-        buttonsLayout.addWidget(backButton)
 
         ppButton = QPushButton(QIcon.fromTheme("media-playback-start"), "", self)
-        buttonsLayout.addWidget(ppButton)
 
         forwardButton = QPushButton(QIcon.fromTheme("media-skip-forward"), "", self)
-        buttonsLayout.addWidget(forwardButton)
 
-        buttonsLayout.addStretch()
+        if microMode:
+            buttonsLayout.addWidget(backButton)
+            buttonsLayout.addWidget(ppButton)
+            buttonsLayout.addWidget(forwardButton)
+            buttonsLayout.addStretch()
+            buttonsLayout.addWidget(albumLabel)
+            albumLabel.setStyleSheet("font-size: 12px;")
+            buttonsLayout.addStretch()
+        else:
+            buttonsLayout.addStretch()
+            buttonsLayout.addWidget(backButton)
+            buttonsLayout.addWidget(ppButton)
+            buttonsLayout.addWidget(forwardButton)
+            buttonsLayout.addStretch()
+
 
         vboxLayout.addStretch()
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        QMainWindow.__init__(self)
+
+        self.setMinimumSize(QSize(300, 475))
+        #self.setMinimumSize(QSize(300, 45))
+        #self.setMaximumSize(QSize(300, 45))
+        self.setWindowTitle("Hello world")
+        self.setStyleSheet("background: #fff; color: #000;")
+
+        self.centralWidget = MiniPlayer(self, False)
+        self.setCentralWidget(self.centralWidget)
 
 app = QApplication(sys.argv)
 win = MainWindow()
