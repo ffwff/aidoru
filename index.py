@@ -3,24 +3,26 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 import sys
 
-class MiniPlayer(QWidget):
+# base player widget
+class PlayerWidget(QWidget):
 
+    # modes
+    MAIN_MODE   = 0
+    MICRO_MODE  = 1
+    WIDGET_MODE = 2
 
-    def __init__(self, parent=None, microMode=False):
+    def __init__(self, parent=None, mode=MAIN_MODE):
         QWidget.__init__(self, parent)
 
         self.setStyleSheet("""
-QSlider{
-margin-top:-6px;
-}
 QSlider::groove:horizontal {
     height: 6px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
     background: #c4c4c4;
     margin: 0 0;
 }
 QSlider::sub-page:horizontal {
-background: red;
-border-radius: 4px;
+    background: red;
+    border-radius: 4px;
 }
 QSlider::handle:horizontal {
     background: blue;
@@ -34,22 +36,26 @@ QSlider::handle:horizontal {
         self.setLayout(vboxLayout)
 
         # song info
-        slider = QSlider(Qt.Horizontal, self)
+        slider = QSlider(Qt.Horizontal)
         slider.setMinimum(0)
         slider.setMaximum(1024)
         slider.setValue(512)
         slider.setTracking(True)
+        if mode != PlayerWidget.WIDGET_MODE:
+            slider.setStyleSheet("margin-top:-6px;")
 
         albumLabel = QLabel("Album title")
         albumLabel.setAlignment(Qt.AlignCenter)
 
-        if not microMode:
+        if mode == PlayerWidget.MAIN_MODE:
             artistLabel = QLabel("Artist name")
             artistLabel.setAlignment(Qt.AlignCenter)
-
-        if microMode:
-            vboxLayout.addWidget(slider)
         else:
+            albumLabel.setText("Artist title − Artist name")
+
+        if mode == PlayerWidget.MICRO_MODE:
+            vboxLayout.addWidget(slider)
+        elif mode == PlayerWidget.MAIN_MODE:
             coverLabelContainer = QWidget(self)
             coverLabelContainer.setStyleSheet("background: #000;")
             coverLabelContainerL = QHBoxLayout(self)
@@ -74,7 +80,7 @@ QSlider::handle:horizontal {
             artistLabel.setStyleSheet("font-size: 12px; margin-bottom: 15px;")
 
         # buttons
-        buttonsWidget = QWidget(self)
+        buttonsWidget = QWidget()
         buttonsWidget.setStyleSheet("""
 QPushButton {
     width: 24px;
@@ -86,15 +92,15 @@ QPushButton {
 
         buttonsLayout = QHBoxLayout(self)
         buttonsWidget.setLayout(buttonsLayout)
-        vboxLayout.addWidget(buttonsWidget)
 
-        backButton = QPushButton(QIcon.fromTheme("media-skip-backward"), "", self)
+        backButton = QPushButton(QIcon.fromTheme("media-skip-backward"), "")
 
-        ppButton = QPushButton(QIcon.fromTheme("media-playback-start"), "", self)
+        ppButton = QPushButton(QIcon.fromTheme("media-playback-start"), "")
 
-        forwardButton = QPushButton(QIcon.fromTheme("media-skip-forward"), "", self)
+        forwardButton = QPushButton(QIcon.fromTheme("media-skip-forward"), "")
 
-        if microMode:
+        if mode == PlayerWidget.MICRO_MODE:
+            vboxLayout.addWidget(buttonsWidget)
             buttonsLayout.addWidget(backButton)
             buttonsLayout.addWidget(ppButton)
             buttonsLayout.addWidget(forwardButton)
@@ -102,27 +108,63 @@ QPushButton {
             buttonsLayout.addWidget(albumLabel)
             albumLabel.setStyleSheet("font-size: 12px;")
             buttonsLayout.addStretch()
-        else:
+        elif mode == PlayerWidget.MAIN_MODE:
+            vboxLayout.addWidget(buttonsWidget)
             buttonsLayout.addStretch()
             buttonsLayout.addWidget(backButton)
             buttonsLayout.addWidget(ppButton)
             buttonsLayout.addWidget(forwardButton)
             buttonsLayout.addStretch()
 
+        if mode != PlayerWidget.WIDGET_MODE:
+            vboxLayout.addStretch()
 
-        vboxLayout.addStretch()
+        # widget mode - separated because it's fundamentally different
+        if mode == PlayerWidget.WIDGET_MODE:
+            vboxLayout.addStretch()
+
+            vboxLayout.addWidget(albumLabel)
+            vboxLayout.addWidget(buttonsWidget)
+
+            buttonsLayout.addWidget(backButton)
+            buttonsLayout.addWidget(ppButton)
+            buttonsLayout.addWidget(forwardButton)
+
+            buttonsLayout.addWidget(slider)
+
+            volumeButton = QPushButton(QIcon.fromTheme("audio-volume-muted"), "")
+            buttonsLayout.addWidget(volumeButton)
+            volumeSlider = QSlider(Qt.Horizontal)
+            volumeSlider.setStyleSheet("max-width: 100%;")
+            buttonsLayout.addWidget(volumeSlider)
+
+            vboxLayout.addStretch()
+
+# application widget
+class MediaPlayer(QWidget):
+
+    def __init__(self, parent=None):
+        QWidget.__init__(self, parent)
+
+        vboxLayout = QVBoxLayout()
+        self.setLayout(vboxLayout)
+
+        self.playerWidget = PlayerWidget(self, PlayerWidget.WIDGET_MODE)
+        vboxLayout.addWidget(self.playerWidget)
 
 class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
 
+        #self.setMinimumSize(QSize(1200, 900))
         self.setMinimumSize(QSize(300, 475))
         #self.setMinimumSize(QSize(300, 45))
         #self.setMaximumSize(QSize(300, 45))
         self.setWindowTitle("Hello world")
         self.setStyleSheet("background: #fff; color: #000;")
 
-        self.centralWidget = MiniPlayer(self, False)
+        self.centralWidget = PlayerWidget(self, PlayerWidget.MAIN_MODE)
+        #self.centralWidget = MediaPlayer(self)
         self.setCentralWidget(self.centralWidget)
 
 app = QApplication(sys.argv)
