@@ -18,6 +18,8 @@ def clearLayout(layout):
         if child.widget():
             child.widget().deleteLater()
 
+UNKNOWN_TEXT = "<i>unknown</i>"
+
 @total_ordering
 class MediaInfo(object):
 
@@ -33,11 +35,7 @@ class MediaInfo(object):
 
     def fromFile(path):
         song = taglib.File(path)
-        artist = "unknown"
-        if "ALBUMARTIST" in song.tags:
-            artist = song.tags["ALBUMARTIST"][0]
-        elif "ARTIST" in song.tags:
-            artist = song.tags["ARTIST"][0]
+        artist = song.tags["ARTIST"][0] if "ARTIST" in song.tags else None
         title = song.tags["TITLE"][0] if "TITLE" in song.tags else os.path.basename(path)
         searchPath = path_up(path)
         # find cover art
@@ -306,9 +304,12 @@ QPushButton {
     def updateInfo(self, mediaInfo):
         if hasattr(self, "artistLabel"):
             self.albumLabel.setText(mediaInfo.title)
-            self.artistLabel.setText(mediaInfo.artist)
+            self.artistLabel.setText(mediaInfo.artist if mediaInfo.artist else UNKNOWN_TEXT)
         else:
-            self.albumLabel.setText(mediaInfo.title + " − " + mediaInfo.artist)
+            if mediaInfo.artist:
+                self.albumLabel.setText(mediaInfo.title + " − " + mediaInfo.artist)
+            else:
+                self.albumLabel.setText(mediaInfo.title)
         if hasattr(self, "coverLabel"):
             self.coverLabel.setPixmap(QPixmap.fromImage(QImage(mediaInfo.image)).scaledToWidth(300, Qt.SmoothTransformation))
 
@@ -328,14 +329,17 @@ class MediaLabel(QLabel):
 """
 <table>
 <tr>
-    <td width='250'>%s</td>
-    <td>%s</td>
+    <td width='250' style='max-width: 250px;'>%s</td>
+    <td style='text-align: right;'>%s</td>
 </tr>
+%s
+</table>
+""" % (self.media.title, self.media.duration.strftime("%M:%S"),
+"""
 <tr>
     <td>%s</td>
 </tr>
-</table>
-""" % (self.media.title, self.media.duration.strftime("%M:%S"), self.media.artist))
+""" % (self.media.artist,) if self.media.artist else ""))
 
     # activity
     def setActive(self, active):
@@ -387,7 +391,7 @@ class PlayingAlbumView(QWidget):
         self.scrollArea = scrollArea = QScrollArea()
         scrollArea.setWidgetResizable(True)
         scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scrollArea.setMinimumSize(QSize(320, 300))
+        scrollArea.setMinimumSize(QSize(310, 300))
         scrollArea.hide()
         scrollArea.setStyleSheet("""
 QScrollArea{
@@ -425,6 +429,8 @@ color: #fff;
         if mediaInfo.image:
             self.coverLabel.setPixmap(QPixmap.fromImage(QImage(mediaInfo.image)).scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation))
             self.coverLabel.show()
+        else:
+            self.coverLabel.hide()
         self.albumLabel.setText(mediaInfo.album)
         self.albumArtistLabel.setText(mediaInfo.albumArtist)
 
