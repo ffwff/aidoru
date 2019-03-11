@@ -21,11 +21,13 @@ def clearLayout(layout):
 @total_ordering
 class MediaInfo(object):
 
-    def __init__(self, path, pos, title, artist, duration, image):
+    def __init__(self, path, pos, title, artist, album, albumArtist, duration, image):
         self.path = path
         self.pos = pos
         self.title = title
         self.artist = artist
+        self.album = album
+        self.albumArtist = albumArtist
         self.duration = duration
         self.image = image
 
@@ -36,7 +38,7 @@ class MediaInfo(object):
             artist = song.tags["ALBUMARTIST"][0]
         elif "ARTIST" in song.tags:
             artist = song.tags["ARTIST"][0]
-        title = song.tags["TITLE"][0] if "TITLE" in song.tags else path
+        title = song.tags["TITLE"][0] if "TITLE" in song.tags else os.path.basename(path)
         searchPath = path_up(path)
         # find cover art
         paths = list(filter(lambda path: \
@@ -55,8 +57,20 @@ class MediaInfo(object):
             imagePath = find_path()
         else:
             imagePath = None
-        pos = int(song.tags["TRACKNUMBER"][0]) if song.tags["TRACKNUMBER"] else -1
-        return MediaInfo(path, pos, title, artist, datetime.datetime.fromtimestamp(song.length),
+        pos = -1
+        if "TRACKNUMBER" in song.tags:
+            try:
+                if "/" in song.tags["TRACKNUMBER"][0]:
+                    pos = int(song.tags["TRACKNUMBER"][0].split("/")[0])
+                else:
+                    pos = int(song.tags["TRACKNUMBER"][0])
+            except ValueError:
+                pass
+        album = song.tags["ALBUM"][0] if "ALBUM" in song.tags else title
+        albumArtist = song.tags["ALBUMARTIST"][0] if "ALBUMARTIST" in song.tags else artist
+        return MediaInfo(path, pos, title, artist,
+                         album, albumArtist,
+                         datetime.datetime.fromtimestamp(song.length),
                          os.path.join(searchPath, imagePath) if imagePath else None)
 
     # comparators
@@ -231,7 +245,7 @@ QPushButton {
 
         # controls button
         self.backButton.clicked.connect(self.backButtonClicked)
-        self.ppButton.clicked.connect(self.ppButtonClicked)
+        self.ppButton.clicked.connect(MainWindow.getInstance().playPause)
         media.stateChanged.connect(self.stateChanged)
         self.forwardButton.clicked.connect(self.forwardButtonClicked)
         if hasattr(self, "volumeButton"):
@@ -267,12 +281,6 @@ QPushButton {
     def forwardButtonClicked(self):
         MainWindow.getInstance().albumNext()
 
-    def ppButtonClicked(self):
-        media = MainWindow.getInstance().media
-        if media.state() == QMediaPlayer.PlayingState:
-            media.pause()
-        else:
-            media.play()
     def stateChanged(self, state):
         if state == QMediaPlayer.PlayingState:
             self.ppButton.setIcon(QIcon.fromTheme("media-playback-pause"))
@@ -417,8 +425,8 @@ color: #fff;
         if mediaInfo.image:
             self.coverLabel.setPixmap(QPixmap.fromImage(QImage(mediaInfo.image)).scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation))
             self.coverLabel.show()
-        self.albumLabel.setText(mediaInfo.title)
-        self.albumArtistLabel.setText(mediaInfo.artist)
+        self.albumLabel.setText(mediaInfo.album)
+        self.albumArtistLabel.setText(mediaInfo.albumArtist)
 
         # album
         mainWindow = MainWindow.getInstance()
@@ -492,12 +500,16 @@ class MainWindow(QMainWindow):
         self.album = []
         self.albumPath = ""
 
-        self.setWindowTitle("Hello world")
+        self.setWindowTitle("aidoru~~")
         self.setStyleSheet("background: #fff; color: #000;")
         self.setMode(MainWindow.FULL_MODE)
 
         self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
 
+        QShortcut(QKeySequence("Ctrl+Q"), self).activated \
+            .connect(sys.exit)
+        QShortcut(QKeySequence("Space"), self).activated \
+            .connect(self.playPause)
         QShortcut(QKeySequence("Ctrl+Shift+F"), self).activated \
             .connect(lambda: self.setMode(MainWindow.FULL_MODE))
         QShortcut(QKeySequence("Ctrl+M"), self).activated \
@@ -524,6 +536,13 @@ class MainWindow(QMainWindow):
         if self.mediaInfo: self.songInfoChanged.emit(self.mediaInfo)
         self.media.durationChanged.emit(self.media.duration())
         self.media.positionChanged.emit(self.media.position())
+
+    # playback
+    def playPause(self):
+        if self.media.state() == QMediaPlayer.PlayingState:
+            self.media.pause()
+        else:
+            self.media.play()
 
     # song info
     songInfoChanged = pyqtSignal(MediaInfo)
