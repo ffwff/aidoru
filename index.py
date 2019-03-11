@@ -9,7 +9,8 @@ import urllib.parse
 
 class MediaInfo(object):
 
-    def __init__(self, title, artist, image=None):
+    def __init__(self, path, title, artist, image=None):
+        self.path = path
         self.title = title
         self.artist = artist
         self.image = image
@@ -39,7 +40,7 @@ class MediaInfo(object):
             imagePath = find_path()
         else:
             imagePath = None
-        return MediaInfo(title, artist,
+        return MediaInfo(path, title, artist,
                          os.path.join(searchPath, imagePath) if imagePath else None)
 
 # base player widget
@@ -305,32 +306,24 @@ QPushButton {
             self.setSong(text[7:])
 
 # media label
-class MediaLabel(QWidget):
+class MediaLabel(QLabel):
 
-    def __init__(self, media):
-        QWidget.__init__(self)
+    def __init__(self, media, parent):
+        QLabel.__init__(self, parent)
         
         self.media = media
-        
-        layout = QHBoxLayout()
-        layout.setContentsMargins(0, 5, 0, 0)
-        layout.setSpacing(0)
-        self.setLayout(layout)
-        
-        self.titlebar = QLabel(media.title)
-        # TODO:
-        self.titlebar.setMinimumSize(QSize(300, 40))
-        self.titlebar.setMaximumSize(QSize(300, 40))
-        layout.addWidget(self.titlebar)
-        
-        self.length = QLabel("04:45")
-        self.titlebar.setMinimumSize(QSize(300, 40))
-        layout.addWidget(self.length)
-        
-        self.setStyleSheet("""
-background: red;
-padding: 0 10px;
-""")
+        self.setText(
+"""
+<table> 
+<tr>
+    <td width='250'>%s</td>
+    <td>%s</td>
+</tr>
+<tr>
+    <td>%s</td>
+</tr>
+</table>
+""" % (media.title, "00:00", media.artist))
     
     def mousePressEvent(self, e):
         print("press")
@@ -369,16 +362,26 @@ class PlayingAlbumView(QWidget):
 
         # media box
         mediaBox = QWidget()
+        mediaBox.setStyleSheet(
+"""
+QLabel{
+padding: 5px    ;
+}
+QLabel:hover {
+background: red;
+}
+""")
+        mediaBox.setObjectName("mediaBox")
         mediaBoxL = QVBoxLayout()
         mediaBox.setLayout(mediaBoxL)
         hboxLayout.addWidget(mediaBox)
 
-        for media in [MediaInfo("Lorem ipsum blah blah", "blah blah"),
-                      MediaInfo("blah blah blah blah", "blah blahblah blah"),
-                      MediaInfo("blah blah blah blah", "blah blahblah blah"),
-                      MediaInfo("blah blah blah blah", "blah blahblah blah"),
-                      MediaInfo("blah blah blah blah", "blah blahblah blah")]:
-            mediaBoxL.addWidget(MediaLabel(media))
+        for media in [MediaInfo("", "Lorem ipsum blah blah", "blah blah"),
+                      MediaInfo("", "blah blah blah blah", "blah blahblah blah"),
+                      MediaInfo("", "blah blah blah blah", "blah blahblah blah"),
+                      MediaInfo("", "blah blah blah blah", "blah blahblah blah"),
+                      MediaInfo("", "blah blah blah blah", "blah blahblah blah")]:
+            mediaBoxL.addWidget(MediaLabel(media, self))
             
         mediaBoxL.addStretch(1)
     
@@ -431,6 +434,7 @@ class MediaPlayer(QWidget):
         self.playerWidget.dropEvent(e)
 
 class MainWindow(QMainWindow):
+
     def __init__(self):
         QMainWindow.__init__(self)
 
