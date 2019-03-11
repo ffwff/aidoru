@@ -5,6 +5,7 @@ from PyQt5.QtMultimedia import *
 import taglib
 import sys
 import os
+import urllib.parse
 
 class MediaInfo(object):
 
@@ -12,6 +13,34 @@ class MediaInfo(object):
         self.title = title
         self.artist = artist
         self.image = image
+    
+    def fromFile(path):
+        song = taglib.File(path)
+        artist = "unknown"
+        if "ALBUMARTIST" in song.tags:
+            artist = song.tags["ALBUMARTIST"][0]
+        elif "ARTIST" in song.tags:
+            artist = song.tags["ARTIST"][0]
+        title = song.tags["TITLE"][0] if "TITLE" in song.tags else path
+        searchPath = os.path.normpath(os.path.join(path, ".."))
+        # find cover art
+        paths = list(filter(lambda path: \
+                        path.endswith(".jpg") or \
+                        path.endswith(".jpeg") or \
+                        path.endswith(".png"), os.listdir(searchPath)))
+        if paths:
+            prioritize = ["Cover.", "cover.", "CD."]
+            def find_path():
+                for path in paths:
+                    for priority in prioritize:
+                        if path.startswith(priority):
+                            return path
+                return paths[0]
+            imagePath = find_path()
+        else:
+            imagePath = None
+        return MediaInfo(title, artist,
+                         os.path.join(searchPath, imagePath) if imagePath else None)
 
 # base player widget
 class PlayerWidget(QWidget):
@@ -50,8 +79,7 @@ QSlider::handle:horizontal {
 
         # events
         self.stateChanged(self.media.state())
-        if hasattr(self, "volumeButton"):
-            self.mutedChanged(self.media.isMuted())
+        if hasattr(self, "volumeButton"): self.mutedChanged(self.media.isMuted())
         self.bindEvents()
 
         # song
@@ -185,8 +213,15 @@ QPushButton {
             self.media.mutedChanged.connect(self.mutedChanged)
         if hasattr(self, "volumeSlider"):
             self.volumeSlider.valueChanged.connect(self.volumeSliderChanged)
+            
+        # misc
+        self.media.error.connect(self.mediaError)
 
     # events
+    # media
+    def mediaError(self, e):
+        print("error", e)
+    
     ## position slider
     def durationChanged(self, duration):
         self.positionSlider.setMaximum(duration)
@@ -242,45 +277,20 @@ QPushButton {
             self.coverLabel.setPixmap(QPixmap.fromImage(QImage(imagePath)).scaledToWidth(300, Qt.SmoothTransformation))
 
     # song info
-    songInfoChanged = pyqtSignal()
+    songInfoChanged = pyqtSignal(MediaInfo)
 
     def setSong(self, path):
-        mediaContent = QMediaContent(QUrl("file://" + path))
+        path = urllib.parse.unquote(path.strip())
+        mediaContent = QMediaContent(QUrl.fromLocalFile(path))
         self.media.setMedia(mediaContent)
         self.media.play()
         self.setSongInfo(path)
+        self.stateChanged(self.media.state())
 
     def setSongInfo(self, path):
-        song = taglib.File(path)
-        artist = ""
-        if "ALBUMARTIST" in song.tags:
-            artist = song.tags["ALBUMARTIST"][0]
-        elif "ARTIST" in song.tags:
-            artist = song.tags["ARTIST"][0]
-        title = path
-        if "TITLE" in song.tags:
-            title = song.tags["TITLE"][0]
-        searchPath = os.path.normpath(os.path.join(path, ".."))
-        # find cover art
-        paths = list(filter(lambda path: \
-                        path.endswith(".jpg") or \
-                        path.endswith(".jpeg") or \
-                        path.endswith(".png"), os.listdir(searchPath)))
-        if paths:
-            prioritize = ["Cover.", "cover.", "CD."]
-            def find_path():
-                for path in paths:
-                    for priority in prioritize:
-                        if path.startswith(priority):
-                            return path
-                return paths[0]
-            imagePath = find_path()
-        else:
-            imagePath = None
-        self.mediaInfo = MediaInfo(title, artist,
-                                   os.path.join(searchPath, imagePath) if imagePath else None)
-        self.songInfoChanged.emit()
-        self.updateInfo(title, artist, self.mediaInfo.image)
+        self.mediaInfo = MediaInfo.fromFile(path)
+        self.updateInfo(self.mediaInfo.title, self.mediaInfo.artist, self.mediaInfo.image)
+        self.songInfoChanged.emit(self.mediaInfo)
 
     # dnd
     def dragEnterEvent(self, e):
@@ -294,27 +304,52 @@ QPushButton {
         if text.startswith("file://"):
             self.setSong(text[7:])
 
+# media label
+class MediaLabel(QWidget):
 
-# application widget
-class MediaPlayer(QWidget):
+    def __init__(self, media):
+        QWidget.__init__(self)
+        
+        self.media = media
+        
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 5, 0, 0)
+        layout.setSpacing(0)
+        self.setLayout(layout)
+        
+        self.titlebar = QLabel(media.title)
+        # TODO:
+        self.titlebar.setMinimumSize(QSize(300, 40))
+        self.titlebar.setMaximumSize(QSize(300, 40))
+        layout.addWidget(self.titlebar)
+        
+        self.length = QLabel("04:45")
+        self.titlebar.setMinimumSize(QSize(300, 40))
+        layout.addWidget(self.length)
+        
+        self.setStyleSheet("""
+background: red;
+padding: 0 10px;
+""")
+    
+    def mousePressEvent(self, e):
+        print("press")
 
+# album view
+class PlayingAlbumView(QWidget):
+    
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
-
-        self.setAcceptDrops(True)
-
-        # ui
+        
         vboxLayout = QVBoxLayout()
         self.setLayout(vboxLayout)
-
-        vboxLayout.addStretch(1)
-
-        albumLabel = QLabel("test")
+        
+        self.albumLabel = albumLabel = QLabel("test")
         albumLabel.setAlignment(Qt.AlignCenter)
         albumLabel.setStyleSheet("font-size: 24px;")
         vboxLayout.addWidget(albumLabel)
 
-        albumArtistLabel = QLabel("test")
+        self.albumArtistLabel = albumArtistLabel = QLabel("test")
         albumArtistLabel.setAlignment(Qt.AlignCenter)
         albumArtistLabel.setStyleSheet("font-size: 12px;")
         vboxLayout.addWidget(albumArtistLabel)
@@ -338,21 +373,55 @@ class MediaPlayer(QWidget):
         mediaBox.setLayout(mediaBoxL)
         hboxLayout.addWidget(mediaBox)
 
-        mediaBoxL.addWidget(QLabel("test"))
+        for media in [MediaInfo("Lorem ipsum blah blah", "blah blah"),
+                      MediaInfo("blah blah blah blah", "blah blahblah blah"),
+                      MediaInfo("blah blah blah blah", "blah blahblah blah"),
+                      MediaInfo("blah blah blah blah", "blah blahblah blah"),
+                      MediaInfo("blah blah blah blah", "blah blahblah blah")]:
+            mediaBoxL.addWidget(MediaLabel(media))
+            
         mediaBoxL.addStretch(1)
+    
+    def songInfoChanged(self, mediaInfo):
+        if mediaInfo.image:
+            self.coverLabel.setPixmap(QPixmap.fromImage(QImage(mediaInfo.image)).scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation))
+            self.coverLabel.show()
+        #TODO:
+        self.albumLabel.setText(mediaInfo.title)
+        self.albumArtistLabel.setText(mediaInfo.artist)
+
+# application widget
+class MediaPlayer(QWidget):
+
+    def __init__(self, parent=None):
+        QWidget.__init__(self, parent)
+
+        self.setAcceptDrops(True)
+
+        # ui
+        vboxLayout = QVBoxLayout()
+        self.setLayout(vboxLayout)
+
+        vboxLayout.addStretch(1)
+        self.view = PlayingAlbumView()
+        vboxLayout.addWidget(self.view)
 
         #
         vboxLayout.addStretch(1)
 
         self.playerWidget = PlayerWidget(self, PlayerWidget.WIDGET_MODE)
-        self.playerWidget.songInfoChanged.connect(self.songInfoChanged)
+        self.playerWidget.songInfoChanged.connect(self.view.songInfoChanged)
         vboxLayout.addWidget(self.playerWidget)
 
-
-    def songInfoChanged(self):
-        if self.playerWidget.mediaInfo.image:
-            self.coverLabel.setPixmap(QPixmap.fromImage(QImage(self.playerWidget.mediaInfo.image)).scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation))
-            self.coverLabel.show()
+    # files
+    def populateMedias(self, path):
+        self.medias = []
+        for f in os.listdir(path):
+            if os.path.isdir(f):
+                populateMedias(f)
+            else:
+                # TODO add files
+                pass
 
     # dnd
     def dragEnterEvent(self, e):
@@ -366,7 +435,7 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self)
 
         #full version
-        self.setMinimumSize(QSize(1200, 900))
+        self.resize(QSize(1200, 900))
 
         # mini version
         #self.setMinimumSize(QSize(300, 475))
