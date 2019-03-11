@@ -120,11 +120,11 @@ QSlider::handle:horizontal {
         if self.mode != PlayerWidget.WIDGET_MODE:
             slider.setStyleSheet("margin-top:-6px;")
 
-        self.albumLabel = albumLabel = QLabel()
+        self.albumLabel = albumLabel = QLabel("no title")
         albumLabel.setAlignment(Qt.AlignCenter)
 
         if self.mode == PlayerWidget.MAIN_MODE:
-            self.artistLabel = artistLabel = QLabel()
+            self.artistLabel = artistLabel = QLabel("no name")
             artistLabel.setAlignment(Qt.AlignCenter)
 
         if self.mode == PlayerWidget.MICRO_MODE:
@@ -496,7 +496,12 @@ class MainWindow(QMainWindow):
         self.setStyleSheet("background: #fff; color: #000;")
         self.setMode(MainWindow.FULL_MODE)
 
-        self.media.stateChanged.connect(self.stateChanged)
+        QShortcut(QKeySequence("Ctrl+Shift+F"), self).activated \
+            .connect(lambda: self.setMode(MainWindow.FULL_MODE))
+        QShortcut(QKeySequence("Ctrl+M"), self).activated \
+            .connect(lambda: self.setMode(MainWindow.MINI_MODE))
+        QShortcut(QKeySequence("Ctrl+Shift+M"), self).activated \
+            .connect(lambda: self.setMode(MainWindow.MICRO_MODE))
 
     def setMode(self, mode):
         if mode == MainWindow.FULL_MODE:
@@ -504,12 +509,19 @@ class MainWindow(QMainWindow):
             self.centralWidget = MediaPlayer(self)
         elif mode == MainWindow.MINI_MODE:
             self.setMinimumSize(QSize(300, 475))
+            self.resize(QSize(300, 475))
             self.centralWidget = PlayerWidget(self, PlayerWidget.MAIN_MODE)
         elif mode == MainWindow.MICRO_MODE:
-            self.setMinimumSize(QSize(300, 45))
-            self.resize(QSize(300, 45))
+            self.setMinimumSize(QSize(300, 65))
+            self.resize(QSize(300, 65))
             self.centralWidget = PlayerWidget(self, PlayerWidget.MICRO_MODE)
         self.setCentralWidget(self.centralWidget)
+        # reemit events to redraw ui
+        self.albumPath = ""
+        if self.album: self.albumChanged.emit(self.album)
+        if self.mediaInfo: self.songInfoChanged.emit(self.mediaInfo)
+        self.media.durationChanged.emit(self.media.duration())
+        self.media.positionChanged.emit(self.media.position())
 
     # song info
     songInfoChanged = pyqtSignal(MediaInfo)
@@ -525,10 +537,6 @@ class MainWindow(QMainWindow):
     def setSongInfo(self, path):
         self.mediaInfo = MediaInfo.fromFile(path)
         self.songInfoChanged.emit(self.mediaInfo)
-
-    def stateChanged(self, state):
-        if state == QMediaPlayer.StoppedState and self.album:
-            self.albumNext()
 
     # dnd
     def dragEnterEvent(self, e):
