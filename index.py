@@ -6,6 +6,13 @@ import taglib
 import sys
 import os
 
+class MediaInfo(object):
+
+    def __init__(self, title, artist, image=None):
+        self.title = title
+        self.artist = artist
+        self.image = image
+
 # base player widget
 class PlayerWidget(QWidget):
 
@@ -19,6 +26,7 @@ class PlayerWidget(QWidget):
 
         # media player
         self.media = QMediaPlayer()
+        self.mediaInfo = None
         self.mode = mode
         self.setAcceptDrops(True)
 
@@ -26,7 +34,7 @@ class PlayerWidget(QWidget):
         self.setStyleSheet("""
 QSlider::groove:horizontal {
     height: 6px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
-    background: #c4c4c4;
+    background: rgba(0, 0, 0, 0.2);
     margin: 0 0;
 }
 QSlider::sub-page:horizontal {
@@ -38,6 +46,18 @@ QSlider::handle:horizontal {
     width: 6px;
 }
 """)
+        self.initUI()
+
+        # events
+        self.stateChanged(self.media.state())
+        if hasattr(self, "volumeButton"):
+            self.mutedChanged(self.media.isMuted())
+        self.bindEvents()
+
+        # song
+        self.updateInfo("no title", "no name", "")
+
+    def initUI(self):
         vboxLayout = QVBoxLayout(self)
         vboxLayout.setContentsMargins(0, 0, 0, 0)
         vboxLayout.setSpacing(0)
@@ -46,19 +66,19 @@ QSlider::handle:horizontal {
         # song info
         self.positionSlider = slider = QSlider(Qt.Horizontal)
         slider.setTracking(True)
-        if mode != PlayerWidget.WIDGET_MODE:
+        if self.mode != PlayerWidget.WIDGET_MODE:
             slider.setStyleSheet("margin-top:-6px;")
 
         self.albumLabel = albumLabel = QLabel()
         albumLabel.setAlignment(Qt.AlignCenter)
 
-        if mode == PlayerWidget.MAIN_MODE:
+        if self.mode == PlayerWidget.MAIN_MODE:
             self.artistLabel = artistLabel = QLabel()
             artistLabel.setAlignment(Qt.AlignCenter)
 
-        if mode == PlayerWidget.MICRO_MODE:
+        if self.mode == PlayerWidget.MICRO_MODE:
             vboxLayout.addWidget(slider)
-        elif mode == PlayerWidget.MAIN_MODE:
+        elif self.mode == PlayerWidget.MAIN_MODE:
             coverLabelContainer = QWidget(self)
             coverLabelContainer.setStyleSheet("background: #000;")
             coverLabelContainerL = QHBoxLayout(self)
@@ -100,7 +120,7 @@ QPushButton {
 
         self.forwardButton = forwardButton = QPushButton(QIcon.fromTheme("media-skip-forward"), "")
 
-        if mode == PlayerWidget.MICRO_MODE:
+        if self.mode == PlayerWidget.MICRO_MODE:
             vboxLayout.addWidget(buttonsWidget)
             buttonsLayout.addWidget(backButton)
             buttonsLayout.addWidget(ppButton)
@@ -109,7 +129,7 @@ QPushButton {
             buttonsLayout.addWidget(albumLabel)
             albumLabel.setStyleSheet("font-size: 12px;")
             buttonsLayout.addStretch()
-        elif mode == PlayerWidget.MAIN_MODE:
+        elif self.mode == PlayerWidget.MAIN_MODE:
             vboxLayout.addWidget(buttonsWidget)
             buttonsLayout.addStretch()
             buttonsLayout.addWidget(backButton)
@@ -117,11 +137,11 @@ QPushButton {
             buttonsLayout.addWidget(forwardButton)
             buttonsLayout.addStretch()
 
-        if mode != PlayerWidget.WIDGET_MODE:
+        if self.mode != PlayerWidget.WIDGET_MODE:
             vboxLayout.addStretch()
 
         # widget mode - separated because it's fundamentally different
-        if mode == PlayerWidget.WIDGET_MODE:
+        if self.mode == PlayerWidget.WIDGET_MODE:
             vboxLayout.addStretch()
 
             vboxLayout.addWidget(albumLabel)
@@ -144,15 +164,9 @@ QPushButton {
 
             vboxLayout.addStretch()
 
-        # events
-        self.stateChanged(self.media.state())
-        if hasattr(self, "volumeButton"):
-            self.mutedChanged(self.media.isMuted())
-        self.bindEvents()
-
-        # song
-        #self.setSong()
-        self.updateInfo("no title", "no name", "")
+    def setMode(self, mode):
+        self.mode = mode
+        self.initUI()
 
     def bindEvents(self):
         # song info
@@ -219,7 +233,6 @@ QPushButton {
 
     # ui elements
     def updateInfo(self, title, artist, imagePath):
-        print(imagePath)
         if hasattr(self, "artistLabel"):
             self.albumLabel.setText(title)
             self.artistLabel.setText(artist)
@@ -229,6 +242,8 @@ QPushButton {
             self.coverLabel.setPixmap(QPixmap.fromImage(QImage(imagePath)).scaledToWidth(300, Qt.SmoothTransformation))
 
     # song info
+    songInfoChanged = pyqtSignal()
+
     def setSong(self, path):
         mediaContent = QMediaContent(QUrl("file://" + path))
         self.media.setMedia(mediaContent)
@@ -262,7 +277,10 @@ QPushButton {
             imagePath = find_path()
         else:
             imagePath = None
-        self.updateInfo(title, artist, os.path.join(searchPath, imagePath) if imagePath else None)
+        self.mediaInfo = MediaInfo(title, artist,
+                                   os.path.join(searchPath, imagePath) if imagePath else None)
+        self.songInfoChanged.emit()
+        self.updateInfo(title, artist, self.mediaInfo.image)
 
     # dnd
     def dragEnterEvent(self, e):
@@ -283,25 +301,85 @@ class MediaPlayer(QWidget):
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
 
+        self.setAcceptDrops(True)
+
+        # ui
         vboxLayout = QVBoxLayout()
         self.setLayout(vboxLayout)
 
+        vboxLayout.addStretch(1)
+
+        albumLabel = QLabel("test")
+        albumLabel.setAlignment(Qt.AlignCenter)
+        albumLabel.setStyleSheet("font-size: 24px;")
+        vboxLayout.addWidget(albumLabel)
+
+        albumArtistLabel = QLabel("test")
+        albumArtistLabel.setAlignment(Qt.AlignCenter)
+        albumArtistLabel.setStyleSheet("font-size: 12px;")
+        vboxLayout.addWidget(albumArtistLabel)
+
+        #
+        hbox = QWidget()
+        vboxLayout.addWidget(hbox)
+        vboxLayout.setAlignment(hbox,Qt.AlignCenter)
+        hboxLayout = QHBoxLayout()
+        hbox.setLayout(hboxLayout)
+
+        self.coverLabel = coverLabel = QLabel()
+        coverLabel.setMinimumSize(QSize(400, 400))
+        coverLabel.setMaximumSize(QSize(400, 400))
+        coverLabel.hide()
+        hboxLayout.addWidget(coverLabel)
+
+        # media box
+        mediaBox = QWidget()
+        mediaBoxL = QVBoxLayout()
+        mediaBox.setLayout(mediaBoxL)
+        hboxLayout.addWidget(mediaBox)
+
+        mediaBoxL.addWidget(QLabel("test"))
+        mediaBoxL.addStretch(1)
+
+        #
+        vboxLayout.addStretch(1)
+
         self.playerWidget = PlayerWidget(self, PlayerWidget.WIDGET_MODE)
+        self.playerWidget.songInfoChanged.connect(self.songInfoChanged)
         vboxLayout.addWidget(self.playerWidget)
+
+
+    def songInfoChanged(self):
+        if self.playerWidget.mediaInfo.image:
+            self.coverLabel.setPixmap(QPixmap.fromImage(QImage(self.playerWidget.mediaInfo.image)).scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation))
+            self.coverLabel.show()
+
+    # dnd
+    def dragEnterEvent(self, e):
+        self.playerWidget.dragEnterEvent(e)
+
+    def dropEvent(self, e):
+        self.playerWidget.dropEvent(e)
 
 class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
 
-        #self.setMinimumSize(QSize(1200, 900))
-        self.setMinimumSize(QSize(300, 475))
+        #full version
+        self.setMinimumSize(QSize(1200, 900))
+
+        # mini version
+        #self.setMinimumSize(QSize(300, 475))
+
+        # micro version
         #self.setMinimumSize(QSize(300, 45))
         #self.setMaximumSize(QSize(300, 45))
+
         self.setWindowTitle("Hello world")
         self.setStyleSheet("background: #fff; color: #000;")
 
-        self.centralWidget = PlayerWidget(self, PlayerWidget.MAIN_MODE)
-        #self.centralWidget = MediaPlayer(self)
+        #self.centralWidget = PlayerWidget(self, PlayerWidget.MAIN_MODE)
+        self.centralWidget = MediaPlayer(self)
         self.setCentralWidget(self.centralWidget)
 
 app = QApplication(sys.argv)
