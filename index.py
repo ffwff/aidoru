@@ -6,15 +6,26 @@ import taglib
 import sys
 import os
 import urllib.parse
+import datetime
+
+def path_up(path):
+    return os.path.normpath(os.path.join(path, ".."))
+
+def clearLayout(layout):
+    while layout.count():
+        child = layout.takeAt(0)
+        if child.widget():
+            child.widget().deleteLater()
 
 class MediaInfo(object):
 
-    def __init__(self, path, title, artist, image=None):
+    def __init__(self, path, title, artist, duration, image):
         self.path = path
         self.title = title
         self.artist = artist
+        self.duration = duration
         self.image = image
-    
+
     def fromFile(path):
         song = taglib.File(path)
         artist = "unknown"
@@ -23,14 +34,15 @@ class MediaInfo(object):
         elif "ARTIST" in song.tags:
             artist = song.tags["ARTIST"][0]
         title = song.tags["TITLE"][0] if "TITLE" in song.tags else path
-        searchPath = os.path.normpath(os.path.join(path, ".."))
+        searchPath = path_up(path)
         # find cover art
         paths = list(filter(lambda path: \
                         path.endswith(".jpg") or \
                         path.endswith(".jpeg") or \
-                        path.endswith(".png"), os.listdir(searchPath)))
+                        path.endswith(".png") or \
+                        path.endswith(".bmp"), os.listdir(searchPath)))
         if paths:
-            prioritize = ["Cover.", "cover.", "CD."]
+            prioritize = ["Case Cover Back Outer", "Cover.", "cover.", "CD."]
             def find_path():
                 for path in paths:
                     for priority in prioritize:
@@ -40,7 +52,7 @@ class MediaInfo(object):
             imagePath = find_path()
         else:
             imagePath = None
-        return MediaInfo(path, title, artist,
+        return MediaInfo(path, title, artist, datetime.datetime.fromtimestamp(song.length),
                          os.path.join(searchPath, imagePath) if imagePath else None)
 
 # base player widget
@@ -63,7 +75,7 @@ class PlayerWidget(QWidget):
         # ui elements
         self.setStyleSheet("""
 QSlider::groove:horizontal {
-    height: 6px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+    height: 6px;
     background: rgba(0, 0, 0, 0.2);
     margin: 0 0;
 }
@@ -187,7 +199,7 @@ QPushButton {
             self.volumeSlider = volumeSlider = QSlider(Qt.Horizontal)
             volumeSlider.setStyleSheet("max-width: 100%;")
             volumeSlider.setMinimum(0)
-            volumeSlider.setMaximum(200)
+            volumeSlider.setMaximum(100)
             volumeSlider.setValue(100)
             buttonsLayout.addWidget(volumeSlider)
 
@@ -214,7 +226,7 @@ QPushButton {
             self.media.mutedChanged.connect(self.mutedChanged)
         if hasattr(self, "volumeSlider"):
             self.volumeSlider.valueChanged.connect(self.volumeSliderChanged)
-            
+
         # misc
         self.media.error.connect(self.mediaError)
 
@@ -222,7 +234,7 @@ QPushButton {
     # media
     def mediaError(self, e):
         print("error", e)
-    
+
     ## position slider
     def durationChanged(self, duration):
         self.positionSlider.setMaximum(duration)
@@ -310,11 +322,11 @@ class MediaLabel(QLabel):
 
     def __init__(self, media, parent):
         QLabel.__init__(self, parent)
-        
+
         self.media = media
         self.setText(
 """
-<table> 
+<table>
 <tr>
     <td width='250'>%s</td>
     <td>%s</td>
@@ -323,26 +335,26 @@ class MediaLabel(QLabel):
     <td>%s</td>
 </tr>
 </table>
-""" % (media.title, "00:00", media.artist))
-    
+""" % (media.title, media.duration.strftime("%M:%S"), media.artist))
+
     def mousePressEvent(self, e):
-        print("press")
+        pass
 
 # album view
 class PlayingAlbumView(QWidget):
-    
+
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
-        
+
         vboxLayout = QVBoxLayout()
         self.setLayout(vboxLayout)
-        
-        self.albumLabel = albumLabel = QLabel("test")
+
+        self.albumLabel = albumLabel = QLabel("no title")
         albumLabel.setAlignment(Qt.AlignCenter)
         albumLabel.setStyleSheet("font-size: 24px;")
         vboxLayout.addWidget(albumLabel)
 
-        self.albumArtistLabel = albumArtistLabel = QLabel("test")
+        self.albumArtistLabel = albumArtistLabel = QLabel("no name")
         albumArtistLabel.setAlignment(Qt.AlignCenter)
         albumArtistLabel.setStyleSheet("font-size: 12px;")
         vboxLayout.addWidget(albumArtistLabel)
@@ -361,37 +373,58 @@ class PlayingAlbumView(QWidget):
         hboxLayout.addWidget(coverLabel)
 
         # media box
+        self.scrollArea = scrollArea = QScrollArea()
+        scrollArea.setWidgetResizable(True)
+        scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scrollArea.setMinimumSize(QSize(310, 300))
+        scrollArea.hide()
+        scrollArea.setStyleSheet("""
+QScrollArea{
+border:0 none;
+margin-right: 5px;
+}
+QScrollBar::handle {
+    background: #9fabb3;
+}
+""")
+        hboxLayout.addWidget(scrollArea)
+
         mediaBox = QWidget()
+        scrollArea.setWidget(mediaBox)
         mediaBox.setStyleSheet(
 """
 QLabel{
-padding: 5px    ;
+padding: 5px;
 }
 QLabel:hover {
-background: red;
+background: #9fabb3;
+color: #fff;
 }
 """)
-        mediaBox.setObjectName("mediaBox")
-        mediaBoxL = QVBoxLayout()
+        self.mediaBoxL = mediaBoxL = QVBoxLayout()
         mediaBox.setLayout(mediaBoxL)
-        hboxLayout.addWidget(mediaBox)
-
-        for media in [MediaInfo("", "Lorem ipsum blah blah", "blah blah"),
-                      MediaInfo("", "blah blah blah blah", "blah blahblah blah"),
-                      MediaInfo("", "blah blah blah blah", "blah blahblah blah"),
-                      MediaInfo("", "blah blah blah blah", "blah blahblah blah"),
-                      MediaInfo("", "blah blah blah blah", "blah blahblah blah")]:
-            mediaBoxL.addWidget(MediaLabel(media, self))
-            
         mediaBoxL.addStretch(1)
-    
+
     def songInfoChanged(self, mediaInfo):
         if mediaInfo.image:
             self.coverLabel.setPixmap(QPixmap.fromImage(QImage(mediaInfo.image)).scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation))
             self.coverLabel.show()
-        #TODO:
         self.albumLabel.setText(mediaInfo.title)
         self.albumArtistLabel.setText(mediaInfo.artist)
+        self.populateAlbum(mediaInfo.path)
+
+    def populateAlbum(self, path):
+        clearLayout(self.mediaBoxL)
+        search_path = path_up(path)
+        self.scrollArea.show()
+        for f in os.listdir(search_path):
+            fpath = os.path.join(search_path, f)
+            if  os.path.isfile(fpath) and \
+                (f.endswith(".mp3") or f.endswith(".flac") or f.endswith(".m4a")): # TODO
+                mediaInfo = MediaInfo.fromFile(fpath)
+                self.mediaBoxL.addWidget(MediaLabel(mediaInfo, self))
+        self.mediaBoxL.addStretch(1)
+
 
 # application widget
 class MediaPlayer(QWidget):
