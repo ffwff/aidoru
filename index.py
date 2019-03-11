@@ -117,7 +117,8 @@ QSlider::handle:horizontal {
 
         # events
         self.stateChanged(MainWindow.getInstance().media.state())
-        if hasattr(self, "volumeButton"): self.mutedChanged(MainWindow.getInstance().media.isMuted())
+        if hasattr(self, "volumeButton"):
+            self.mutedChanged(MainWindow.getInstance().media.isMuted())
         self.bindEvents()
 
     def initUI(self):
@@ -177,11 +178,11 @@ QPushButton {
         buttonsLayout = QHBoxLayout(self)
         buttonsWidget.setLayout(buttonsLayout)
 
-        self.backButton = backButton = QPushButton(QIcon.fromTheme("media-skip-backward"), "")
+        self.backButton = backButton = QPushButton(QIcon("./icons/media-skip-backward"), "")
 
         self.ppButton = ppButton = QPushButton()
 
-        self.forwardButton = forwardButton = QPushButton(QIcon.fromTheme("media-skip-forward"), "")
+        self.forwardButton = forwardButton = QPushButton(QIcon("./icons/media-skip-forward"), "")
 
         if self.mode == PlayerWidget.MICRO_MODE:
             vboxLayout.addWidget(buttonsWidget)
@@ -281,16 +282,16 @@ QPushButton {
 
     def stateChanged(self, state):
         if state == QMediaPlayer.PlayingState:
-            self.ppButton.setIcon(QIcon.fromTheme("media-playback-pause"))
+            self.ppButton.setIcon(QIcon("./icons/media-playback-pause"))
         else:
-            self.ppButton.setIcon(QIcon.fromTheme("media-playback-start"))
+            self.ppButton.setIcon(QIcon("./icons/media-playback-start"))
 
     ## volume mute
     def mutedChanged(self, muted):
         if muted:
-            self.volumeButton.setIcon(QIcon.fromTheme("audio-volume-muted"))
+            self.volumeButton.setIcon(QIcon("./icons/audio-volume-muted"))
         else:
-            self.volumeButton.setIcon(QIcon.fromTheme("audio-volume-high"))
+            self.volumeButton.setIcon(QIcon("./icons/audio-volume-high"))
 
     def volumeButtonClicked(self):
         media = MainWindow.getInstance().media
