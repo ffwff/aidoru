@@ -496,6 +496,8 @@ class MainWindow(QMainWindow):
         self.setStyleSheet("background: #fff; color: #000;")
         self.setMode(MainWindow.FULL_MODE)
 
+        self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
+
         QShortcut(QKeySequence("Ctrl+Shift+F"), self).activated \
             .connect(lambda: self.setMode(MainWindow.FULL_MODE))
         QShortcut(QKeySequence("Ctrl+M"), self).activated \
@@ -565,6 +567,10 @@ class MainWindow(QMainWindow):
         self.album.sort()
         self.albumChanged.emit(self.album)
         self.albumPath = path
+
+    def mediaStatusChanged(self, status):
+        if status == QMediaPlayer.EndOfMedia and self.album:
+            self.albumNext()
 
     def songIndexAlbum(self):
         for i, info in enumerate(self.album):
