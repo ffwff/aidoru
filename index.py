@@ -18,6 +18,10 @@ def clearLayout(layout):
         if child.widget():
             child.widget().deleteLater()
 
+mimeDatabase = QMimeDatabase()
+def getFileType(f):
+    return mimeDatabase.mimeTypesForFileName(f)[0].name().split("/")[0]
+
 UNKNOWN_TEXT = "<i>unknown</i>"
 
 @total_ordering
@@ -39,11 +43,7 @@ class MediaInfo(object):
         title = song.tags["TITLE"][0] if "TITLE" in song.tags else os.path.basename(path)
         searchPath = path_up(path)
         # find cover art
-        paths = list(filter(lambda path: \
-                        path.endswith(".jpg") or \
-                        path.endswith(".jpeg") or \
-                        path.endswith(".png") or \
-                        path.endswith(".bmp"), os.listdir(searchPath)))
+        paths = list(filter(lambda path: getFileType(path) == "image", os.listdir(searchPath)))
         if paths:
             prioritize = ["Case Cover Back Outer", "Cover.", "cover.", "CD."]
             def find_path():
@@ -312,7 +312,7 @@ QPushButton {
             else:
                 self.albumLabel.setText(mediaInfo.title)
         if hasattr(self, "coverLabel"):
-            self.coverLabel.setPixmap(QPixmap.fromImage(QImage(mediaInfo.image)).scaledToWidth(300, Qt.SmoothTransformation))
+            self.coverLabel.setPixmap(QPixmap.fromImage(QImage(mediaInfo.image)).scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation))
 
 
 # media label
@@ -555,6 +555,7 @@ class MainWindow(QMainWindow):
     songInfoChanged = pyqtSignal(MediaInfo)
 
     def setSong(self, path):
+        print(self.album)
         path = urllib.parse.unquote(path.strip())
         mediaContent = QMediaContent(QUrl.fromLocalFile(path))
         self.media.setMedia(mediaContent)
@@ -582,12 +583,11 @@ class MainWindow(QMainWindow):
     albumChanged = pyqtSignal(list)
     def populateAlbum(self, path):
         if self.albumPath == path: return
-        search_path = path_up(path)
         self.album.clear()
+        search_path = path_up(path)
         for f in os.listdir(search_path):
             fpath = os.path.join(search_path, f)
-            if  os.path.isfile(fpath) and \
-                (f.endswith(".mp3") or f.endswith(".flac") or f.endswith(".m4a")): # TODO
+            if os.path.isfile(fpath) and getFileType(fpath) == "audio":
                 mediaInfo = MediaInfo.fromFile(fpath)
                 self.album.append(mediaInfo)
         self.album.sort()
@@ -605,14 +605,16 @@ class MainWindow(QMainWindow):
         return -1
 
     def albumNext(self):
-        idx = self.songIndexAlbum() + 1
-        if 0 <= idx < len(self.album):
-            self.setSong(self.album[idx].path)
+        idx = self.songIndexAlbum()
+        if idx == -1: return
+        if 0 <= idx+1 < len(self.album):
+            self.setSong(self.album[idx+1].path)
 
     def albumPrev(self):
-        idx = self.songIndexAlbum() - 1
-        if 0 <= idx < len(self.album):
-            self.setSong(self.album[idx].path)
+        idx = self.songIndexAlbum()
+        if idx == -1: return
+        if 0 <= idx-1 < len(self.album):
+            self.setSong(self.album[idx-1].path)
 
 app = QApplication(sys.argv)
 win = MainWindow()
