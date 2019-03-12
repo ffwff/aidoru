@@ -206,8 +206,6 @@ QPushButton {
 
         # widget mode - separated because it's fundamentally different
         if self.mode == PlayerWidget.WIDGET_MODE:
-            vboxLayout.addStretch()
-
             vboxLayout.addWidget(albumLabel)
             vboxLayout.addWidget(buttonsWidget)
 
@@ -225,8 +223,6 @@ QPushButton {
             volumeSlider.setMaximum(100)
             volumeSlider.setValue(100)
             buttonsLayout.addWidget(volumeSlider)
-
-            vboxLayout.addStretch()
 
     def setMode(self, mode):
         self.mode = mode
@@ -338,7 +334,7 @@ class MediaLabel(QLabel):
 """ % (self.media.title, self.media.duration.strftime("%M:%S"),
 """
 <tr>
-    <td>%s</td>
+    <td colspan='2'>%s</td>
 </tr>
 """ % (self.media.artist,) if self.media.artist else ""))
 
@@ -364,6 +360,8 @@ class PlayingAlbumView(QWidget):
     def initUI(self):
         vboxLayout = QVBoxLayout()
         self.setLayout(vboxLayout)
+        
+        vboxLayout.addStretch(1)
 
         self.albumLabel = albumLabel = QLabel("no title")
         albumLabel.setAlignment(Qt.AlignCenter)
@@ -421,6 +419,8 @@ color: #fff;
         mediaBox.setLayout(mediaBoxL)
         mediaBoxL.addStretch(1)
         self.mediaLabels = []
+        
+        vboxLayout.addStretch(1)
 
     def bindEvents(self):
         MainWindow.getInstance().albumChanged.connect(self.populateAlbum)
@@ -441,7 +441,6 @@ color: #fff;
         for mediaLabel in self.mediaLabels:
             mediaLabel.setActive(mediaLabel.media == mediaInfo)
 
-
     def populateAlbum(self, path):
         self.scrollArea.show()
         self.mediaLabels.clear()
@@ -452,6 +451,18 @@ color: #fff;
             self.mediaLabels.append(mediaLabel)
         self.mediaBoxL.addStretch(1)
 
+# file list view
+class FileListView(QWidget):
+
+    def __init__(self, parent=None):
+        self.initUI()
+        self.bindEvents()
+    
+    def initUI(self):
+        pass
+        
+    def bindEvents(self):
+        pass
 
 # application widget
 class MediaPlayer(QWidget):
@@ -462,12 +473,8 @@ class MediaPlayer(QWidget):
         vboxLayout = QVBoxLayout()
         self.setLayout(vboxLayout)
 
-        vboxLayout.addStretch(1)
         self.view = PlayingAlbumView()
         vboxLayout.addWidget(self.view)
-
-        #
-        vboxLayout.addStretch(1)
 
         self.playerWidget = PlayerWidget(self, PlayerWidget.WIDGET_MODE)
         vboxLayout.addWidget(self.playerWidget)
