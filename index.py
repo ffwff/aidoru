@@ -41,7 +41,10 @@ class MediaInfo(object):
         self.image = image
 
     def fromFile(path):
-        song = taglib.File(path)
+        try:
+            song = taglib.File(path)
+        except OSError:
+            return None
         artist = song.tags["ARTIST"][0] if "ARTIST" in song.tags else None
         title = song.tags["TITLE"][0] if "TITLE" in song.tags else os.path.basename(path)
         searchPath = path_up(path)
@@ -67,11 +70,11 @@ class MediaInfo(object):
                     pos = int(song.tags["TRACKNUMBER"][0])
             except ValueError:
                 pass
-        album = song.tags["ALBUM"][0] if "ALBUM" in song.tags else title
+        album = song.tags["ALBUM"][0] if "ALBUM" in song.tags else ""
         albumArtist = song.tags["ALBUMARTIST"][0] if "ALBUMARTIST" in song.tags else artist
         try:
             year = int(song.tags["DATE"][0])
-        except ValueError:
+        except:
             year = -1
         return MediaInfo(path, pos, title, artist,
                          album, albumArtist,
@@ -81,7 +84,7 @@ class MediaInfo(object):
 
     # comparators
     def __lt__(self, other):
-        if self.pos != -1 and other.pos != -1:
+        if self.album == other.album and self.pos != -1 and other.pos != -1:
             return self.pos < other.pos
         return self.title < other.title
 
@@ -151,7 +154,7 @@ QSlider::handle:horizontal {
         if self.mode == PlayerWidget.MICRO_MODE:
             vboxLayout.addWidget(slider)
         elif self.mode == PlayerWidget.MAIN_MODE:
-            coverLabelContainer = QWidget(self)
+            self.coverLabelContainer = coverLabelContainer = QWidget(self)
             coverLabelContainer.setStyleSheet("background: #000;")
             coverLabelContainerL = QHBoxLayout(self)
             coverLabelContainerL.setSpacing(0)
@@ -316,7 +319,10 @@ QPushButton {
             else:
                 self.albumLabel.setText(mediaInfo.title)
         if hasattr(self, "coverLabel"):
-            self.coverLabel.setPixmap(QPixmap.fromImage(QImage(mediaInfo.image)).scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation))
+            pixmap = QPixmap.fromImage(QImage(mediaInfo.image)) \
+                .scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation)
+            self.coverLabel.setPixmap(pixmap)
+            self.coverLabelContainer.resize(QSize(self.coverLabel.width(), pixmap.height()))
 
 
 # media label
@@ -468,6 +474,8 @@ class FileListTableItemDelegate(QStyledItemDelegate):
         option.state &= ~QStyle.State_HasFocus
         if option.styleObject.hoverRow == index.row():
             option.state |= QStyle.State_MouseOver
+        elif index.column() == option.styleObject.columnCount()-1:
+            option.state &= ~QStyle.State_MouseOver
         QStyledItemDelegate.paint(self, painter, option, index)
 
 class FileListTableWidget(QTableWidget):
@@ -501,18 +509,7 @@ background: #778791;
         self.hoverRow = -1
         self.setItemDelegate(FileListTableItemDelegate())
         self.nrows = 0
-
-    # events
-    def mouseMoveEvent(self, e):
-        QTableView.mouseMoveEvent(self, e)
-        index = self.indexAt(e.pos())
-        self.hoverRow = index.row()
-
-    def mousePressEvent(self, e):
-        QTableView.mousePressEvent(self, e)
-        index = self.indexAt(e.pos())
-        mainWindow = MainWindow.getInstance()
-        mainWindow.setSong(mainWindow.medias[index.row()].path)
+        self.mediaRow = []
 
     # add item
     def addMedia(self, mediaInfo):
@@ -524,7 +521,25 @@ background: #778791;
         self.setItem(self.nrows, 4, QTableWidgetItem(mediaInfo.albumArtist))
         self.setItem(self.nrows, 5, QTableWidgetItem(str(mediaInfo.year) if mediaInfo.year != -1 else ""))
         self.setItem(self.nrows, 6, QTableWidgetItem("")) # filler
+        self.resizeRowToContents(self.nrows)
+        self.mediaRow.append(mediaInfo)
         self.nrows += 1
+
+    # events
+    def mouseMoveEvent(self, e):
+        QTableView.mouseMoveEvent(self, e)
+        index = self.indexAt(e.pos())
+        if index.column() == self.columnCount()-1:
+            self.hoverRow = -1
+        else:
+            self.hoverRow = index.row()
+
+    def mousePressEvent(self, e):
+        QTableView.mousePressEvent(self, e)
+        index = self.indexAt(e.pos())
+        mainWindow = MainWindow.getInstance()
+        if self.mediaRow:
+            mainWindow.setSong(self.mediaRow[index.row()].path)
 
 
 class FileListView(QWidget):
@@ -541,12 +556,12 @@ class FileListView(QWidget):
         self.tableWidget = tableWidget = FileListTableWidget()
         vboxLayout.addWidget(tableWidget)
 
-        for media in MainWindow.getInstance().medias:
-            tableWidget.addMedia(media)
-        tableWidget.resizeRowsToContents()
+        mainWindow = MainWindow.getInstance()
+        for media in mainWindow.medias:
+            self.tableWidget.addMedia(media)
 
     def bindEvents(self):
-        pass
+        MainWindow.getInstance().mediaAdded.connect(self.tableWidget.addMedia)
 
 # application widget
 class MediaPlayer(QWidget):
@@ -591,7 +606,9 @@ class MainWindow(QMainWindow):
         self.setStyleSheet("background: #fff; color: #000;")
         self.setMode(MainWindow.FULL_MODE)
 
+        # events
         self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
+        self.mediaAdded.connect(self.onMediaAdded)
 
         QShortcut(QKeySequence("Ctrl+Q"), self).activated \
             .connect(sys.exit)
@@ -603,6 +620,18 @@ class MainWindow(QMainWindow):
             .connect(lambda: self.setMode(MainWindow.MINI_MODE))
         QShortcut(QKeySequence("Ctrl+Shift+M"), self).activated \
             .connect(lambda: self.setMode(MainWindow.MICRO_MODE))
+
+        class PopulateMediaThread(QThread):
+
+            def destroy(self_):
+                del self._thread
+
+            def run(self_):
+                self.populateMedias("/home/user/Music")
+
+        self._thread = PopulateMediaThread()
+        self._thread.start()
+        self._thread.finished.connect(self._thread.destroy)
 
     def setMode(self, mode):
         if mode == MainWindow.FULL_MODE:
@@ -697,14 +726,18 @@ class MainWindow(QMainWindow):
             self.setSong(self.album[idx-1].path)
 
     # files
+    mediaAdded = pyqtSignal(MediaInfo)
     def populateMedias(self, path):
         for f in os.listdir(path):
             fpath = os.path.join(path, f)
             if os.path.isdir(fpath):
                 self.populateMedias(fpath)
-            elif getFileType(fpath) == "audio":
+            elif os.access(fpath, os.R_OK) and getFileType(fpath) == "audio":
                 mediaInfo = MediaInfo.fromFile(fpath)
-                self.medias.append(mediaInfo)
+                if mediaInfo: self.mediaAdded.emit(mediaInfo)
+
+    def onMediaAdded(self, mediaInfo):
+        self.medias.append(mediaInfo)
 
 app = QApplication(sys.argv)
 win = MainWindow()
