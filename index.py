@@ -20,7 +20,9 @@ def clearLayout(layout):
 
 mimeDatabase = QMimeDatabase()
 def getFileType(f):
-    return mimeDatabase.mimeTypesForFileName(f)[0].name().split("/")[0]
+    mime = mimeDatabase.mimeTypesForFileName(f)
+    if not mime: return ""
+    return mime[0].name().split("/")[0]
 
 UNKNOWN_TEXT = "<i>unknown</i>"
 
@@ -68,13 +70,14 @@ class MediaInfo(object):
         album = song.tags["ALBUM"][0] if "ALBUM" in song.tags else title
         albumArtist = song.tags["ALBUMARTIST"][0] if "ALBUMARTIST" in song.tags else artist
         try:
-            year = int(song.tags["YEAR"][0])
+            year = int(song.tags["DATE"][0])
         except ValueError:
             year = -1
         return MediaInfo(path, pos, title, artist,
                          album, albumArtist,
                          datetime.datetime.fromtimestamp(song.length),
-                         os.path.join(searchPath, imagePath) if imagePath else None)
+                         os.path.join(searchPath, imagePath) if imagePath else None,
+                         year)
 
     # comparators
     def __lt__(self, other):
@@ -475,19 +478,24 @@ class FileListTableWidget(QTableWidget):
 QTableWidget {
 border: 0;
 }
+
+QScrollBar::handle {
+    background: #9fabb3;
+}
 ::item:hover {
-background: red;
+background: #9fabb3;
 }
 ::item:selected{
-background: blue;
+background: #778791;
 }
 """)
         self.setMouseTracking(True)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.verticalHeader().setVisible(False)
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.horizontalHeader().setVisible(False)
-        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.horizontalHeader().setStretchLastSection(True)
+        self.setEditTriggers(QAbstractItemView.NoEditTriggers);
         self.setShowGrid(False)
 
         self.hoverRow = -1
@@ -499,6 +507,12 @@ background: blue;
         QTableView.mouseMoveEvent(self, e)
         index = self.indexAt(e.pos())
         self.hoverRow = index.row()
+
+    def mousePressEvent(self, e):
+        QTableView.mousePressEvent(self, e)
+        index = self.indexAt(e.pos())
+        mainWindow = MainWindow.getInstance()
+        mainWindow.setSong(mainWindow.medias[index.row()].path)
 
     # add item
     def addMedia(self, mediaInfo):
@@ -527,9 +541,9 @@ class FileListView(QWidget):
         self.tableWidget = tableWidget = FileListTableWidget()
         vboxLayout.addWidget(tableWidget)
 
-        #def __init__(self, path, pos, title, artist, album, albumArtist, duration, image, year=0):
-        for i in range(10):
-            tableWidget.addMedia(MediaInfo("",i,str(i),"1","1","1",datetime.datetime.fromtimestamp(2000),"",2000))
+        for media in MainWindow.getInstance().medias:
+            tableWidget.addMedia(media)
+        tableWidget.resizeRowsToContents()
 
     def bindEvents(self):
         pass
@@ -548,16 +562,6 @@ class MediaPlayer(QWidget):
 
         self.playerWidget = PlayerWidget(self, PlayerWidget.WIDGET_MODE)
         vboxLayout.addWidget(self.playerWidget)
-
-    # files
-    def populateMedias(self, path):
-        self.medias = []
-        for f in os.listdir(path):
-            if os.path.isdir(f):
-                populateMedias(f)
-            else:
-                # TODO add files
-                pass
 
 class MainWindow(QMainWindow):
 
@@ -581,6 +585,7 @@ class MainWindow(QMainWindow):
         self.mediaInfo = None
         self.album = []
         self.albumPath = ""
+        self.medias = [] # medias in scan directory
 
         self.setWindowTitle("aidoru~~")
         self.setStyleSheet("background: #fff; color: #000;")
@@ -690,6 +695,16 @@ class MainWindow(QMainWindow):
         if idx == -1: return
         if 0 <= idx-1 < len(self.album):
             self.setSong(self.album[idx-1].path)
+
+    # files
+    def populateMedias(self, path):
+        for f in os.listdir(path):
+            fpath = os.path.join(path, f)
+            if os.path.isdir(fpath):
+                self.populateMedias(fpath)
+            elif getFileType(fpath) == "audio":
+                mediaInfo = MediaInfo.fromFile(fpath)
+                self.medias.append(mediaInfo)
 
 app = QApplication(sys.argv)
 win = MainWindow()
