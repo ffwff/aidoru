@@ -27,13 +27,14 @@ UNKNOWN_TEXT = "<i>unknown</i>"
 @total_ordering
 class MediaInfo(object):
 
-    def __init__(self, path, pos, title, artist, album, albumArtist, duration, image):
+    def __init__(self, path, pos, title, artist, album, albumArtist, duration, image, year=0):
         self.path = path
         self.pos = pos
         self.title = title
         self.artist = artist
         self.album = album
         self.albumArtist = albumArtist
+        self.year = year
         self.duration = duration
         self.image = image
 
@@ -66,6 +67,10 @@ class MediaInfo(object):
                 pass
         album = song.tags["ALBUM"][0] if "ALBUM" in song.tags else title
         albumArtist = song.tags["ALBUMARTIST"][0] if "ALBUMARTIST" in song.tags else artist
+        try:
+            year = int(song.tags["YEAR"][0])
+        except ValueError:
+            year = -1
         return MediaInfo(path, pos, title, artist,
                          album, albumArtist,
                          datetime.datetime.fromtimestamp(song.length),
@@ -360,7 +365,7 @@ class PlayingAlbumView(QWidget):
     def initUI(self):
         vboxLayout = QVBoxLayout()
         self.setLayout(vboxLayout)
-        
+
         vboxLayout.addStretch(1)
 
         self.albumLabel = albumLabel = QLabel("no title")
@@ -419,11 +424,13 @@ color: #fff;
         mediaBox.setLayout(mediaBoxL)
         mediaBoxL.addStretch(1)
         self.mediaLabels = []
-        
+
         vboxLayout.addStretch(1)
 
     def bindEvents(self):
-        MainWindow.getInstance().albumChanged.connect(self.populateAlbum)
+        mainWindow = MainWindow.getInstance()
+        mainWindow.albumChanged.connect(self.populateAlbum)
+        mainWindow.songInfoChanged.connect(self.songInfoChanged)
 
     def songInfoChanged(self, mediaInfo):
         # song info
@@ -452,15 +459,78 @@ color: #fff;
         self.mediaBoxL.addStretch(1)
 
 # file list view
+class FileListTableItemDelegate(QStyledItemDelegate):
+
+    def paint(self, painter, option, index):
+        option.state &= ~QStyle.State_HasFocus
+        if option.styleObject.hoverRow == index.row():
+            option.state |= QStyle.State_MouseOver
+        QStyledItemDelegate.paint(self, painter, option, index)
+
+class FileListTableWidget(QTableWidget):
+# https://github.com/lowbees/Hover-entire-row-of-QTableView
+    def __init__(self, rows=1, cols=7):
+        QTableView.__init__(self, rows, cols)
+        self.setStyleSheet("""
+QTableWidget {
+border: 0;
+}
+::item:hover {
+background: red;
+}
+::item:selected{
+background: blue;
+}
+""")
+        self.setMouseTracking(True)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.verticalHeader().setVisible(False)
+        self.horizontalHeader().setVisible(False)
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.horizontalHeader().setStretchLastSection(True)
+        self.setShowGrid(False)
+
+        self.hoverRow = -1
+        self.setItemDelegate(FileListTableItemDelegate())
+        self.nrows = 0
+
+    # events
+    def mouseMoveEvent(self, e):
+        QTableView.mouseMoveEvent(self, e)
+        index = self.indexAt(e.pos())
+        self.hoverRow = index.row()
+
+    # add item
+    def addMedia(self, mediaInfo):
+        self.setRowCount(self.nrows+1)
+        self.setItem(self.nrows, 0, QTableWidgetItem(mediaInfo.duration.strftime("%M:%S")))
+        self.setItem(self.nrows, 1, QTableWidgetItem(mediaInfo.title))
+        self.setItem(self.nrows, 2, QTableWidgetItem(mediaInfo.artist))
+        self.setItem(self.nrows, 3, QTableWidgetItem(mediaInfo.album))
+        self.setItem(self.nrows, 4, QTableWidgetItem(mediaInfo.albumArtist))
+        self.setItem(self.nrows, 5, QTableWidgetItem(str(mediaInfo.year) if mediaInfo.year != -1 else ""))
+        self.setItem(self.nrows, 6, QTableWidgetItem("")) # filler
+        self.nrows += 1
+
+
 class FileListView(QWidget):
 
     def __init__(self, parent=None):
+        QWidget.__init__(self, parent)
         self.initUI()
         self.bindEvents()
-    
+
     def initUI(self):
-        pass
-        
+        vboxLayout = QVBoxLayout()
+        self.setLayout(vboxLayout)
+
+        self.tableWidget = tableWidget = FileListTableWidget()
+        vboxLayout.addWidget(tableWidget)
+
+        #def __init__(self, path, pos, title, artist, album, albumArtist, duration, image, year=0):
+        for i in range(10):
+            tableWidget.addMedia(MediaInfo("",i,str(i),"1","1","1",datetime.datetime.fromtimestamp(2000),"",2000))
+
     def bindEvents(self):
         pass
 
@@ -473,13 +543,11 @@ class MediaPlayer(QWidget):
         vboxLayout = QVBoxLayout()
         self.setLayout(vboxLayout)
 
-        self.view = PlayingAlbumView()
+        self.view = FileListView()
         vboxLayout.addWidget(self.view)
 
         self.playerWidget = PlayerWidget(self, PlayerWidget.WIDGET_MODE)
         vboxLayout.addWidget(self.playerWidget)
-
-        MainWindow.getInstance().songInfoChanged.connect(self.view.songInfoChanged)
 
     # files
     def populateMedias(self, path):
