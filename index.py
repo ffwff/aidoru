@@ -523,11 +523,60 @@ class FileListView(QWidget):
         vboxLayout.addWidget(tableWidget)
 
         mainWindow = MainWindow.getInstance()
-        for media in mainWindow.medias:
-            self.tableWidget.addMedia(media)
+
+        if mainWindow.medias:
+            class PopulateMediaThread(QThread):
+
+                def run(self_):
+                    for media in mainWindow.medias:
+                        self.tableWidget.addMedia(media)
+                    self.tableWidget.resizeRowsToContents()
+                    del self._thread
+
+            self._thread = PopulateMediaThread()
+            self._thread.start()
 
     def bindEvents(self):
         MainWindow.getInstance().mediaAdded.connect(self.tableWidget.addMedia)
+
+class MediaPlayerMenu(QWidget):
+
+    def __init__(self, parent=None):
+        QWidget.__init__(self, parent)
+        self.initUI()
+        self.bindEvents()
+
+    def initUI(self):
+        self.setStyleSheet("""
+QPushButton {
+    width: 32px;
+    height: 32px;
+    qproperty-iconSize: 32px;
+    border: 0 none;
+}
+""")
+
+        self.layout = vboxLayout = QVBoxLayout()
+        self.setLayout(vboxLayout)
+
+        self.fileButton = QPushButton(QIcon("./icons/files"), "")
+        vboxLayout.addWidget(self.fileButton)
+
+        self.albumButton = QPushButton(QIcon("./icons/album"), "")
+        vboxLayout.addWidget(self.albumButton)
+
+        self.findButton = QPushButton(QIcon("./icons/find"), "")
+        vboxLayout.addWidget(self.findButton)
+
+        vboxLayout.addStretch(1)
+
+    def bindEvents(self):
+        self.fileButton.clicked.connect \
+            (lambda: self.parentWidget().setMode(MediaPlayer.FILE_LIST_MODE))
+        self.albumButton.clicked.connect \
+            (lambda: self.parentWidget().setMode(MediaPlayer.PLAYING_ALBUM_MODE))
+        self.findButton.clicked.connect \
+            (lambda: self.parentWidget().setMode(MediaPlayer.FILE_LIST_MODE))
 
 # application widget
 class MediaPlayer(QWidget):
@@ -538,30 +587,37 @@ class MediaPlayer(QWidget):
 
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
-        self.mode = None
+        self.mode = MediaPlayer.FILE_LIST_MODE
         self.initUI()
         self.bindEvents()
 
     def initUI(self):
-        self.layout = vboxLayout = QVBoxLayout()
-        self.setLayout(vboxLayout)
+        self.layout = layout = QGridLayout()
+        self.setLayout(layout)
+        layout.setColumnStretch(1, 1)
 
-        self.view = FileListView()
-        vboxLayout.addWidget(self.view)
+        self.menu = MediaPlayerMenu(self)
+        layout.addWidget(self.menu, 0, 0)
+
+        self.fileListView = FileListView()
+        self.playingAlbumView = PlayingAlbumView()
+        self.view = self.fileListView
+        layout.addWidget(self.view, 0, 1)
 
         self.playerWidget = PlayerWidget(self, PlayerWidget.WIDGET_MODE)
-        vboxLayout.addWidget(self.playerWidget)
+        layout.addWidget(self.playerWidget, 1, 0, 1, 2)
 
     def setMode(self, mode):
         if mode == self.mode: return False
         self.mode = mode
-        self.view.deleteLater()
+        self.view.hide()
         if mode == MediaPlayer.FILE_LIST_MODE:
-            view = FileListView()
+            view = self.fileListView
         elif mode == MediaPlayer.PLAYING_ALBUM_MODE:
-            view = PlayingAlbumView()
+            view = self.playingAlbumView
         self.layout.replaceWidget(self.view, view)
         self.view = view
+        self.view.show()
         return True
 
     #events
@@ -670,9 +726,6 @@ background: #778791;
 
         class PopulateMediaThread(QThread):
 
-            def destroy(self_):
-                del self._thread
-
             def run(self_):
                 self.medias = Database.load("medias")
                 if self.medias:
@@ -682,10 +735,10 @@ background: #778791;
                     self.medias = []
                     self.populateMedias("/home/user/Music")
                     Database.save(self.medias, "medias")
+                del self._thread
 
         self._thread = PopulateMediaThread()
         self._thread.start()
-        self._thread.finished.connect(self._thread.destroy)
 
     def setMode(self, mode):
         if mode == MainWindow.FULL_MODE:
