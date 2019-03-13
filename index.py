@@ -8,6 +8,7 @@ import os
 import urllib.parse
 import datetime
 from functools import total_ordering
+import pickle
 
 def path_up(path):
     return os.path.normpath(os.path.join(path, ".."))
@@ -109,21 +110,6 @@ class PlayerWidget(QWidget):
         self.setAcceptDrops(True)
 
         # ui elements
-        self.setStyleSheet("""
-QSlider::groove:horizontal {
-    height: 6px;
-    background: rgba(0, 0, 0, 0.2);
-    margin: 0 0;
-}
-QSlider::sub-page:horizontal {
-    background: #9fabb3;
-    border-radius: 4px;
-}
-QSlider::handle:horizontal {
-    background: #778791;
-    width: 6px;
-}
-""")
         self.initUI()
 
         # events
@@ -406,15 +392,6 @@ class PlayingAlbumView(QWidget):
         scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scrollArea.setMinimumSize(QSize(310, 300))
         scrollArea.hide()
-        scrollArea.setStyleSheet("""
-QScrollArea{
-border:0 none;
-margin-right: 5px;
-}
-QScrollBar::handle {
-    background: #9fabb3;
-}
-""")
         hboxLayout.addWidget(scrollArea)
 
         mediaBox = QWidget()
@@ -483,19 +460,6 @@ class FileListTableWidget(QTableWidget):
     def __init__(self, rows=1, cols=7):
         QTableView.__init__(self, rows, cols)
         self.setStyleSheet("""
-QTableWidget {
-border: 0;
-}
-
-QScrollBar::handle {
-    background: #9fabb3;
-}
-::item:hover {
-background: #9fabb3;
-}
-::item:selected{
-background: #778791;
-}
 """)
         self.setMouseTracking(True)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -568,39 +532,61 @@ class FileListView(QWidget):
 # application widget
 class MediaPlayer(QWidget):
 
+    # modes
+    FILE_LIST_MODE = 0
+    PLAYING_ALBUM_MODE = 1
+
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
-        # ui
-        vboxLayout = QVBoxLayout()
+        self.mode = None
+        self.initUI()
+        self.bindEvents()
+
+    def initUI(self):
+        self.layout = vboxLayout = QVBoxLayout()
         self.setLayout(vboxLayout)
 
-        #self.view = FileListView()
-        self.view = PlayingAlbumView()
+        self.view = FileListView()
         vboxLayout.addWidget(self.view)
 
         self.playerWidget = PlayerWidget(self, PlayerWidget.WIDGET_MODE)
         vboxLayout.addWidget(self.playerWidget)
 
+    def setMode(self, mode):
+        if mode == self.mode: return False
+        self.mode = mode
+        self.view.deleteLater()
+        if mode == MediaPlayer.FILE_LIST_MODE:
+            view = FileListView()
+        elif mode == MediaPlayer.PLAYING_ALBUM_MODE:
+            view = PlayingAlbumView()
+        self.layout.replaceWidget(self.view, view)
+        self.view = view
+        return True
+
+    #events
+    def bindEvents(self):
+        pass
+
+
 
 # database
-class Database(object):
+class Database:
 
-    _threads = {}
+    BASE = os.path.expanduser("~/.aidoru")
+    EXT = ".pkl"
 
     def save(obj, filename):
-        objid = id(obj)
-        class SaveThread(QThread):
+        os.makedirs(Database.BASE, exist_ok=True)
+        with open(os.path.join(Database.BASE, filename + Database.EXT), "wb") as f:
+            pickle.dump(obj, f)
 
-            def destroy(self):
-                del Database._threads[objid]
-
-            def run(self):
-                with open(filename, "w") as f:
-                    pickle.dump(obj, f)
-                self.destroy()
-
-        _threads[objid] = SaveThread()
-        _threads[objid].start()
+    def load(filename):
+        try:
+            with open(os.path.join(Database.BASE, filename + Database.EXT), "rb") as f:
+                return pickle.load(f)
+        except:
+            return None
 
 
 class MainWindow(QMainWindow):
@@ -629,6 +615,42 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("aidoru~~")
         #self.setStyleSheet("background: #fff; color: #000;")
+        self.setStyleSheet(
+"""
+*{background: #fff; color: #000;}
+QSlider::groove:horizontal {
+    height: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    margin: 0 0;
+}
+QSlider::sub-page:horizontal {
+    background: #9fabb3;
+    border-radius: 4px;
+}
+QSlider::handle:horizontal {
+    background: #778791;
+    width: 6px;
+}
+QScrollArea{
+border:0 none;
+margin-right: 5px;
+}
+QScrollBar::handle {
+    background: #9fabb3;
+}
+QTableWidget {
+border: 0;
+}
+QScrollBar::handle {
+    background: #9fabb3;
+}
+::item:hover {
+background: #9fabb3;
+}
+::item:selected{
+background: #778791;
+}
+""")
         self.setMode(MainWindow.FULL_MODE)
 
         # events
@@ -652,7 +674,14 @@ class MainWindow(QMainWindow):
                 del self._thread
 
             def run(self_):
-                self.populateMedias("/home/user/Music")
+                self.medias = Database.load("medias")
+                if self.medias:
+                    for media in self.medias:
+                        self.mediaAdded.emit(media)
+                else:
+                    self.medias = []
+                    self.populateMedias("/home/user/Music")
+                    Database.save(self.medias, "medias")
 
         self._thread = PopulateMediaThread()
         self._thread.start()
