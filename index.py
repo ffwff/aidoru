@@ -539,6 +539,8 @@ background: #778791;
         index = self.indexAt(e.pos())
         mainWindow = MainWindow.getInstance()
         if self.mediaRow:
+            if mainWindow.mediaInfo and self.mediaRow[index.row()] == mainWindow.mediaInfo:
+                return
             mainWindow.setSong(self.mediaRow[index.row()].path)
 
 
@@ -572,11 +574,34 @@ class MediaPlayer(QWidget):
         vboxLayout = QVBoxLayout()
         self.setLayout(vboxLayout)
 
-        self.view = FileListView()
+        #self.view = FileListView()
+        self.view = PlayingAlbumView()
         vboxLayout.addWidget(self.view)
 
         self.playerWidget = PlayerWidget(self, PlayerWidget.WIDGET_MODE)
         vboxLayout.addWidget(self.playerWidget)
+
+
+# database
+class Database(object):
+
+    _threads = {}
+
+    def save(obj, filename):
+        objid = id(obj)
+        class SaveThread(QThread):
+
+            def destroy(self):
+                del Database._threads[objid]
+
+            def run(self):
+                with open(filename, "w") as f:
+                    pickle.dump(obj, f)
+                self.destroy()
+
+        _threads[objid] = SaveThread()
+        _threads[objid].start()
+
 
 class MainWindow(QMainWindow):
 
@@ -603,7 +628,7 @@ class MainWindow(QMainWindow):
         self.medias = [] # medias in scan directory
 
         self.setWindowTitle("aidoru~~")
-        self.setStyleSheet("background: #fff; color: #000;")
+        #self.setStyleSheet("background: #fff; color: #000;")
         self.setMode(MainWindow.FULL_MODE)
 
         # events
@@ -664,7 +689,6 @@ class MainWindow(QMainWindow):
     songInfoChanged = pyqtSignal(MediaInfo)
 
     def setSong(self, path):
-        print(self.album)
         path = urllib.parse.unquote(path.strip())
         mediaContent = QMediaContent(QUrl.fromLocalFile(path))
         self.media.setMedia(mediaContent)
