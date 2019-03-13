@@ -456,7 +456,7 @@ class FileListTableItemDelegate(QStyledItemDelegate):
         QStyledItemDelegate.paint(self, painter, option, index)
 
 class FileListTableWidget(QTableWidget):
-# https://github.com/lowbees/Hover-entire-row-of-QTableView
+    # https://github.com/lowbees/Hover-entire-row-of-QTableView
     def __init__(self, rows=1, cols=7):
         QTableView.__init__(self, rows, cols)
         self.setStyleSheet("""
@@ -466,6 +466,7 @@ class FileListTableWidget(QTableWidget):
         self.verticalHeader().setVisible(False)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.horizontalHeader().setVisible(False)
+        self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.horizontalHeader().setStretchLastSection(True)
         self.setEditTriggers(QAbstractItemView.NoEditTriggers);
         self.setShowGrid(False)
@@ -671,9 +672,55 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("aidoru~~")
         #self.setStyleSheet("background: #fff; color: #000;")
-        self.setStyleSheet(
+        self.setMode(MainWindow.FULL_MODE)
+
+        # events
+        self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
+        self.mediaAdded.connect(self.onMediaAdded)
+
+        QShortcut(QKeySequence("Ctrl+Q"), self).activated \
+            .connect(sys.exit)
+        QShortcut(QKeySequence("Space"), self).activated \
+            .connect(self.playPause)
+        QShortcut(QKeySequence("Ctrl+Shift+F"), self).activated \
+            .connect(lambda: self.setMode(MainWindow.FULL_MODE))
+        QShortcut(QKeySequence("Ctrl+M"), self).activated \
+            .connect(lambda: self.setMode(MainWindow.MINI_MODE))
+        QShortcut(QKeySequence("Ctrl+Shift+M"), self).activated \
+            .connect(lambda: self.setMode(MainWindow.MICRO_MODE))
+
+        class PopulateMediaThread(QThread):
+
+            def run(self_):
+                self.medias = Database.load("medias")
+                if self.medias:
+                    for media in self.medias:
+                        self.mediaAdded.emit(media)
+                else:
+                    self.medias = []
+                    self.populateMedias(os.path.expanduser("~/Music"))
+                    Database.save(self.medias, "medias")
+                del self._thread
+
+        self._thread = PopulateMediaThread()
+        self._thread.start()
+
+    def setMode(self, mode):
+        if mode == MainWindow.FULL_MODE:
+            self.resize(QSize(1200, 900))
+            self.centralWidget = MediaPlayer(self)
+        elif mode == MainWindow.MINI_MODE:
+            self.setMinimumSize(QSize(300, 475))
+            self.resize(QSize(300, 475))
+            self.centralWidget = PlayerWidget(self, PlayerWidget.MAIN_MODE)
+        elif mode == MainWindow.MICRO_MODE:
+            self.setMinimumSize(QSize(300, 65))
+            self.resize(QSize(300, 65))
+            self.centralWidget = PlayerWidget(self, PlayerWidget.MICRO_MODE)
+        self.setCentralWidget(self.centralWidget)
+        self.centralWidget.setStyleSheet(
 """
-*{background: #fff; color: #000;}
+QTableWidget{background: transparent;}
 QSlider::groove:horizontal {
     height: 6px;
     background: rgba(0, 0, 0, 0.2);
@@ -707,52 +754,6 @@ background: #9fabb3;
 background: #778791;
 }
 """)
-        self.setMode(MainWindow.FULL_MODE)
-
-        # events
-        self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
-        self.mediaAdded.connect(self.onMediaAdded)
-
-        QShortcut(QKeySequence("Ctrl+Q"), self).activated \
-            .connect(sys.exit)
-        QShortcut(QKeySequence("Space"), self).activated \
-            .connect(self.playPause)
-        QShortcut(QKeySequence("Ctrl+Shift+F"), self).activated \
-            .connect(lambda: self.setMode(MainWindow.FULL_MODE))
-        QShortcut(QKeySequence("Ctrl+M"), self).activated \
-            .connect(lambda: self.setMode(MainWindow.MINI_MODE))
-        QShortcut(QKeySequence("Ctrl+Shift+M"), self).activated \
-            .connect(lambda: self.setMode(MainWindow.MICRO_MODE))
-
-        class PopulateMediaThread(QThread):
-
-            def run(self_):
-                self.medias = Database.load("medias")
-                if self.medias:
-                    for media in self.medias:
-                        self.mediaAdded.emit(media)
-                else:
-                    self.medias = []
-                    self.populateMedias("/home/user/Music")
-                    Database.save(self.medias, "medias")
-                del self._thread
-
-        self._thread = PopulateMediaThread()
-        self._thread.start()
-
-    def setMode(self, mode):
-        if mode == MainWindow.FULL_MODE:
-            self.resize(QSize(1200, 900))
-            self.centralWidget = MediaPlayer(self)
-        elif mode == MainWindow.MINI_MODE:
-            self.setMinimumSize(QSize(300, 475))
-            self.resize(QSize(300, 475))
-            self.centralWidget = PlayerWidget(self, PlayerWidget.MAIN_MODE)
-        elif mode == MainWindow.MICRO_MODE:
-            self.setMinimumSize(QSize(300, 65))
-            self.resize(QSize(300, 65))
-            self.centralWidget = PlayerWidget(self, PlayerWidget.MICRO_MODE)
-        self.setCentralWidget(self.centralWidget)
         # reemit events to redraw ui
         self.albumPath = ""
         if self.album: self.albumChanged.emit(self.album)
