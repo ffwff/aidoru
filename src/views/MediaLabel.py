@@ -18,8 +18,8 @@ class MediaLabel(QLabel):
 """
 <table>
 <tr>
-    <td width='250' style='max-width: 250px;'>%s</td>
-    <td width='80' style='max-width: 80px;text-align: right;'>%s</td>
+    <td width='80%%' style='max-width: 80%%;'>%s</td>
+    <td width='20%%' style='max-width: 20%%;text-align: right;'>%s</td>
 </tr>
 %s
 </table>

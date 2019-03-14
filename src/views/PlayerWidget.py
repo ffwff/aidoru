@@ -141,10 +141,10 @@ class PlayerWidget(QWidget):
         self.positionSlider.valueChanged.connect(self.positionSliderChanged)
 
         # controls button
-        self.backButton.clicked.connect(self.backButtonClicked)
+        self.backButton.clicked.connect(MainWindow.instance.prevSong)
+        self.forwardButton.clicked.connect(MainWindow.instance.nextSong)
         self.ppButton.clicked.connect(MainWindow.instance.playPause)
         media.stateChanged.connect(self.stateChanged)
-        self.forwardButton.clicked.connect(self.forwardButtonClicked)
         if hasattr(self, "volumeButton"):
             self.volumeButton.clicked.connect(self.volumeButtonClicked)
             media.mutedChanged.connect(self.mutedChanged)
@@ -172,12 +172,6 @@ class PlayerWidget(QWidget):
         MainWindow.instance.media.setPosition(position)
 
     ## controls
-    def backButtonClicked(self):
-        MainWindow.instance.albumPrev()
-
-    def forwardButtonClicked(self):
-        MainWindow.instance.albumNext()
-
     def stateChanged(self, state):
         if state == QMediaPlayer.PlayingState:
             self.ppButton.setIcon(QIcon("./icons/media-playback-pause"))
