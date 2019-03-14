@@ -44,6 +44,8 @@ class MainWindow(QMainWindow):
             .connect(sys.exit)
         QShortcut(QKeySequence("Space"), self).activated \
             .connect(self.playPause)
+        QShortcut(QKeySequence("Ctrl+F"), self).activated \
+            .connect(self.onCtrlF)
         QShortcut(QKeySequence("Ctrl+Shift+F"), self).activated \
             .connect(lambda: self.setMode(MainWindow.FULL_MODE))
         QShortcut(QKeySequence("Ctrl+M"), self).activated \
@@ -183,5 +185,10 @@ class MainWindow(QMainWindow):
                 if mediaInfo: batch.push(mediaInfo)
         self.medias.extend(batch)
         self.mediasAdded.emit(batch)
+
+    # misc
+    def onCtrlF(self):
+        self.setMode(MainWindow.FULL_MODE)
+        self.centralWidget().fileListView.searchView.toggleVisible()
 
 instance = None

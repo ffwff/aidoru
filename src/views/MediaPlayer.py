@@ -34,7 +34,8 @@ class MediaPlayerMenu(QWidget):
         self.albumButton.clicked.connect \
             (lambda: self.parentWidget().setMode(MediaPlayer.PLAYING_ALBUM_MODE))
         self.findButton.clicked.connect \
-            (lambda: self.parentWidget().setMode(MediaPlayer.FILE_LIST_MODE))
+            (lambda: self.parentWidget().setMode(MediaPlayer.FILE_LIST_MODE) or \
+                     self.parentWidget().fileListView.searchView.toggleVisible())
 
 # application widget
 class MediaPlayer(QWidget):
