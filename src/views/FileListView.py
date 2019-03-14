@@ -3,6 +3,7 @@ from PyQt5.QtCore import *
 from operator import attrgetter
 import src.MainWindow as MainWindow
 from .PlayingAlbumView import PlayingAlbumView
+from .SearchView import SearchView
 
 # file list view
 class FileListTableItemDelegate(QStyledItemDelegate):
@@ -40,8 +41,9 @@ class FileListTableWidget(QTableWidget):
         self.hoverRow = -1
         self.nrows = 0
         self.mediaRow = []
-        self.sortKey = None
+        self.sortKey = "title"
         self.sortRev = False
+        self.filterText = ""
 
     def selectPlaying(self):
         if not self.mediaRow: return
@@ -62,7 +64,6 @@ class FileListTableWidget(QTableWidget):
         self.setItem(self.nrows, 4, QTableWidgetItem(mediaInfo.albumArtist))
         self.setItem(self.nrows, 5, QTableWidgetItem(str(mediaInfo.year) if mediaInfo.year != -1 else ""))
         self.setItem(self.nrows, 6, QTableWidgetItem("")) # filler
-        #self.resizeRowToContents(self.nrows)
         if append: self.mediaRow.append(mediaInfo)
         self.nrows += 1
 
@@ -70,6 +71,19 @@ class FileListTableWidget(QTableWidget):
         for media in medias:
             self.addMedia(media, append)
         self.resizeRowsToContents()
+
+    # data manip
+    def sortAndFilter(self):
+        if self.filterText:
+            self.mediaRow = list(filter(lambda media: self.filterText in media.title.lower(), MainWindow.instance.medias))
+        else:
+            self.mediaRow = MainWindow.instance.medias
+        self.mediaRow.sort(key=attrgetter(self.sortKey), reverse=self.sortRev)
+
+        self.clearContents()
+        self.nrows = 0
+        self.mediasAdded(self.mediaRow, False)
+        self.selectPlaying()
 
     # events
     def headerClicked(self, index):
@@ -80,17 +94,14 @@ class FileListTableWidget(QTableWidget):
         elif index == 4: key = 'albumArtist'
         elif index == 5: key = 'year'
         else: return
+
         if key == self.sortKey:
             self.sortRev = not self.sortRev
-
         else:
             self.sortKey = key
             self.sortAsc = False
-        self.mediaRow = sorted(MainWindow.instance.medias, key=attrgetter(key), reverse=self.sortRev)
-        self.clearContents()
-        self.nrows = 0
-        self.mediasAdded(self.mediaRow, False)
-        self.selectPlaying()
+
+        self.sortAndFilter()
 
     def mouseMoveEvent(self, e):
         QTableWidget.mouseMoveEvent(self, e)
@@ -123,6 +134,10 @@ class FileListView(QWidget):
     def initUI(self):
         vboxLayout = QVBoxLayout()
         self.setLayout(vboxLayout)
+
+        self.searchView = SearchView()
+        self.searchView.hide()
+        vboxLayout.addWidget(self.searchView)
 
         self.tableWidget = tableWidget = FileListTableWidget()
         tableWidget.setAlternatingRowColors(True)
