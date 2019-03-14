@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from operator import attrgetter
 import src.MainWindow as MainWindow
 from .PlayingAlbumView import PlayingAlbumView
 
@@ -25,8 +26,10 @@ class FileListTableWidget(QTableWidget):
         self.verticalHeader().setVisible(False)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         #self.horizontalHeader().setVisible(False)
-        self.setSortingEnabled(True)
-        self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.setHorizontalHeaderLabels(["Duration", "Name", "Artist", "Album", "Album artist", "Year", ""])
+        self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents) # dur
+        self.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents) # year
+        self.horizontalHeader().sectionClicked.connect(self.headerClicked)
         self.setEditTriggers(QAbstractItemView.NoEditTriggers);
         self.setShowGrid(False)
 
@@ -49,11 +52,16 @@ class FileListTableWidget(QTableWidget):
         self.mediaRow.append(mediaInfo)
         self.nrows += 1
 
-    # sort
-    def sort(self, col, order=Qt.AscendingOrder):
-        print(col)
-
     # events
+    def headerClicked(self, index):
+        if index == 0: key = attrgetter('duration')
+        elif index == 1: key = attrgetter('title')
+        elif index == 2: key = attrgetter('artist')
+        elif index == 3: key = attrgetter('album')
+        elif index == 4: key = attrgetter('albumArtist')
+        elif index == 5: key = attrgetter('year')
+        self.mediaRow.sort(key=key)
+
     def mouseMoveEvent(self, e):
         QTableView.mouseMoveEvent(self, e)
         index = self.indexAt(e.pos())
