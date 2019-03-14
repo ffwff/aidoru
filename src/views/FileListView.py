@@ -25,21 +25,22 @@ class FileListTableWidget(QTableWidget):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.verticalHeader().setVisible(False)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        #self.horizontalHeader().setVisible(False)
         self.setHorizontalHeaderLabels(["Duration", "Name", "Artist", "Album", "Album artist", "Year", ""])
         self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents) # dur
         self.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents) # year
         self.horizontalHeader().sectionClicked.connect(self.headerClicked)
         self.setEditTriggers(QAbstractItemView.NoEditTriggers);
         self.setShowGrid(False)
+        self.setItemDelegate(FileListTableItemDelegate())
 
         self.hoverRow = -1
-        self.setItemDelegate(FileListTableItemDelegate())
         self.nrows = 0
         self.mediaRow = []
+        self.sortKey = None
+        self.sortRev = False
 
     # add item
-    def addMedia(self, mediaInfo):
+    def addMedia(self, mediaInfo, append=True):
         self.setRowCount(self.nrows+1)
         self.setItem(self.nrows, 0, QTableWidgetItem(mediaInfo.duration.strftime("%M:%S")))
         self.setItem(self.nrows, 1, QTableWidgetItem(mediaInfo.title))
@@ -49,29 +50,49 @@ class FileListTableWidget(QTableWidget):
         self.setItem(self.nrows, 5, QTableWidgetItem(str(mediaInfo.year) if mediaInfo.year != -1 else ""))
         self.setItem(self.nrows, 6, QTableWidgetItem("")) # filler
         self.resizeRowToContents(self.nrows)
-        self.mediaRow.append(mediaInfo)
+        if append: self.mediaRow.append(mediaInfo)
         self.nrows += 1
 
     # events
     def headerClicked(self, index):
-        if index == 0: key = attrgetter('duration')
-        elif index == 1: key = attrgetter('title')
-        elif index == 2: key = attrgetter('artist')
-        elif index == 3: key = attrgetter('album')
-        elif index == 4: key = attrgetter('albumArtist')
-        elif index == 5: key = attrgetter('year')
-        self.mediaRow.sort(key=key)
+        if index == 0: key = 'duration'
+        elif index == 1: key = 'title'
+        elif index == 2: key = 'artist'
+        elif index == 3: key = 'album'
+        elif index == 4: key = 'albumArtist'
+        elif index == 5: key = 'year'
+        else: return
+        if key == self.sortKey:
+            self.sortRev = not self.sortRev
+            self.mediaRow.sort(key=attrgetter(key), reverse=self.sortRev)
+        else:
+            self.sortKey = key
+            self.sortAsc = False
+            self.mediaRow.sort(key=attrgetter(key))
+        self.clearContents()
+        self.nrows = 0
+        class PopulateMediaThread(QThread):
+
+            def run(self_):
+                for media in self.mediaRow:
+                    self.addMedia(media, False)
+                del self._thread
+        self._thread = PopulateMediaThread()
+        self._thread.start()
 
     def mouseMoveEvent(self, e):
-        QTableView.mouseMoveEvent(self, e)
+        QTableWidget.mouseMoveEvent(self, e)
         index = self.indexAt(e.pos())
         if index.column() == self.columnCount()-1:
             self.hoverRow = -1
         else:
             self.hoverRow = index.row()
 
+    def leaveEvent(self, e):
+        self.hoverRow = -1
+
     def mousePressEvent(self, e):
-        QTableView.mousePressEvent(self, e)
+        QTableWidget.mousePressEvent(self, e)
         index = self.indexAt(e.pos())
         mainWindow = MainWindow.instance
         if self.mediaRow:

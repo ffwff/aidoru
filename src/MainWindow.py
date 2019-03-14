@@ -70,17 +70,17 @@ class MainWindow(QMainWindow):
     def setMode(self, mode):
         if mode == MainWindow.FULL_MODE:
             self.resize(QSize(1200, 900))
-            self.centralWidget = MediaPlayer(self)
+            centralWidget = MediaPlayer(self)
         elif mode == MainWindow.MINI_MODE:
             self.setMinimumSize(QSize(300, 475))
             self.resize(QSize(300, 475))
-            self.centralWidget = PlayerWidget(self, PlayerWidget.MAIN_MODE)
+            centralWidget = PlayerWidget(self, PlayerWidget.MAIN_MODE)
         elif mode == MainWindow.MICRO_MODE:
             self.setMinimumSize(QSize(300, 65))
             self.resize(QSize(300, 65))
-            self.centralWidget = PlayerWidget(self, PlayerWidget.MICRO_MODE)
-        self.setCentralWidget(self.centralWidget)
-        self.centralWidget.setStyleSheet(
+            centralWidget = PlayerWidget(self, PlayerWidget.MICRO_MODE)
+        self.setCentralWidget(centralWidget)
+        centralWidget.setStyleSheet(
 """
 QTableWidget{background: transparent;}
 QSlider::groove:horizontal {
