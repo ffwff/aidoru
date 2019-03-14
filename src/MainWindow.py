@@ -189,6 +189,7 @@ class MainWindow(QMainWindow):
     # misc
     def onCtrlF(self):
         self.setMode(MainWindow.FULL_MODE)
+        self.centralWidget().setMode(MediaPlayer.FILE_LIST_MODE)
         self.centralWidget().fileListView.searchView.toggleVisible()
 
 instance = None
