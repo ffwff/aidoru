@@ -1,0 +1,80 @@
+QSlider::groove:horizontal {
+    height: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    margin: 0 0;
+}
+QSlider::sub-page:horizontal {
+    background: #9fabb3;
+    border-radius: 4px;
+}
+QSlider::handle:horizontal {
+    background: #778791;
+    width: 6px;
+}
+QScrollArea{
+    border:0 none;
+    margin-right: 5px;
+}
+QScrollBar::handle {
+    background: #9fabb3;
+}
+QTableWidget{
+    background: transparent;
+    alternate-background-color: rgba(60, 60, 60, 0.2);
+    border: 0 none;
+}
+QHeaderView::section {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px;
+    border: 0 none;
+}
+QHeaderView::section:hover, ::item:selected{
+    background: #778791;
+}
+::item:hover {
+    background: #9fabb3;
+}
+/* main mode */
+.main-mode QSlider, .micro-mode QSlider{
+    margin-top:-6px;
+}
+#cover-label {
+    background: #000;
+}
+#album-label {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+#artist-label {
+    font-size: 12px;
+    margin-bottom: 15px;
+}
+.micro-mode #artist-label {
+    font-size: 12px;
+}
+.buttons-widget QPushButton {
+    width: 24px;
+    height: 24px;
+    qproperty-iconSize: 24px;
+    border: 0 none;
+}
+#volume-slider {
+    max-width: 100%;
+}
+/* media player */
+#media-player-menu QPushButton {
+    width: 32px;
+    height: 32px;
+    qproperty-iconSize: 32px;
+    border: 0 none;
+}
+/* playing album view */
+.album-label { font-size: 24px; }
+.artist-label { font-size: 16px; }
+.media-box QLabel{
+    padding: 5px;
+}
+.media-box QLabel:hover, .media-box QLabel.active {
+    background: #9fabb3;
+    color: #fff;
+}
