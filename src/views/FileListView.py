@@ -24,7 +24,8 @@ class FileListTableWidget(QTableWidget):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.verticalHeader().setVisible(False)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.horizontalHeader().setVisible(False)
+        #self.horizontalHeader().setVisible(False)
+        self.setSortingEnabled(True)
         self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.setEditTriggers(QAbstractItemView.NoEditTriggers);
         self.setShowGrid(False)
@@ -47,6 +48,10 @@ class FileListTableWidget(QTableWidget):
         self.resizeRowToContents(self.nrows)
         self.mediaRow.append(mediaInfo)
         self.nrows += 1
+
+    # sort
+    def sort(self, col, order=Qt.AscendingOrder):
+        print(col)
 
     # events
     def mouseMoveEvent(self, e):
