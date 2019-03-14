@@ -7,6 +7,11 @@ from .PlayingAlbumView import PlayingAlbumView
 # file list view
 class FileListTableItemDelegate(QStyledItemDelegate):
 
+    def sizeHint(self, option, index):
+        size = QStyledItemDelegate.sizeHint(self, option, index)
+        size = QSize(size.width(), max(size.height(), 40))
+        return size
+
     def paint(self, painter, option, index):
         option.state &= ~QStyle.State_HasFocus
         if option.styleObject.hoverRow == index.row():
@@ -19,8 +24,7 @@ class FileListTableWidget(QTableWidget):
     # https://github.com/lowbees/Hover-entire-row-of-QTableView
     def __init__(self, rows=1, cols=7):
         QTableView.__init__(self, rows, cols)
-        self.setStyleSheet("""
-""")
+
         self.setMouseTracking(True)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.verticalHeader().setVisible(False)
@@ -76,6 +80,7 @@ class FileListTableWidget(QTableWidget):
             def run(self_):
                 for media in self.mediaRow:
                     self.addMedia(media, False)
+                QTimer.singleShot(0, self.resizeRowsToContents)
                 del self._thread
         self._thread = PopulateMediaThread()
         self._thread.start()
@@ -113,6 +118,7 @@ class FileListView(QWidget):
         self.setLayout(vboxLayout)
 
         self.tableWidget = tableWidget = FileListTableWidget()
+        tableWidget.setAlternatingRowColors(True)
         vboxLayout.addWidget(tableWidget)
 
         mainWindow = MainWindow.instance
@@ -123,7 +129,7 @@ class FileListView(QWidget):
                 def run(self_):
                     for media in mainWindow.medias:
                         self.tableWidget.addMedia(media)
-                    self.tableWidget.resizeRowsToContents()
+                    QTimer.singleShot(0, self.tableWidget.resizeRowsToContents)
                     del self._thread
 
             self._thread = PopulateMediaThread()
