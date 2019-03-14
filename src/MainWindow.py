@@ -33,7 +33,6 @@ class MainWindow(QMainWindow):
         self.medias = [] # medias in scan directory
 
         self.setWindowTitle("aidoru~~")
-        #self.setStyleSheet("background: #fff; color: #000;")
         self.setMode(MainWindow.FULL_MODE)
 
         # events
@@ -80,9 +79,10 @@ class MainWindow(QMainWindow):
             self.resize(QSize(300, 65))
             centralWidget = PlayerWidget(self, PlayerWidget.MICRO_MODE)
         self.setCentralWidget(centralWidget)
+        #centralWidget.palette().setColor(QPalette.Window, Qt.black)
+        #centralWidget.setAutoFillBackground(True)
         centralWidget.setStyleSheet(
 """
-QTableWidget{background: transparent;}
 QSlider::groove:horizontal {
     height: 6px;
     background: rgba(0, 0, 0, 0.2);
@@ -103,16 +103,20 @@ margin-right: 5px;
 QScrollBar::handle {
     background: #9fabb3;
 }
-QTableWidget {
-border: 0;
+QTableWidget{
+background: transparent;
+alternate-background-color: rgba(60, 60, 60, 0.2);
+border: 0 none;
 }
-QScrollBar::handle {
-    background: #9fabb3;
+QHeaderView::section {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px;
+    border: 0 none;
 }
 ::item:hover {
 background: #9fabb3;
 }
-::item:selected{
+QHeaderView::section:hover, ::item:selected{
 background: #778791;
 }
 """)
