@@ -62,9 +62,14 @@ class FileListTableWidget(QTableWidget):
         self.setItem(self.nrows, 4, QTableWidgetItem(mediaInfo.albumArtist))
         self.setItem(self.nrows, 5, QTableWidgetItem(str(mediaInfo.year) if mediaInfo.year != -1 else ""))
         self.setItem(self.nrows, 6, QTableWidgetItem("")) # filler
-        self.resizeRowToContents(self.nrows)
+        #self.resizeRowToContents(self.nrows)
         if append: self.mediaRow.append(mediaInfo)
         self.nrows += 1
+
+    def mediasAdded(self, medias, append=True):
+        for media in medias:
+            self.addMedia(media, append)
+        self.resizeRowsToContents()
 
     # events
     def headerClicked(self, index):
@@ -77,24 +82,15 @@ class FileListTableWidget(QTableWidget):
         else: return
         if key == self.sortKey:
             self.sortRev = not self.sortRev
-            self.mediaRow = sorted(MainWindow.instance.medias, key=attrgetter(key), reverse=self.sortRev)
+
         else:
             self.sortKey = key
             self.sortAsc = False
-            self.mediaRow = sorted(MainWindow.instance.medias, key=attrgetter(key))
+        self.mediaRow = sorted(MainWindow.instance.medias, key=attrgetter(key), reverse=self.sortRev)
         self.clearContents()
         self.nrows = 0
-        MainWindow.instance.deferPopulate = False
-        class PopulateMediaThread(QThread):
-
-            def run(self_):
-                for media in self.mediaRow:
-                    self.addMedia(media, False)
-                self.selectPlaying()
-                QTimer.singleShot(0, self.resizeRowsToContents)
-                del self._thread
-        self._thread = PopulateMediaThread()
-        self._thread.start()
+        self.mediasAdded(self.mediaRow, False)
+        self.selectPlaying()
 
     def mouseMoveEvent(self, e):
         QTableWidget.mouseMoveEvent(self, e)
@@ -133,20 +129,10 @@ class FileListView(QWidget):
         vboxLayout.addWidget(tableWidget)
 
         mainWindow = MainWindow.instance
-
         if mainWindow.medias:
-            class PopulateMediaThread(QThread):
-
-                def run(self_):
-                    if self.tableWidget.mediaRow: return
-                    for media in mainWindow.medias:
-                        self.tableWidget.addMedia(media)
-                    QTimer.singleShot(0, self.tableWidget.resizeRowsToContents)
-                    del self._thread
-
-            self._thread = PopulateMediaThread()
-            self._thread.start()
+            self.tableWidget.mediasAdded(mainWindow.medias)
+            self.tableWidget.selectPlaying()
 
     def bindEvents(self):
-        MainWindow.instance.mediaAdded.connect(self.tableWidget.addMedia)
+        MainWindow.instance.mediasAdded.connect(self.tableWidget.mediasAdded)
         MainWindow.instance.songInfoChanged.connect(self.tableWidget.selectPlaying)
