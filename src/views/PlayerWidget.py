@@ -19,6 +19,12 @@ class PlayerWidget(QWidget):
         self.setAcceptDrops(True)
 
         # ui elements
+        if self.mode == PlayerWidget.MAIN_MODE:
+            self.setProperty("class", "main-mode")
+        elif self.mode == PlayerWidget.MICRO_MODE:
+            self.setProperty("class", "micro-mode")
+        elif self.mode == PlayerWidget.WIDGET_MODE:
+            self.setProperty("class", "widget-mode")
         self.initUI()
 
         # events
@@ -36,8 +42,6 @@ class PlayerWidget(QWidget):
         # song info
         self.positionSlider = slider = QSlider(Qt.Horizontal)
         slider.setTracking(True)
-        if self.mode != PlayerWidget.WIDGET_MODE:
-            slider.setStyleSheet("margin-top:-6px;")
 
         self.albumLabel = albumLabel = QLabel("no title")
         albumLabel.setAlignment(Qt.AlignCenter)
@@ -50,7 +54,7 @@ class PlayerWidget(QWidget):
             vboxLayout.addWidget(slider)
         elif self.mode == PlayerWidget.MAIN_MODE:
             self.coverLabelContainer = coverLabelContainer = QWidget(self)
-            coverLabelContainer.setStyleSheet("background: #000;")
+            coverLabelContainer.setObjectName("cover-label")
             coverLabelContainerL = QHBoxLayout(self)
             coverLabelContainerL.setSpacing(0)
             coverLabelContainerL.setContentsMargins(0, 0, 0, 0)
@@ -66,20 +70,13 @@ class PlayerWidget(QWidget):
             vboxLayout.addWidget(slider)
             vboxLayout.addStretch()
             vboxLayout.addWidget(albumLabel)
-            albumLabel.setStyleSheet("font-size: 16px; margin-bottom: 5px;")
+            albumLabel.setObjectName("album-label")
             vboxLayout.addWidget(artistLabel)
-            artistLabel.setStyleSheet("font-size: 12px; margin-bottom: 15px;")
+            artistLabel.setObjectName("artist-label")
 
         # buttons
         buttonsWidget = QWidget()
-        buttonsWidget.setStyleSheet("""
-QPushButton {
-    width: 24px;
-    height: 24px;
-    qproperty-iconSize: 24px;
-    border: 0 none;
-}
-""")
+        buttonsWidget.setProperty("class", "buttons-widget")
 
         buttonsLayout = QHBoxLayout(self)
         buttonsWidget.setLayout(buttonsLayout)
@@ -97,7 +94,6 @@ QPushButton {
             buttonsLayout.addWidget(forwardButton)
             buttonsLayout.addStretch()
             buttonsLayout.addWidget(albumLabel)
-            albumLabel.setStyleSheet("font-size: 12px;")
             buttonsLayout.addStretch()
         elif self.mode == PlayerWidget.MAIN_MODE:
             vboxLayout.addWidget(buttonsWidget)
@@ -124,7 +120,7 @@ QPushButton {
             self.volumeButton = volumeButton = QPushButton()
             buttonsLayout.addWidget(volumeButton)
             self.volumeSlider = volumeSlider = QSlider(Qt.Horizontal)
-            volumeSlider.setStyleSheet("max-width: 100%;")
+            volumeSlider.setObjectName("volume-slider")
             volumeSlider.setMinimum(0)
             volumeSlider.setMaximum(100)
             volumeSlider.setValue(100)

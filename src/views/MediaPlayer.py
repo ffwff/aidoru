@@ -9,19 +9,11 @@ class MediaPlayerMenu(QWidget):
 
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
+        self.setObjectName("media-player-menu")
         self.initUI()
         self.bindEvents()
 
     def initUI(self):
-        self.setStyleSheet("""
-QPushButton {
-    width: 32px;
-    height: 32px;
-    qproperty-iconSize: 32px;
-    border: 0 none;
-}
-""")
-
         self.layout = vboxLayout = QVBoxLayout()
         self.setLayout(vboxLayout)
 

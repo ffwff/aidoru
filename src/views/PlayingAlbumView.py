@@ -21,12 +21,12 @@ class PlayingAlbumView(QWidget):
 
         self.albumLabel = albumLabel = QLabel("no title")
         albumLabel.setAlignment(Qt.AlignCenter)
-        albumLabel.setStyleSheet("font-size: 24px;")
+        albumLabel.setProperty("class", "album-label")
         vboxLayout.addWidget(albumLabel)
 
         self.albumArtistLabel = albumArtistLabel = QLabel("no name")
         albumArtistLabel.setAlignment(Qt.AlignCenter)
-        albumArtistLabel.setStyleSheet("font-size: 12px;")
+        albumLabel.setProperty("class", "artist-label")
         vboxLayout.addWidget(albumArtistLabel)
 
         #
@@ -51,17 +51,8 @@ class PlayingAlbumView(QWidget):
         hboxLayout.addWidget(scrollArea)
 
         mediaBox = QWidget()
+        mediaBox.setProperty("class", "media-box")
         scrollArea.setWidget(mediaBox)
-        mediaBox.setStyleSheet(
-"""
-QLabel{
-padding: 5px;
-}
-QLabel:hover, QLabel.active {
-background: #9fabb3;
-color: #fff;
-}
-""")
         self.mediaBoxL = mediaBoxL = QVBoxLayout()
         mediaBox.setLayout(mediaBoxL)
         mediaBoxL.addStretch(1)

@@ -81,51 +81,15 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(centralWidget)
         #centralWidget.palette().setColor(QPalette.Window, Qt.black)
         #centralWidget.setAutoFillBackground(True)
-        centralWidget.setStyleSheet(
-"""
-QSlider::groove:horizontal {
-    height: 6px;
-    background: rgba(0, 0, 0, 0.2);
-    margin: 0 0;
-}
-QSlider::sub-page:horizontal {
-    background: #9fabb3;
-    border-radius: 4px;
-}
-QSlider::handle:horizontal {
-    background: #778791;
-    width: 6px;
-}
-QScrollArea{
-border:0 none;
-margin-right: 5px;
-}
-QScrollBar::handle {
-    background: #9fabb3;
-}
-QTableWidget{
-background: transparent;
-alternate-background-color: rgba(60, 60, 60, 0.2);
-border: 0 none;
-}
-QHeaderView::section {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 5px;
-    border: 0 none;
-}
-::item:hover {
-background: #9fabb3;
-}
-QHeaderView::section:hover, ::item:selected{
-background: #778791;
-}
-""")
+        centralWidget.setStyleSheet(Database.loadFile("style.css", "style.css"))
         # reemit events to redraw ui
-        self.albumPath = ""
-        if self.album: self.albumChanged.emit(self.album)
-        if self.mediaInfo: self.songInfoChanged.emit(self.mediaInfo)
-        self.media.durationChanged.emit(self.media.duration())
-        self.media.positionChanged.emit(self.media.position())
+        def emitAll():
+            self.albumPath = ""
+            if self.album: self.albumChanged.emit(self.album)
+            if self.mediaInfo: self.songInfoChanged.emit(self.mediaInfo)
+            self.media.durationChanged.emit(self.media.duration())
+            self.media.positionChanged.emit(self.media.position())
+        QTimer.singleShot(0, emitAll)
 
     # playback
     def playPause(self):

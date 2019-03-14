@@ -127,6 +127,7 @@ class FileListView(QWidget):
             class PopulateMediaThread(QThread):
 
                 def run(self_):
+                    if self.tableWidget.mediaRow: return
                     for media in mainWindow.medias:
                         self.tableWidget.addMedia(media)
                     QTimer.singleShot(0, self.tableWidget.resizeRowsToContents)
