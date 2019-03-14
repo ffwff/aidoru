@@ -56,16 +56,7 @@ class MainWindow(QMainWindow):
         self.deferPopulate = True
         if medias:
             self.medias = medias
-            miter = iter(medias)
-            def processMedia():
-                if not self.deferPopulate: return
-                try:
-                    mediaInfo = next(miter)
-                    self.mediaAdded.emit(mediaInfo)
-                    QTimer.singleShot(0, processMedia)
-                except StopIteration:
-                    return
-            processMedia()
+            self.mediasAdded.emit(medias)
         else:
             class ProcessMediaThread(QThread):
 
@@ -92,8 +83,6 @@ class MainWindow(QMainWindow):
             centralWidget = PlayerWidget(self, PlayerWidget.MICRO_MODE)
         self.mode = mode
         self.setCentralWidget(centralWidget)
-        #centralWidget.palette().setColor(QPalette.Window, Qt.black)
-        #centralWidget.setAutoFillBackground(True)
         # reemit events to redraw ui
         def emitAll():
             self.albumPath = ""
@@ -182,16 +171,17 @@ class MainWindow(QMainWindow):
             self.setSong(array[idx+delta].path)
 
     # files
-    mediaAdded = pyqtSignal(MediaInfo)
+    mediasAdded = pyqtSignal(list)
     def populateMedias(self, path):
+        batch = []
         for f in os.listdir(path):
             fpath = os.path.join(path, f)
             if os.path.isdir(fpath):
                 self.populateMedias(fpath)
             elif os.access(fpath, os.R_OK) and getFileType(fpath) == "audio":
                 mediaInfo = MediaInfo.fromFile(fpath)
-                if mediaInfo:
-                    self.medias.append(mediaInfo)
-                    self.mediaAdded.emit(mediaInfo)
+                if mediaInfo: batch.push(mediaInfo)
+        self.medias.extend(batch)
+        self.mediasAdded.emit(batch)
 
 instance = None
