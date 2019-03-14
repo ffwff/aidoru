@@ -22,7 +22,7 @@ class MediaInfo(object):
             song = taglib.File(path)
         except OSError:
             return None
-        artist = song.tags["ARTIST"][0] if "ARTIST" in song.tags else None
+        artist = song.tags["ARTIST"][0] if "ARTIST" in song.tags else ""
         title = song.tags["TITLE"][0] if "TITLE" in song.tags else os.path.basename(path)
         searchPath = pathUp(path)
         # find cover art
@@ -61,11 +61,15 @@ class MediaInfo(object):
 
     # comparators
     def __lt__(self, other):
+        if not isinstance(other, MediaInfo):
+            return False
         if self.album == other.album and self.pos != -1 and other.pos != -1:
             return self.pos < other.pos
         return self.title < other.title
 
     def __eq__(self, other):
+        if not isinstance(other, MediaInfo):
+            return False
         if os.path.samefile(self.path, other.path):
             return True
         return object.__eq__(self, other)

@@ -43,8 +43,17 @@ class FileListTableWidget(QTableWidget):
         self.sortKey = None
         self.sortRev = False
 
+    def selectPlaying(self):
+        if not self.mediaRow: return
+        try:
+            i, _ = next(filter(lambda i: i[1] == MainWindow.instance.mediaInfo, enumerate(self.mediaRow)))
+            self.selectRow(i)
+        except StopIteration:
+            pass
+
     # add item
     def addMedia(self, mediaInfo, append=True):
+        if not mediaInfo: return
         self.setRowCount(self.nrows+1)
         self.setItem(self.nrows, 0, QTableWidgetItem(mediaInfo.duration.strftime("%M:%S")))
         self.setItem(self.nrows, 1, QTableWidgetItem(mediaInfo.title))
@@ -68,18 +77,20 @@ class FileListTableWidget(QTableWidget):
         else: return
         if key == self.sortKey:
             self.sortRev = not self.sortRev
-            self.mediaRow.sort(key=attrgetter(key), reverse=self.sortRev)
+            self.mediaRow = sorted(MainWindow.instance.medias, key=attrgetter(key), reverse=self.sortRev)
         else:
             self.sortKey = key
             self.sortAsc = False
-            self.mediaRow.sort(key=attrgetter(key))
+            self.mediaRow = sorted(MainWindow.instance.medias, key=attrgetter(key))
         self.clearContents()
         self.nrows = 0
+        MainWindow.instance.deferPopulate = False
         class PopulateMediaThread(QThread):
 
             def run(self_):
                 for media in self.mediaRow:
                     self.addMedia(media, False)
+                self.selectPlaying()
                 QTimer.singleShot(0, self.resizeRowsToContents)
                 del self._thread
         self._thread = PopulateMediaThread()
@@ -138,3 +149,4 @@ class FileListView(QWidget):
 
     def bindEvents(self):
         MainWindow.instance.mediaAdded.connect(self.tableWidget.addMedia)
+        MainWindow.instance.songInfoChanged.connect(self.tableWidget.selectPlaying)

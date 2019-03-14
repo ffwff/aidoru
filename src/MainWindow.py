@@ -33,11 +33,12 @@ class MainWindow(QMainWindow):
         self.medias = [] # medias in scan directory
 
         self.setWindowTitle("aidoru~~")
+        self.mode = None
         self.setMode(MainWindow.FULL_MODE)
+        self.setStyleSheet(Database.loadFile("style.css", "style.css"))
 
         # events
         self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
-        self.mediaAdded.connect(self.onMediaAdded)
 
         QShortcut(QKeySequence("Ctrl+Q"), self).activated \
             .connect(sys.exit)
@@ -50,23 +51,34 @@ class MainWindow(QMainWindow):
         QShortcut(QKeySequence("Ctrl+Shift+M"), self).activated \
             .connect(lambda: self.setMode(MainWindow.MICRO_MODE))
 
-        class PopulateMediaThread(QThread):
+        # populate media
+        medias = Database.load("medias")
+        self.deferPopulate = True
+        if medias:
+            self.medias = medias
+            miter = iter(medias)
+            def processMedia():
+                if not self.deferPopulate: return
+                try:
+                    mediaInfo = next(miter)
+                    self.mediaAdded.emit(mediaInfo)
+                    QTimer.singleShot(0, processMedia)
+                except StopIteration:
+                    return
+            processMedia()
+        else:
+            class ProcessMediaThread(QThread):
 
-            def run(self_):
-                self.medias = Database.load("medias")
-                if self.medias:
-                    for media in self.medias:
-                        self.mediaAdded.emit(media)
-                else:
-                    self.medias = []
+                def run(self_):
                     self.populateMedias(os.path.expanduser("~/Music"))
                     Database.save(self.medias, "medias")
-                del self._thread
+                    del self._thread
 
-        self._thread = PopulateMediaThread()
-        self._thread.start()
+            self._thread = ProcessMediaThread()
+            self._thread.start()
 
     def setMode(self, mode):
+        if mode == self.mode: return
         if mode == MainWindow.FULL_MODE:
             self.resize(QSize(1200, 900))
             centralWidget = MediaPlayer(self)
@@ -78,10 +90,10 @@ class MainWindow(QMainWindow):
             self.setMinimumSize(QSize(300, 65))
             self.resize(QSize(300, 65))
             centralWidget = PlayerWidget(self, PlayerWidget.MICRO_MODE)
+        self.mode = mode
         self.setCentralWidget(centralWidget)
         #centralWidget.palette().setColor(QPalette.Window, Qt.black)
         #centralWidget.setAutoFillBackground(True)
-        centralWidget.setStyleSheet(Database.loadFile("style.css", "style.css"))
         # reemit events to redraw ui
         def emitAll():
             self.albumPath = ""
@@ -141,26 +153,33 @@ class MainWindow(QMainWindow):
         self.albumPath = path
 
     def mediaStatusChanged(self, status):
-        if status == QMediaPlayer.EndOfMedia and self.album:
-            self.albumNext()
+        if status == QMediaPlayer.EndOfMedia:
+            self.nextSong()
 
-    def songIndexAlbum(self):
-        for i, info in enumerate(self.album):
-            if info == self.mediaInfo:
-                return i
-        return -1
+    # controls
+    def songIndex(self, array):
+        try:
+            i, _ = next(filter(lambda i: i[1] == self.mediaInfo, enumerate(array)))
+            return i
+        except StopIteration:
+            return -1
 
-    def albumNext(self):
-        idx = self.songIndexAlbum()
+    def nextSong(self):
+        if self.mode == MainWindow.FULL_MODE and self.centralWidget().mode != MediaPlayer.PLAYING_ALBUM_MODE:
+            self.nextSongArray(self.medias, 1)
+        elif self.album:
+            self.nextSongArray(self.album, 1)
+    def prevSong(self):
+        if self.mode == MainWindow.FULL_MODE and self.centralWidget().mode != MediaPlayer.PLAYING_ALBUM_MODE:
+            self.nextSongArray(self.medias, -1)
+        elif self.album:
+            self.nextSongArray(self.album, -1)
+
+    def nextSongArray(self, array, delta):
+        idx = self.songIndex(array)
         if idx == -1: return
-        if 0 <= idx+1 < len(self.album):
-            self.setSong(self.album[idx+1].path)
-
-    def albumPrev(self):
-        idx = self.songIndexAlbum()
-        if idx == -1: return
-        if 0 <= idx-1 < len(self.album):
-            self.setSong(self.album[idx-1].path)
+        if 0 <= idx+delta < len(array):
+            self.setSong(array[idx+delta].path)
 
     # files
     mediaAdded = pyqtSignal(MediaInfo)
@@ -171,9 +190,8 @@ class MainWindow(QMainWindow):
                 self.populateMedias(fpath)
             elif os.access(fpath, os.R_OK) and getFileType(fpath) == "audio":
                 mediaInfo = MediaInfo.fromFile(fpath)
-                if mediaInfo: self.mediaAdded.emit(mediaInfo)
-
-    def onMediaAdded(self, mediaInfo):
-        self.medias.append(mediaInfo)
+                if mediaInfo:
+                    self.medias.append(mediaInfo)
+                    self.mediaAdded.emit(mediaInfo)
 
 instance = None

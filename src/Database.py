@@ -30,5 +30,4 @@ class Database:
             if not default: return ""
             dfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), default)
             with open(dfile, "r") as f:
-                copyfile(dfile, Database.getPath(filename))
                 return f.read()

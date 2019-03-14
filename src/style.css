@@ -1,3 +1,4 @@
+/* widgets */
 QSlider::groove:horizontal {
     height: 6px;
     background: rgba(0, 0, 0, 0.2);
@@ -20,11 +21,11 @@ QScrollBar::handle {
 }
 QTableWidget{
     background: transparent;
-    alternate-background-color: rgba(60, 60, 60, 0.2);
+    alternate-background-color: rgba(60, 60, 60, 0.1);
     border: 0 none;
 }
 QHeaderView::section {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(60, 60, 60, 0.3);
     padding: 5px;
     border: 0 none;
 }
