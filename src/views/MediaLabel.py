@@ -13,12 +13,13 @@ class MediaLabel(QLabel):
 
     # ui
     def initUI(self):
+        self.setWordWrap(True)
         self.setText(
 """
 <table>
 <tr>
     <td width='250' style='max-width: 250px;'>%s</td>
-    <td style='text-align: right;'>%s</td>
+    <td width='80' style='max-width: 80px;text-align: right;'>%s</td>
 </tr>
 %s
 </table>
