@@ -37,6 +37,8 @@ class MainWindow(QMainWindow):
         self.setMode(MainWindow.FULL_MODE)
         self.setStyleSheet(Database.loadFile("style.css", "style.css"))
 
+        self.mediaLocation = os.path.expanduser("~/Music")
+
         # events
         self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
 
@@ -52,6 +54,9 @@ class MainWindow(QMainWindow):
             .connect(lambda: self.setMode(MainWindow.MINI_MODE))
         QShortcut(QKeySequence("Ctrl+Shift+M"), self).activated \
             .connect(lambda: self.setMode(MainWindow.MICRO_MODE))
+        QShortcut(QKeySequence("F5"), self).activated \
+            .connect(lambda: self.repopulateMedias())
+
 
         # populate media
         medias = Database.load("medias")
@@ -60,15 +65,7 @@ class MainWindow(QMainWindow):
             self.medias = medias
             self.mediasAdded.emit(medias)
         else:
-            class ProcessMediaThread(QThread):
-
-                def run(self_):
-                    self.populateMedias(os.path.expanduser("~/Music"))
-                    Database.save(self.medias, "medias")
-                    del self._thread
-
-            self._thread = ProcessMediaThread()
-            self._thread.start()
+            self.populateMediaThread()
 
     def setMode(self, mode):
         if mode == self.mode: return
@@ -174,6 +171,7 @@ class MainWindow(QMainWindow):
 
     # files
     mediasAdded = pyqtSignal(list)
+    mediasDeleted = pyqtSignal(list)
     def populateMedias(self, path):
         batch = []
         for f in os.listdir(path):
@@ -182,9 +180,27 @@ class MainWindow(QMainWindow):
                 self.populateMedias(fpath)
             elif os.access(fpath, os.R_OK) and getFileType(fpath) == "audio":
                 mediaInfo = MediaInfo.fromFile(fpath)
-                if mediaInfo: batch.push(mediaInfo)
+                if mediaInfo: batch.append(mediaInfo)
         self.medias.extend(batch)
         self.mediasAdded.emit(batch)
+
+    def populateMediaThread(self):
+        class ProcessMediaThread(QThread):
+
+            def run(self_):
+                self.populateMedias(self.mediaLocation)
+                Database.save(self.medias, "medias")
+                del self._thread
+
+        self._thread = ProcessMediaThread()
+        self._thread.start()
+
+    def repopulateMedias(self):
+        deleted = self.medias
+        self.medias = []
+        self.mediasDeleted.emit(deleted)
+        QTimer.singleShot(0, self.populateMediaThread)
+
 
     # misc
     def onCtrlF(self):

@@ -72,6 +72,13 @@ class FileListTableWidget(QTableWidget):
             self.addMedia(media, append)
         self.resizeRowsToContents()
 
+    def mediasDeleted(self, medias):
+        for media in medias:
+            self.mediaRow.remove(media)
+        self.clearContents()
+        self.nrows = 0
+        self.setRowCount(0)
+
     # data manip
     def sortAndFilter(self):
         if self.filterText:
@@ -82,6 +89,7 @@ class FileListTableWidget(QTableWidget):
 
         self.clearContents()
         self.nrows = 0
+        self.setRowCount(0)
         self.mediasAdded(self.mediaRow, False)
         self.selectPlaying()
 
@@ -116,6 +124,7 @@ class FileListTableWidget(QTableWidget):
 
     def mousePressEvent(self, e):
         QTableWidget.mousePressEvent(self, e)
+        if self.hoverRow == -1: return
         index = self.indexAt(e.pos())
         mainWindow = MainWindow.instance
         if self.mediaRow:
@@ -150,4 +159,5 @@ class FileListView(QWidget):
 
     def bindEvents(self):
         MainWindow.instance.mediasAdded.connect(self.tableWidget.mediasAdded)
+        MainWindow.instance.mediasDeleted.connect(self.tableWidget.mediasDeleted)
         MainWindow.instance.songInfoChanged.connect(self.tableWidget.selectPlaying)
