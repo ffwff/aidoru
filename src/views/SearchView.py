@@ -25,6 +25,11 @@ class SearchView(QWidget):
 
     # slots
     def toggleVisible(self):
-        self.setVisible(not self.isVisible())
+        from .MediaPlayer import MediaPlayer
+        if self.parentWidget().parentWidget().mode == MediaPlayer.FILE_LIST_MODE:
+            self.setVisible(not self.isVisible())
+        else:
+            self.parentWidget().parentWidget().setMode(MediaPlayer.FILE_LIST_MODE)
+            self.show()
         if self.isVisible():
             self.searchBox.setFocus(True)
