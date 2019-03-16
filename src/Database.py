@@ -1,26 +1,26 @@
 import os
 import pickle
+import json
 from shutil import copyfile
 
 class Database:
 
     BASE = os.path.expanduser("~/.aidoru")
-    EXT = ".pkl"
 
     def getPath(filename):
         return os.path.join(Database.BASE, filename)
 
-    def save(obj, filename):
+    def save(obj, filename, save_json=False):
         os.makedirs(Database.BASE, exist_ok=True)
-        with open(Database.getPath(filename) + Database.EXT, "wb") as f:
-            pickle.dump(obj, f)
+        with open(Database.getPath(filename), ("w" if save_json else "wb")) as f:
+            (json if save_json else pickle).dump(obj, f)
 
-    def load(filename):
+    def load(filename, load_json=False, default=None):
         try:
-            with open(Database.getPath(filename) + Database.EXT, "rb") as f:
-                return pickle.load(f)
+            with open(Database.getPath(filename), ("r" if save_json else "rb")) as f:
+                return (json if load_json else pickle).load(f)
         except:
-            return None
+            return default
 
     def loadFile(filename, default=""):
         try:

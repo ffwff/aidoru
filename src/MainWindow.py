@@ -18,6 +18,12 @@ class MainWindow(QMainWindow):
     MINI_MODE = 1
     MICRO_MODE = 2
 
+    # settings
+    DEFAULT_SETTINGS = {
+        "mediaLocation": os.path.expanduser("~/Music")
+    }
+    SETINGS_FILE = "settings.json"
+
     # main
     def __init__(self):
         global instance
@@ -31,13 +37,13 @@ class MainWindow(QMainWindow):
         self.album = []
         self.albumPath = ""
         self.medias = [] # medias in scan directory
+        self.settings = Database.load(MainWindow.SETINGS_FILE, True,
+                                      MainWindow.DEFAULT_SETTINGS)
 
         self.setWindowTitle("aidoru~~")
         self.mode = None
         self.setMode(MainWindow.FULL_MODE)
         self.setStyleSheet(Database.loadFile("style.css", "style.css"))
-
-        self.mediaLocation = os.path.expanduser("~/Music")
 
         # events
         self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
@@ -57,10 +63,8 @@ class MainWindow(QMainWindow):
         QShortcut(QKeySequence("F5"), self).activated \
             .connect(lambda: self.repopulateMedias())
 
-
         # populate media
-        medias = Database.load("medias")
-        self.deferPopulate = True
+        medias = Database.load("medias.pkl")
         if medias:
             self.medias = medias
             self.mediasAdded.emit(medias)
@@ -188,7 +192,7 @@ class MainWindow(QMainWindow):
         class ProcessMediaThread(QThread):
 
             def run(self_):
-                self.populateMedias(self.mediaLocation)
+                self.populateMedias(self.settings["mediaLocation"])
                 Database.save(self.medias, "medias")
                 del self._thread
 
@@ -201,6 +205,9 @@ class MainWindow(QMainWindow):
         self.mediasDeleted.emit(deleted)
         QTimer.singleShot(0, self.populateMediaThread)
 
+    # settings
+    def saveSettings(self):
+        Database.save(self.settings, MainWindow.SETINGS_FILE, True)
 
     # misc
     def onCtrlF(self):

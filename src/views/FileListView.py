@@ -8,11 +8,6 @@ from .SearchView import SearchView
 # file list view
 class FileListTableItemDelegate(QStyledItemDelegate):
 
-    def sizeHint(self, option, index):
-        size = QStyledItemDelegate.sizeHint(self, option, index)
-        size = QSize(size.width(), max(size.height(), 40))
-        return size
-
     def paint(self, painter, option, index):
         option.state &= ~QStyle.State_HasFocus
         if option.styleObject.hoverRow == index.row():
@@ -64,17 +59,21 @@ class FileListTableWidget(QTableWidget):
         self.setItem(self.nrows, 4, QTableWidgetItem(mediaInfo.albumArtist))
         self.setItem(self.nrows, 5, QTableWidgetItem(str(mediaInfo.year) if mediaInfo.year != -1 else ""))
         self.setItem(self.nrows, 6, QTableWidgetItem("")) # filler
+        self.setRowHeight(self.nrows, 40)
         if append: self.mediaRow.append(mediaInfo)
         self.nrows += 1
 
     def mediasAdded(self, medias, append=True):
         for media in medias:
             self.addMedia(media, append)
-        self.resizeRowsToContents()
+        #QTimer.singleShot(100, self.resizeRowsToContents)
 
     def mediasDeleted(self, medias):
-        for media in medias:
-            self.mediaRow.remove(media)
+        try:
+            for media in medias:
+                self.mediaRow.remove(media)
+        except ValueError:
+            pass
         self.clearContents()
         self.nrows = 0
         self.setRowCount(0)
