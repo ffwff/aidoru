@@ -18,10 +18,7 @@ class MediaInfo(object):
         self.image = image
 
     def fromFile(path):
-        try:
-            song = taglib.File(path)
-        except OSError:
-            return None
+        song = taglib.File(path)
         artist = song.tags["ARTIST"][0] if "ARTIST" in song.tags else ""
         title = song.tags["TITLE"][0] if "TITLE" in song.tags else os.path.basename(path)
         searchPath = pathUp(path)
@@ -70,6 +67,8 @@ class MediaInfo(object):
     def __eq__(self, other):
         if not isinstance(other, MediaInfo):
             return False
+        if object.__eq__(self, other):
+            return True
         if os.path.samefile(self.path, other.path):
             return True
-        return object.__eq__(self, other)
+        return False
