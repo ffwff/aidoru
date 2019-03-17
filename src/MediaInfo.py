@@ -67,8 +67,6 @@ class MediaInfo(object):
     def __eq__(self, other):
         if not isinstance(other, MediaInfo):
             return False
-        if object.__eq__(self, other):
+        if self.path == other.path:
             return True
-        if os.path.samefile(self.path, other.path):
-            return True
-        return False
+        return object.__eq__(self, other)
