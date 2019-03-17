@@ -17,9 +17,10 @@ class Database:
 
     def load(filename, load_json=False, default=None):
         try:
-            with open(Database.getPath(filename), ("r" if save_json else "rb")) as f:
-                return (json if load_json else pickle).load(f)
-        except:
+            with open(Database.getPath(filename), ("r" if load_json else "rb")) as f:
+                 return (json if load_json else pickle).load(f)
+        except FileNotFoundError:
+            print("can't load %s" % filename)
             return default
 
     def loadFile(filename, default=""):

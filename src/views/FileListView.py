@@ -66,17 +66,20 @@ class FileListTableWidget(QTableWidget):
     def mediasAdded(self, medias, append=True):
         for media in medias:
             self.addMedia(media, append)
-        #QTimer.singleShot(100, self.resizeRowsToContents)
 
     def mediasDeleted(self, medias):
-        try:
-            for media in medias:
-                self.mediaRow.remove(media)
-        except ValueError:
-            pass
+        removed = []
+        for i, m in enumerate(self.mediaRow):
+            for m_ in medias:
+                if m.path == m_.path:
+                    removed.append(m)
+                    break
+        for media in removed:
+            self.mediaRow.remove(media)
         self.clearContents()
         self.nrows = 0
         self.setRowCount(0)
+        self.mediasAdded(self.mediaRow, False)
 
     # data manip
     def sortAndFilter(self):

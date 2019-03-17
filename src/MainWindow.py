@@ -20,9 +20,11 @@ class MainWindow(QMainWindow):
 
     # settings
     DEFAULT_SETTINGS = {
-        "mediaLocation": os.path.expanduser("~/Music")
+        "mediaLocation": os.path.expanduser("~/Music"),
+        "fileWatch": True
     }
     SETINGS_FILE = "settings.json"
+    MEDIAS_FILE = "medias.pkl"
 
     # main
     def __init__(self):
@@ -39,6 +41,7 @@ class MainWindow(QMainWindow):
         self.medias = [] # medias in scan directory
         self.settings = Database.load(MainWindow.SETINGS_FILE, True,
                                       MainWindow.DEFAULT_SETTINGS)
+        self.setWatchFiles()
 
         self.setWindowTitle("aidoru~~")
         self.mode = None
@@ -64,10 +67,14 @@ class MainWindow(QMainWindow):
             .connect(lambda: self.repopulateMedias())
 
         # populate media
-        medias = Database.load("medias.pkl")
+        medias = Database.load(MainWindow.MEDIAS_FILE)
         if medias:
             self.medias = medias
             self.mediasAdded.emit(medias)
+            if self.settings["fileWatch"]:
+                for media in self.medias:
+                    self.fsWatcher.addPath(pathUp(media.path))
+                    self.fsWatcher.addPath(media.path)
         else:
             self.populateMediaThread()
 
@@ -178,13 +185,20 @@ class MainWindow(QMainWindow):
     mediasDeleted = pyqtSignal(list)
     def populateMedias(self, path):
         batch = []
-        for f in os.listdir(path):
-            fpath = os.path.join(path, f)
+        ls = list(map(lambda f: os.path.join(path, f), os.listdir(path)))
+        if not ls: return
+        if self.settings["fileWatch"]:
+            self.fsWatcher.addPath(path)
+            self.fsWatcher.addPaths(ls)
+        for fpath in ls:
             if os.path.isdir(fpath):
                 self.populateMedias(fpath)
             elif os.access(fpath, os.R_OK) and getFileType(fpath) == "audio":
-                mediaInfo = MediaInfo.fromFile(fpath)
-                if mediaInfo: batch.append(mediaInfo)
+                try:
+                    mediaInfo = MediaInfo.fromFile(fpath)
+                    batch.append(mediaInfo)
+                except OSError:
+                    pass
         self.medias.extend(batch)
         self.mediasAdded.emit(batch)
 
@@ -193,7 +207,7 @@ class MainWindow(QMainWindow):
 
             def run(self_):
                 self.populateMedias(self.settings["mediaLocation"])
-                Database.save(self.medias, "medias")
+                Database.save(self.medias, MainWindow.MEDIAS_FILE)
                 del self._thread
 
         self._thread = ProcessMediaThread()
@@ -203,7 +217,54 @@ class MainWindow(QMainWindow):
         deleted = self.medias
         self.medias = []
         self.mediasDeleted.emit(deleted)
+        self.setWatchFiles()
         QTimer.singleShot(0, self.populateMediaThread)
+
+    # file watcher
+    def setWatchFiles(self):
+        if self.settings["fileWatch"]:
+            self.fsWatcher = QFileSystemWatcher()
+            if self.medias:
+                for media in self.medias:
+                    self.fsWatcher.addPath(pathUp(media.path))
+                    self.fsWatcher.addPath(media.path)
+            self.fsWatcher.fileChanged.connect(self.watchFileChanged)
+            self.fsWatcher.directoryChanged.connect(self.watchDirChanged)
+        elif hasattr(self, "fsWatcher"):
+            del self.fsWatcher
+
+    def watchFileChanged(self, fpath):
+        try:
+            i, mediaInfo = next(filter(lambda i: i[1].path == fpath, enumerate(self.medias)))
+            self.mediasDeleted.emit([mediaInfo])
+            del self.medias[i]
+        except StopIteration:
+            pass
+        try:
+            mediaInfo = MediaInfo.fromFile(fpath)
+            self.medias.append(mediaInfo)
+            self.mediasAdded.emit([mediaInfo])
+        except OSError:
+            return
+
+    def watchDirChanged(self, dpath):
+        print(dpath)
+        # TODO: handle directories
+        oldPaths = set(filter(lambda fpath: pathUp(fpath) == dpath,
+            map(lambda info: info.path, self.medias)))
+        newPaths = set(map(lambda fpath: os.path.join(dpath, fpath),
+                filter(lambda fpath: getFileType(fpath) == "audio", os.listdir(dpath))))
+        removed = oldPaths.difference(newPaths)
+        added = newPaths.difference(oldPaths)
+        
+        for fpath in removed:
+            i, mediaInfo = next(filter(lambda i: i[1].path == fpath, enumerate(self.medias)))
+            self.mediasDeleted.emit([mediaInfo])
+            del self.medias[i]
+        for fpath in added:
+            mediaInfo = MediaInfo.fromFile(fpath)
+            self.medias.append(mediaInfo)
+            self.mediasAdded.emit([mediaInfo])
 
     # settings
     def saveSettings(self):
