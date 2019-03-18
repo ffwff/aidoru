@@ -26,6 +26,8 @@ appears upon running, then:
  2. remove `~/.local/lib/python3*/dist-packages/PyQt5/Qt/plugins/mediaservice/libgstmediaplayer.so`
  3. `ln -s /usr/lib/x86_64-linux-gnu/qt5/plugins/mediaservice/libgstmediaplayer.so ~/.local/lib/python3*/dist-packages/PyQt5/Qt/plugins/mediaservice/libgstmediaplayer.so`
  
+*Windows users*, support coming soon!™
+ 
 <h2 align="center">credits</h2>
 
 - Breeze/Paper icons
