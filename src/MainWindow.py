@@ -21,7 +21,8 @@ class MainWindow(QMainWindow):
     # settings
     DEFAULT_SETTINGS = {
         "mediaLocation": os.path.expanduser("~/Music"),
-        "fileWatch": True
+        "fileWatch": True,
+        "redrawBackground": True
     }
     SETINGS_FILE = "settings.json"
     MEDIAS_FILE = "medias.pkl"
@@ -44,8 +45,12 @@ class MainWindow(QMainWindow):
     def initUI(self):
         self.setWindowTitle("aidoru~~")
         self.mode = None
+
         self.setMode(MainWindow.FULL_MODE)
         self.setStyleSheet(Database.loadFile("style.css", "style.css"))
+        if self.settings["redrawBackground"]:
+            # workaround for qt themes with transparent backgrounds
+            self.style().unpolish(self)
 
         # events
         self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
@@ -92,6 +97,7 @@ class MainWindow(QMainWindow):
             centralWidget = PlayerWidget(self, PlayerWidget.MICRO_MODE)
         self.mode = mode
         self.setCentralWidget(centralWidget)
+
         # reemit events to redraw ui
         def emitAll():
             self.albumPath = ""
@@ -247,7 +253,6 @@ class MainWindow(QMainWindow):
             return
 
     def watchDirChanged(self, dpath):
-        print(dpath)
         # TODO: handle directories
         oldPaths = set(filter(lambda fpath: pathUp(fpath) == dpath,
             map(lambda info: info.path, self.medias)))
