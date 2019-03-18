@@ -14,13 +14,13 @@ You must install Qt5 library and python3. After that, do:
 pip3 install --user -r requirements.txt
 ```
 
-*Linux users*, if this issue:
+*Linux users*, if this line:
 
 ```
 defaultServiceProvider::requestService(): no service found for - "org.qt-project.qt.mediaplayer"
 ```
 
-upon running, then:
+appears upon running, then:
 
  1. install your distro's equivalent to `libqt5multimedia5-plugins`
  2. remove `~/.local/lib/python3*/dist-packages/PyQt5/Qt/plugins/mediaservice/libgstmediaplayer.so`
