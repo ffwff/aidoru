@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from operator import attrgetter
-import src.MainWindow as MainWindow
 from .PlayingAlbumView import PlayingAlbumView
 from .SearchView import SearchView
+from src.Application import Application
 
 # file list view
 class FileListTableItemDelegate(QStyledItemDelegate):
@@ -43,7 +43,7 @@ class FileListTableWidget(QTableWidget):
     def selectPlaying(self):
         if not self.mediaRow: return
         try:
-            i, _ = next(filter(lambda i: i[1] == MainWindow.instance.mediaInfo, enumerate(self.mediaRow)))
+            i, _ = next(filter(lambda i: i[1] == Application.mainWindow.mediaInfo, enumerate(self.mediaRow)))
             self.selectRow(i)
         except StopIteration:
             pass
@@ -84,9 +84,9 @@ class FileListTableWidget(QTableWidget):
     # data manip
     def sortAndFilter(self):
         if self.filterText:
-            self.mediaRow = list(filter(lambda media: self.filterText in media.title.lower(), MainWindow.instance.medias))
+            self.mediaRow = list(filter(lambda media: self.filterText in media.title.lower(), Application.mainWindow.medias))
         else:
-            self.mediaRow = MainWindow.instance.medias
+            self.mediaRow = Application.mainWindow.medias
         self.mediaRow.sort(key=attrgetter(self.sortKey), reverse=self.sortRev)
 
         self.clearContents()
@@ -128,7 +128,7 @@ class FileListTableWidget(QTableWidget):
         QTableWidget.mousePressEvent(self, e)
         if self.hoverRow == -1: return
         index = self.indexAt(e.pos())
-        mainWindow = MainWindow.instance
+        mainWindow = Application.mainWindow
         if self.mediaRow:
             if mainWindow.mediaInfo and self.mediaRow[index.row()] == mainWindow.mediaInfo:
                 return
@@ -154,12 +154,11 @@ class FileListView(QWidget):
         tableWidget.setAlternatingRowColors(True)
         vboxLayout.addWidget(tableWidget)
 
-        mainWindow = MainWindow.instance
-        if mainWindow.medias:
+        if Application.mainWindow.medias:
             self.tableWidget.mediasAdded(mainWindow.medias)
             self.tableWidget.selectPlaying()
 
     def bindEvents(self):
-        MainWindow.instance.mediasAdded.connect(self.tableWidget.mediasAdded)
-        MainWindow.instance.mediasDeleted.connect(self.tableWidget.mediasDeleted)
-        MainWindow.instance.songInfoChanged.connect(self.tableWidget.selectPlaying)
+        Application.mainWindow.mediasAdded.connect(self.tableWidget.mediasAdded)
+        Application.mainWindow.mediasDeleted.connect(self.tableWidget.mediasDeleted)
+        Application.mainWindow.songInfoChanged.connect(self.tableWidget.selectPlaying)

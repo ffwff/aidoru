@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-import src.MainWindow as MainWindow
+from src.Application import Application
 
 class SettingsView(QWidget):
 
@@ -27,7 +27,7 @@ class SettingsView(QWidget):
         vboxLayout.addWidget(layoutw)
 
         self.musicLocationInput = musicLocationInput = QLineEdit()
-        musicLocationInput.setText(MainWindow.instance.settings["mediaLocation"])
+        musicLocationInput.setText(Application.mainWindow.settings["mediaLocation"])
         layout.addWidget(musicLocationInput)
 
         self.musicLocationBrowse = musicLocationBrowse = QPushButton("Browse...")
@@ -40,11 +40,11 @@ class SettingsView(QWidget):
 
         # file watcher
         self.fileWatcherOption = QCheckBox("Watch file changes in this directory")
-        self.fileWatcherOption.setChecked(MainWindow.instance.settings["fileWatch"])
+        self.fileWatcherOption.setChecked(Application.mainWindow.settings["fileWatch"])
         layout.addWidget(self.fileWatcherOption)
-        
+
         layout.addStretch()
-        
+
         self.musicRefreshButton = musicRefreshButton = QPushButton("Refresh media listing")
         layout.addWidget(musicRefreshButton)
 
@@ -58,21 +58,21 @@ class SettingsView(QWidget):
 
     def musicLocationBrowseClicked(self):
         self.fileDialog = dialog = QFileDialog()
-        dialog.setDirectory(MainWindow.instance.settings["mediaLocation"])
+        dialog.setDirectory(Application.mainWindow.settings["mediaLocation"])
         dialog.setFileMode(QFileDialog.Directory)
         dialog.setOption(QFileDialog.ShowDirsOnly, True)
         dialog.fileSelected.connect(self.refreshMedia)
         dialog.show()
 
     def refreshMedia(self, dpath):
-        mainWindow = MainWindow.instance
+        mainWindow = Application.mainWindow
         mainWindow.settings["mediaLocation"] = dpath
         self.musicLocationInput.setText(dpath)
         mainWindow.saveSettings()
         mainWindow.repopulateMedias()
 
     def fileWatcherOptionChanged(self):
-        mainWindow = MainWindow.instance
+        mainWindow = Application.mainWindow
         mainWindow.settings["fileWatch"] = self.fileWatcherOption.isChecked()
         mainWindow.saveSettings()
         mainWindow.setWatchFiles()
