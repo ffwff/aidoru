@@ -6,7 +6,7 @@
 <img src="./img/main.png" alt="music player in playing album mode"/>
 </p>
 
-<h2 align="center">installation</h2>
+## installation
 
 You must install Qt5 library and python3. After that, do:
 
@@ -28,7 +28,20 @@ appears upon running, then:
  
 *Windows users*, support coming soon!™
  
-<h2 align="center">credits</h2>
+
+## shortcuts
+
+shortcut     | action
+-------------|--------
+ctrl+q       | quit
+space        | play/pause song
+F5           | refresh listing
+ctrl+f       | toggle file search bar
+ctrl+shift+f | switch to full mode
+ctrl+m       | switch to mini mode
+ctrl+shift+m | switch to micro mode
+
+## credits
 
 - Breeze/Paper icons
 - Design based on [voltra.co](https://voltra.co/)
