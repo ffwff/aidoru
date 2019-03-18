@@ -28,10 +28,8 @@ class MainWindow(QMainWindow):
 
     # main
     def __init__(self):
-        global instance
-        instance = self
-
         QMainWindow.__init__(self)
+
         self.setAcceptDrops(True)
 
         self.media = QMediaPlayer()
@@ -43,6 +41,7 @@ class MainWindow(QMainWindow):
                                       MainWindow.DEFAULT_SETTINGS)
         self.setWatchFiles()
 
+    def initUI(self):
         self.setWindowTitle("aidoru~~")
         self.mode = None
         self.setMode(MainWindow.FULL_MODE)
@@ -256,7 +255,7 @@ class MainWindow(QMainWindow):
                 filter(lambda fpath: getFileType(fpath) == "audio", os.listdir(dpath))))
         removed = oldPaths.difference(newPaths)
         added = newPaths.difference(oldPaths)
-        
+
         for fpath in removed:
             i, mediaInfo = next(filter(lambda i: i[1].path == fpath, enumerate(self.medias)))
             self.mediasDeleted.emit([mediaInfo])

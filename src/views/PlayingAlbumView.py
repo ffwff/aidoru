@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-import src.MainWindow as MainWindow
 from .PlayerWidget import PlayerWidget
 from .MediaLabel import MediaLabel
 from src.utils import clearLayout
+from src.Application import Application
 
 class PlayingAlbumView(QWidget):
 
@@ -61,7 +61,7 @@ class PlayingAlbumView(QWidget):
         vboxLayout.addStretch(1)
 
     def bindEvents(self):
-        mainWindow = MainWindow.instance
+        mainWindow = Application.mainWindow
         mainWindow.albumChanged.connect(self.populateAlbum)
         mainWindow.songInfoChanged.connect(self.songInfoChanged)
 
@@ -76,8 +76,7 @@ class PlayingAlbumView(QWidget):
         self.albumArtistLabel.setText(mediaInfo.albumArtist)
 
         # album
-        mainWindow = MainWindow.instance
-        mainWindow.populateAlbum(mediaInfo.path)
+        Application.mainWindow.populateAlbum(mediaInfo.path)
         for mediaLabel in self.mediaLabels:
             mediaLabel.setActive(mediaLabel.media == mediaInfo)
 
@@ -85,7 +84,7 @@ class PlayingAlbumView(QWidget):
         self.scrollArea.show()
         self.mediaLabels.clear()
         clearLayout(self.mediaBoxL)
-        for mediaInfo in MainWindow.instance.album:
+        for mediaInfo in Application.mainWindow.album:
             mediaLabel = MediaLabel(mediaInfo, self)
             self.mediaBoxL.addWidget(mediaLabel)
             self.mediaLabels.append(mediaLabel)

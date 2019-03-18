@@ -1,7 +1,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-import src.MainWindow as MainWindow
+from src.Application import Application
 
 class MediaLabel(QLabel):
 
@@ -39,4 +39,4 @@ class MediaLabel(QLabel):
 
     # events
     def mousePressEvent(self, e):
-        MainWindow.instance.setSong(self.media.path)
+        Application.mainWindow.setSong(self.media.path)

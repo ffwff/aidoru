@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtMultimedia import *
-import src.MainWindow as MainWindow
+from src.Application import Application
 
 class PlayerWidget(QWidget):
 
@@ -28,9 +28,9 @@ class PlayerWidget(QWidget):
         self.initUI()
 
         # events
-        self.stateChanged(MainWindow.instance.media.state())
+        self.stateChanged(Application.mainWindow.media.state())
         if hasattr(self, "volumeButton"):
-            self.mutedChanged(MainWindow.instance.media.isMuted())
+            self.mutedChanged(Application.mainWindow.media.isMuted())
         self.bindEvents()
 
     def initUI(self):
@@ -131,19 +131,19 @@ class PlayerWidget(QWidget):
         self.initUI()
 
     def bindEvents(self):
-        media = MainWindow.instance.media
+        media = Application.mainWindow.media
 
         # song info
-        MainWindow.instance.songInfoChanged.connect(self.updateInfo)
+        Application.mainWindow.songInfoChanged.connect(self.updateInfo)
         ## pos slider
         media.durationChanged.connect(self.durationChanged)
         media.positionChanged.connect(self.positionChanged)
         self.positionSlider.valueChanged.connect(self.positionSliderChanged)
 
         # controls button
-        self.backButton.clicked.connect(MainWindow.instance.prevSong)
-        self.forwardButton.clicked.connect(MainWindow.instance.nextSong)
-        self.ppButton.clicked.connect(MainWindow.instance.playPause)
+        self.backButton.clicked.connect(Application.mainWindow.prevSong)
+        self.forwardButton.clicked.connect(Application.mainWindow.nextSong)
+        self.ppButton.clicked.connect(Application.mainWindow.playPause)
         media.stateChanged.connect(self.stateChanged)
         if hasattr(self, "volumeButton"):
             self.volumeButton.clicked.connect(self.volumeButtonClicked)
@@ -169,7 +169,7 @@ class PlayerWidget(QWidget):
         self.positionSlider.blockSignals(False)
 
     def positionSliderChanged(self, position):
-        MainWindow.instance.media.setPosition(position)
+        Application.mainWindow.media.setPosition(position)
 
     ## controls
     def stateChanged(self, state):
@@ -186,12 +186,12 @@ class PlayerWidget(QWidget):
             self.volumeButton.setIcon(QIcon("./icons/audio-volume-high"))
 
     def volumeButtonClicked(self):
-        media = MainWindow.instance.media
+        media = Application.mainWindow.media
         media.setMuted(not media.isMuted())
 
     ## volume slider
     def volumeSliderChanged(self, volume):
-        MainWindow.instance.media.setVolume(volume)
+        Application.mainWindow.media.setVolume(volume)
 
     # ui elements
     def updateInfo(self, mediaInfo):
