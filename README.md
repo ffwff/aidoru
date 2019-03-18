@@ -2,7 +2,9 @@
 
 a qt music player in python
 
-![music player in playing album mode](img/main.png)
+<p align="center">
+<img src="./img/main.png" alt="music player in playing album mode"/>
+ </p>
 
 ## Installation
 
