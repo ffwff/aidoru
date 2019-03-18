@@ -8,7 +8,7 @@
 
 ## installation
 
-You must install Qt5 library and python3. After that, do:
+You must install Qt5 library, taglib headers (`libtag1-dev` in Ubuntu) and python3. After that, do:
 
 ```
 pip3 install --user -r requirements.txt
