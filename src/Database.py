@@ -15,11 +15,12 @@ class Database:
         with open(Database.getPath(filename), ("w" if save_json else "wb")) as f:
             (json if save_json else pickle).dump(obj, f)
 
-    def load(filename, load_json=False, default={}):
+    def load(filename, load_json=False, default=None):
         try:
             with open(Database.getPath(filename), ("r" if load_json else "rb")) as f:
                 obj = (json if load_json else pickle).load(f)
-                return {**default, **obj}
+                if default: return {**default, **obj}
+                return obj
         except FileNotFoundError:
             print("can't load %s" % filename)
             return default
