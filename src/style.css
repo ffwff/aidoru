@@ -1,3 +1,7 @@
+QMainWindow {
+    background: #3b3f45;
+    color: white;
+}
 /* widgets */
 QSlider::groove:horizontal {
     height: 6px;
