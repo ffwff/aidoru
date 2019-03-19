@@ -10,7 +10,6 @@ from .MediaInfo import MediaInfo
 from .views.PlayerWidget import PlayerWidget
 from .views.MediaPlayer import MediaPlayer
 from .utils import *
-import os
 
 class MainWindow(QMainWindow):
 
@@ -271,7 +270,10 @@ class MainWindow(QMainWindow):
             self.mediasDeleted.emit([mediaInfo])
             del self.medias[i]
         for fpath in added:
-            mediaInfo = MediaInfo.fromFile(fpath)
+            try:
+                mediaInfo = MediaInfo.fromFile(fpath)
+            except OSError:
+                continue
             self.medias.append(mediaInfo)
             self.mediasAdded.emit([mediaInfo])
 
