@@ -9,5 +9,4 @@ class Application(QApplication):
         from src.MainWindow import MainWindow
         Application.mainWindow = MainWindow()
         Application.mainWindow.initUI()
-        Application.mainWindow.show()
         return QApplication.exec()
