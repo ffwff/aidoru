@@ -53,6 +53,7 @@ class MainWindow(QMainWindow):
             # workaround for qt themes with transparent backgrounds
             self.setProperty("class", "redraw-background")
             self.style().unpolish(self)
+        self.show()
 
         # events
         self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
@@ -81,9 +82,16 @@ class MainWindow(QMainWindow):
                 for media in self.medias:
                     self.fsWatcher.addPath(pathUp(media.path))
                     self.fsWatcher.addPath(media.path)
+        elif not os.path.isdir(self.settings["mediaLocation"]):
+            self.hide()
+            self.mediaSelectionDialog = MediaLocationSelectionDialog()
+            def delMediaSelection():
+                self.show()
+                self.populateMediaThread()
+                del self.mediaSelectionDialog
+            self.mediaSelectionDialog.okButton.clicked.connect(delMediaSelection)
+            self.mediaSelectionDialog.show()
         else:
-            if not os.path.exists(self.settings["mediaLocation"]):
-                return
             self.populateMediaThread()
 
     def setMode(self, mode):
