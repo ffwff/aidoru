@@ -50,6 +50,7 @@ class MainWindow(QMainWindow):
         self.setStyleSheet(Database.loadFile("style.css", "style.css"))
         if self.settings["redrawBackground"]:
             # workaround for qt themes with transparent backgrounds
+            self.setProperty("class", "redraw-background")
             self.style().unpolish(self)
 
         # events
