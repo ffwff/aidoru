@@ -45,12 +45,16 @@ class MediaInfo(object):
                     pos = int(song.tags["TRACKNUMBER"][0])
             except ValueError:
                 pass
-        album = song.tags["ALBUM"][0] if "ALBUM" in song.tags else ""
-        albumArtist = song.tags["ALBUMARTIST"][0] if "ALBUMARTIST" in song.tags else artist
-        try:
-            year = int(song.tags["DATE"][0])
-        except:
-            year = -1
+
+        try: album = song.tags["ALBUM"][0]
+        except: album = ""
+
+        try: albumArtist = song.tags["ALBUMARTIST"][0]
+        except: albumArtist = artist
+
+        try: year = int(song.tags["DATE"][0])
+        except: year = -1
+
         return MediaInfo(path, pos, title, artist,
                          album, albumArtist,
                          datetime.datetime.fromtimestamp(song.length),
