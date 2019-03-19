@@ -1,6 +1,5 @@
 @echo off
 rmdir dist /s /q
-venv\Scripts\activate.bat
 pyinstaller aidoru.spec || goto :error
 if "%PROCESSOR_ARCHITECTURE%" == "x86" set ARCH=win32
 if "%PROCESSOR_ARCHITECTURE%" == "AMD64" set ARCH=win64
