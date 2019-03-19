@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
 
     # settings
     DEFAULT_SETTINGS = {
-        "mediaLocation": os.path.expanduser("~/Music"),
+        "mediaLocation": os.path.normpath(os.path.expanduser("~/Music")),
         "fileWatch": True,
         "redrawBackground": True
     }
