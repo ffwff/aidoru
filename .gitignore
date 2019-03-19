@@ -1,3 +1,5 @@
 .directory
 __pycache__
 venv
+dist
+build
