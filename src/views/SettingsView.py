@@ -19,6 +19,11 @@ class SettingsView(QWidget):
         vboxLayout.addStretch(1)
 
         # ui options
+        layoutw = QWidget()
+        layout = QHBoxLayout()
+        layoutw.setLayout(layout)
+        vboxLayout.addWidget(layoutw)
+
         self.redrawBackgroundOption = QCheckBox("Redraw window background (requires restart)")
         self.redrawBackgroundOption.setChecked(Application.mainWindow.settings["redrawBackground"])
         layout.addWidget(self.redrawBackgroundOption)
