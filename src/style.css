@@ -76,6 +76,7 @@ QHeaderView::section:hover, ::item:selected{
     qproperty-iconSize: 24px;
     border: 0 none;
     background: transparent;
+    padding: 0;
 }
 #volume-slider {
     max-width: 100%;
@@ -87,6 +88,7 @@ QHeaderView::section:hover, ::item:selected{
     qproperty-iconSize: 32px;
     border: 0 none;
     background: transparent;
+    padding: 0;
 }
 /* playing album view */
 .album-label { font-size: 24px; }
