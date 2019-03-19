@@ -18,6 +18,11 @@ class SettingsView(QWidget):
 
         vboxLayout.addStretch(1)
 
+        # ui options
+        self.redrawBackgroundOption = QCheckBox("Redraw window background (requires restart)")
+        self.redrawBackgroundOption.setChecked(Application.mainWindow.settings["redrawBackground"])
+        layout.addWidget(self.redrawBackgroundOption)
+
         # media location
         vboxLayout.addWidget(QLabel("Media Location"))
 
@@ -55,6 +60,7 @@ class SettingsView(QWidget):
         self.musicLocationBrowse.clicked.connect(self.musicLocationBrowseClicked)
         self.musicRefreshButton.clicked.connect(lambda: self.refreshMedia(self.musicLocationInput.text()))
         self.fileWatcherOption.stateChanged.connect(self.fileWatcherOptionChanged)
+        self.redrawBackgroundOption.stateChanged.connect(self.redrawBackgroundOptionChanged)
 
     def musicLocationBrowseClicked(self):
         self.fileDialog = dialog = QFileDialog()
@@ -76,3 +82,8 @@ class SettingsView(QWidget):
         mainWindow.settings["fileWatch"] = self.fileWatcherOption.isChecked()
         mainWindow.saveSettings()
         mainWindow.setWatchFiles()
+
+    def redrawBackgroundOptionChanged(self):
+        mainWindow = Application.mainWindow
+        mainWindow.settings["redrawBackground"] = self.redrawBackgroundOption.isChecked()
+        mainWindow.saveSettings()

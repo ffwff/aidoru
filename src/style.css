@@ -1,4 +1,4 @@
-QMainWindow {
+QMainWindow, .redraw-background .media-box {
     background: #51555a;
 }
 QWidget {
@@ -93,9 +93,6 @@ QHeaderView::section:hover, ::item:selected{
 /* playing album view */
 .album-label { font-size: 24px; }
 .artist-label { font-size: 16px; }
-.media-box {
-    background: #3b3f45;
-}
 .media-box QLabel{
     padding: 5px;
 }
