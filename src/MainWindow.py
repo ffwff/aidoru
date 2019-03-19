@@ -10,6 +10,7 @@ from .MediaInfo import MediaInfo
 from .views.PlayerWidget import PlayerWidget
 from .views.MediaPlayer import MediaPlayer
 from .utils import *
+import os
 
 class MainWindow(QMainWindow):
 
@@ -140,7 +141,10 @@ class MainWindow(QMainWindow):
     def dropEvent(self, e):
         text = e.mimeData().text()
         if text.startswith("file://"):
-            self.setSong(text[7:])
+            if os.name == 'nt': # NT paths goes like file:///C:\
+                self.setSong(text[8:])
+            else:
+                self.setSong(text[7:])
 
     # album
     albumChanged = pyqtSignal(list)
