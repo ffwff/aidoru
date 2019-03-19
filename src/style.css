@@ -1,8 +1,21 @@
 QMainWindow {
-    background: #3b3f45;
+    background: #51555a;
+}
+QWidget {
     color: white;
 }
 /* widgets */
+QPushButton, QLineEdit, QHeaderView {
+    background: rgba(0, 0, 0, 0.2);
+}
+QLineEdit, QPushButton {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+QPushButton:hover {
+    background: rgba(0, 0, 0, 0.4);
+}
 QSlider::groove:horizontal {
     height: 6px;
     background: rgba(0, 0, 0, 0.2);
@@ -28,7 +41,7 @@ QTableWidget{
     alternate-background-color: rgba(60, 60, 60, 0.1);
     border: 0 none;
 }
-QHeaderView::section {
+QHeaderView::section, QHeaderView::section:last:hover {
     background: rgba(60, 60, 60, 0.3);
     padding: 5px;
     border: 0 none;
@@ -62,6 +75,7 @@ QHeaderView::section:hover, ::item:selected{
     height: 24px;
     qproperty-iconSize: 24px;
     border: 0 none;
+    background: transparent;
 }
 #volume-slider {
     max-width: 100%;
@@ -72,10 +86,14 @@ QHeaderView::section:hover, ::item:selected{
     height: 32px;
     qproperty-iconSize: 32px;
     border: 0 none;
+    background: transparent;
 }
 /* playing album view */
 .album-label { font-size: 24px; }
 .artist-label { font-size: 16px; }
+.media-box {
+    background: #3b3f45;
+}
 .media-box QLabel{
     padding: 5px;
 }

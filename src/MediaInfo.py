@@ -2,12 +2,13 @@ from functools import total_ordering
 import datetime
 import taglib
 from .utils import *
+import os
 
 @total_ordering
 class MediaInfo(object):
 
     def __init__(self, path, pos, title, artist, album, albumArtist, duration, image, year=0):
-        self.path = path
+        self.path = os.path.normpath(path)
         self.pos = pos
         self.title = title
         self.artist = artist
