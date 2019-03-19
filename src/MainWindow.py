@@ -9,6 +9,7 @@ from .Database import Database
 from .MediaInfo import MediaInfo
 from .views.PlayerWidget import PlayerWidget
 from .views.MediaPlayer import MediaPlayer
+from .views.MediaLocationSelectionDialog import MediaLocationSelectionDialog
 from .utils import *
 
 class MainWindow(QMainWindow):
@@ -81,6 +82,8 @@ class MainWindow(QMainWindow):
                     self.fsWatcher.addPath(pathUp(media.path))
                     self.fsWatcher.addPath(media.path)
         else:
+            if not os.path.exists(self.settings["mediaLocation"]):
+                return
             self.populateMediaThread()
 
     def setMode(self, mode):
@@ -120,6 +123,8 @@ class MainWindow(QMainWindow):
 
     def setSong(self, path):
         path = urllib.parse.unquote(path.strip())
+        if not os.path.isfile(path):
+            return
         mediaContent = QMediaContent(QUrl.fromLocalFile(path))
         self.media.setMedia(mediaContent)
         self.media.play()
