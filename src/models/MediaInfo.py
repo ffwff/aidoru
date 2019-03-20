@@ -1,8 +1,8 @@
 from functools import total_ordering
 import datetime
 import taglib
-from .utils import *
 import os
+from src.utils import getFileType, pathUp
 
 @total_ordering
 class MediaInfo(object):
