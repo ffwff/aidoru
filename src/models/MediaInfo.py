@@ -2,10 +2,14 @@ from functools import total_ordering
 import datetime
 import taglib
 import os
+from hashlib import md5
 from src.utils import getFileType, pathUp
+from src.models.Database import Database
 
 @total_ordering
 class MediaInfo(object):
+
+    IMAGE_CACHE = os.path.join(Database.BASE, "cache")
 
     def __init__(self, path, pos, title, artist, album, albumArtist, duration, image, year=0):
         self.path = os.path.normpath(path)
@@ -18,7 +22,21 @@ class MediaInfo(object):
         self.duration = duration
         self.image = image
 
-    def searchImage(path):
+    def searchImage(path, song=None):
+        if song and song.picture:
+            picture = song.picture
+            if picture.mimetype == "image/jpg": ext = ".jpg"
+            elif picture.mimetype == "image/jpeg": ext = ".jpeg"
+            elif picture.mimetype == "image/png": ext = ".png"
+            elif picture.mimetype == "image/bmp": ext = ".bmp"
+            elif picture.mimetype == "image/gif": ext = ".gif"
+            else: ext = ""
+            dataHash = md5(picture.data).hexdigest()
+            fpath = os.path.join(MediaInfo.IMAGE_CACHE, dataHash + ext)
+            if os.path.isfile(fpath): return fpath
+            Database.saveFile(picture.data, dataHash + ext, "cache")
+            return fpath
+
         searchPath = pathUp(path)
         paths = list(filter(lambda path: getFileType(path) == "image", os.listdir(searchPath)))
         if paths:
@@ -39,7 +57,6 @@ class MediaInfo(object):
         if self.image and not os.path.isfile(self.image):
             self.image = MediaInfo.searchImage(self.path)
         return True
-
 
     def fromFile(path):
         song = taglib.File(path)
@@ -68,7 +85,7 @@ class MediaInfo(object):
         return MediaInfo(path, pos, title, artist,
                          album, albumArtist,
                          datetime.datetime.fromtimestamp(song.length),
-                         MediaInfo.searchImage(path),
+                         MediaInfo.searchImage(path, song),
                          year)
 
     # comparators
