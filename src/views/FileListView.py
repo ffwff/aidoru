@@ -12,7 +12,7 @@ class FileListTableItemDelegate(QStyledItemDelegate):
         option.state &= ~QStyle.State_HasFocus
         if option.styleObject.hoverRow == index.row():
             option.state |= QStyle.State_MouseOver
-        elif index.column() == option.styleObject.columnCount()-1:
+        else:
             option.state &= ~QStyle.State_MouseOver
         QStyledItemDelegate.paint(self, painter, option, index)
 

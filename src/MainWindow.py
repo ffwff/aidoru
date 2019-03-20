@@ -76,7 +76,9 @@ class MainWindow(QMainWindow):
         # populate media
         medias = Database.load(MainWindow.MEDIAS_FILE)
         if medias:
-            self.medias = medias
+            self.medias = list(filter(lambda media: os.path.isfile(media.path), medias))
+            if len(medias) != len(self.medias):
+                Database.save(self.medias, MainWindow.MEDIAS_FILE)
             self.mediasAdded.emit(medias)
             if self.settings["fileWatch"]:
                 for media in self.medias:
