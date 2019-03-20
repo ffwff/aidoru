@@ -1,4 +1,4 @@
-QMainWindow, .redraw-background .media-box {
+QMainWindow {
     background: #51555a;
 }
 QWidget {
