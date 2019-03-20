@@ -74,7 +74,10 @@ class MainWindow(QMainWindow):
             .connect(lambda: self.repopulateMedias())
 
         # populate media
-        medias = Database.load(MainWindow.MEDIAS_FILE)
+        try:
+            medias = Database.load(MainWindow.MEDIAS_FILE)
+        except:
+            medias = None
         if medias:
             self.medias = list(filter(lambda media: os.path.isfile(media.path), medias))
             if len(medias) != len(self.medias):
