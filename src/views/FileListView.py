@@ -143,6 +143,7 @@ class FileListView(QWidget):
 
     def initUI(self):
         vboxLayout = QVBoxLayout()
+        vboxLayout.setContentsMargins(0,0,0,0)
         self.setLayout(vboxLayout)
 
         self.searchView = SearchView()

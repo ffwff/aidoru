@@ -16,6 +16,8 @@ class MediaPlayerMenu(QWidget):
 
     def initUI(self):
         self.layout = vboxLayout = QVBoxLayout()
+        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setSpacing(0)
         self.setLayout(vboxLayout)
 
         self.fileButton = QPushButton(QIcon("./icons/files"), "")
@@ -26,7 +28,7 @@ class MediaPlayerMenu(QWidget):
 
         self.findButton = QPushButton(QIcon("./icons/find"), "")
         vboxLayout.addWidget(self.findButton)
-        vboxLayout.addStretch(1)
+        vboxLayout.addWidget(QWidget())
 
         self.settingsButton = QPushButton(QIcon("./icons/settings"), "")
         vboxLayout.addWidget(self.settingsButton)
@@ -51,12 +53,15 @@ class MediaPlayer(QWidget):
 
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
+        self.setObjectName("media-player")
         self.initUI()
         self.bindEvents()
 
     def initUI(self):
         self.layout = layout = QGridLayout()
         self.setLayout(layout)
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(0)
         layout.setColumnStretch(1, 1)
 
         self.menu = MediaPlayerMenu(self)

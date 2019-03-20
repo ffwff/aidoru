@@ -14,17 +14,8 @@ class PlayerWidget(QWidget):
     def __init__(self, parent=None, mode=MAIN_MODE):
         QWidget.__init__(self, parent)
 
-        # media player
         self.mode = mode
         self.setAcceptDrops(True)
-
-        # ui elements
-        if self.mode == PlayerWidget.MAIN_MODE:
-            self.setProperty("class", "main-mode")
-        elif self.mode == PlayerWidget.MICRO_MODE:
-            self.setProperty("class", "micro-mode")
-        elif self.mode == PlayerWidget.WIDGET_MODE:
-            self.setProperty("class", "widget-mode")
         self.initUI()
 
         # events
@@ -34,6 +25,13 @@ class PlayerWidget(QWidget):
         self.bindEvents()
 
     def initUI(self):
+        if self.mode == PlayerWidget.MAIN_MODE:
+            self.setProperty("class", "main-mode")
+        elif self.mode == PlayerWidget.MICRO_MODE:
+            self.setProperty("class", "micro-mode")
+        elif self.mode == PlayerWidget.WIDGET_MODE:
+            self.setProperty("class", "widget-mode")
+
         vboxLayout = QVBoxLayout(self)
         vboxLayout.setContentsMargins(0, 0, 0, 0)
         vboxLayout.setSpacing(0)
