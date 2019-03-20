@@ -31,6 +31,6 @@ class Database:
                 return f.read()
         except:
             if not default: return ""
-            dfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), default)
+            dfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", default)
             with open(dfile, "r") as f:
                 return f.read()

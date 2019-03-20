@@ -5,12 +5,12 @@ from PyQt5.QtMultimedia import *
 import sys
 import os
 import urllib.parse
-from .Database import Database
-from .MediaInfo import MediaInfo
+from .utils import getFileType, pathUp
+from .models.Database import Database
+from .models.MediaInfo import MediaInfo
 from .views.PlayerWidget import PlayerWidget
 from .views.MediaPlayer import MediaPlayer
 from .views.MediaLocationSelectionDialog import MediaLocationSelectionDialog
-from .utils import *
 
 class MainWindow(QMainWindow):
 
