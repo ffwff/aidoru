@@ -154,7 +154,7 @@ class FileListView(QWidget):
         vboxLayout.addWidget(tableWidget)
 
         if Application.mainWindow.medias:
-            self.tableWidget.mediasAdded(mainWindow.medias)
+            self.tableWidget.mediasAdded(Application.mainWindow.medias)
             self.tableWidget.selectPlaying()
 
     def bindEvents(self):
