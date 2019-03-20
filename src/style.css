@@ -33,6 +33,9 @@ QScrollArea{
     border:0 none;
     margin-right: 5px;
 }
+QScrollArea { background: transparent; }
+QScrollArea > QWidget > QWidget { background: transparent; }
+QScrollArea > QWidget > QScrollBar { background: palette(base); }
 QScrollBar::handle {
     background: #9fabb3;
 }
