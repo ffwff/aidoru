@@ -57,7 +57,7 @@ QHeaderView::section:hover, ::item:selected{
 }
 /* main mode */
 .main-mode QSlider, .micro-mode QSlider{
-    margin-top:-6px;
+    margin-top:-7px;
 }
 #cover-label {
     background: #000;

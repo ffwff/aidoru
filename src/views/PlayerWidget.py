@@ -207,4 +207,6 @@ class PlayerWidget(QWidget):
             pixmap = QPixmap.fromImage(QImage(mediaInfo.image)) \
                 .scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation)
             self.coverLabel.setPixmap(pixmap)
-            self.coverLabelContainer.resize(QSize(self.coverLabel.width(), pixmap.height()))
+            size = QSize(self.coverLabel.width(), pixmap.height())
+            self.coverLabelContainer.setMinimumSize(size)
+            self.coverLabelContainer.setMaximumSize(size)
