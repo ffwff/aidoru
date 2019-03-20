@@ -1,12 +1,13 @@
 QMainWindow {
-    background: #51555a;
+    background: #fff;
 }
 QWidget {
-    color: white;
+    color: #000;
 }
 /* widgets */
 QPushButton, QLineEdit, QHeaderView {
-    background: rgba(0, 0, 0, 0.2);
+    color: rgb(153, 170, 181);
+    background: #f3f3f3;
 }
 QLineEdit, QPushButton {
     border: 1px solid rgba(0, 0, 0, 0.2);
@@ -14,7 +15,8 @@ QLineEdit, QPushButton {
     border-radius: 5px;
 }
 QPushButton:hover {
-    background: rgba(0, 0, 0, 0.4);
+    background: #9fabb3;
+    color: #fff;
 }
 QSlider::groove:horizontal {
     height: 6px;
@@ -31,29 +33,35 @@ QSlider::handle:horizontal {
 }
 QScrollArea{
     border:0 none;
-    margin-right: 5px;
 }
 QScrollArea { background: transparent; }
 QScrollArea > QWidget > QWidget { background: transparent; }
-QScrollArea > QWidget > QScrollBar { background: palette(base); }
+QScrollArea > QWidget > QScrollBar { background: #fff; }
+QScrollBar{
+    background: #f3f3f3;
+}
 QScrollBar::handle {
-    background: #9fabb3;
+    background:#9fabb3;
 }
 QTableWidget{
-    background: transparent;
-    alternate-background-color: rgba(60, 60, 60, 0.1);
+    background: #fff;
+    alternate-background-color: #fbfbfb;
     border: 0 none;
 }
 QHeaderView::section, QHeaderView::section:last:hover {
-    background: rgba(60, 60, 60, 0.3);
-    padding: 5px;
+    background: #f3f3f3;
     border: 0 none;
+    border-bottom: 1px solid #e8e9ea;
+    color: #7e7e7e;
+    padding: 5px;
 }
 QHeaderView::section:hover, ::item:selected{
     background: #778791;
+    color: #fff;
 }
 ::item:hover {
     background: #9fabb3;
+    color: #fff;
 }
 /* main mode */
 .main-mode QSlider, .micro-mode QSlider{
@@ -90,8 +98,28 @@ QHeaderView::section:hover, ::item:selected{
     height: 32px;
     qproperty-iconSize: 32px;
     border: 0 none;
-    background: transparent;
-    padding: 0;
+    border-radius: 0;
+    padding: 10px;
+}
+#media-player-menu *, #media-player-menu QPushButton{
+    background: #f3f3f3;
+    border-right: 1px solid #eef1f4;
+}
+#media-player-menu QPushButton:hover {
+background: #dae6ee;
+}
+.widget-mode >* {
+    background: #fdfdfd;
+    padding: 10px 5px;
+}
+.widget-mode QLabel {
+    border-top: 1px solid #b1b1b1;
+    padding-top: 15px;
+    padding-bottom: 0;
+}
+.widget-mode QPushButton {
+    padding-top: 0;
+    padding: 10px 5px;
 }
 /* playing album view */
 .album-label { font-size: 24px; }
