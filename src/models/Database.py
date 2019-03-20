@@ -10,11 +10,19 @@ class Database:
     def getPath(filename):
         return os.path.join(Database.BASE, filename)
 
+    # save
     def save(obj, filename, save_json=False):
         os.makedirs(Database.BASE, exist_ok=True)
         with open(Database.getPath(filename), ("w" if save_json else "wb")) as f:
             (json if save_json else pickle).dump(obj, f)
 
+    def saveFile(obj, filename, path=""):
+        path = os.path.join(Database.BASE, path)
+        os.makedirs(path, exist_ok=True)
+        with open(os.path.join(path, filename), "wb") as f:
+            f.write(obj)
+
+    # load
     def load(filename, load_json=False, default=None):
         try:
             with open(Database.getPath(filename), ("r" if load_json else "rb")) as f:
