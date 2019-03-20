@@ -10,10 +10,9 @@ class FileListTableItemDelegate(QStyledItemDelegate):
 
     def paint(self, painter, option, index):
         option.state &= ~QStyle.State_HasFocus
+        option.state &= ~QStyle.State_MouseOver
         if option.styleObject.hoverRow == index.row():
             option.state |= QStyle.State_MouseOver
-        else:
-            option.state &= ~QStyle.State_MouseOver
         QStyledItemDelegate.paint(self, painter, option, index)
 
 class FileListTableWidget(QTableWidget):
