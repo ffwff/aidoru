@@ -18,12 +18,8 @@ class MediaInfo(object):
         self.duration = duration
         self.image = image
 
-    def fromFile(path):
-        song = taglib.File(path)
-        artist = song.tags["ARTIST"][0] if "ARTIST" in song.tags else ""
-        title = song.tags["TITLE"][0] if "TITLE" in song.tags else os.path.basename(path)
+    def searchImage(path):
         searchPath = pathUp(path)
-        # find cover art
         paths = list(filter(lambda path: getFileType(path) == "image", os.listdir(searchPath)))
         if paths:
             prioritize = ["Case Cover Back Outer", "Cover.", "cover.", "CD."]
@@ -33,9 +29,23 @@ class MediaInfo(object):
                         if path.startswith(priority):
                             return path
                 return paths[0]
-            imagePath = find_path()
+            return os.path.join(searchPath, find_path())
         else:
-            imagePath = None
+            return None
+
+    def verify(self):
+        if not os.path.isfile(self.path):
+            return False
+        if self.image and not os.path.isfile(self.image):
+            self.image = MediaInfo.searchImage(self.path)
+        return True
+
+
+    def fromFile(path):
+        song = taglib.File(path)
+        artist = song.tags["ARTIST"][0] if "ARTIST" in song.tags else ""
+        title = song.tags["TITLE"][0] if "TITLE" in song.tags else os.path.basename(path)
+
         pos = -1
         if "TRACKNUMBER" in song.tags:
             try:
@@ -58,7 +68,7 @@ class MediaInfo(object):
         return MediaInfo(path, pos, title, artist,
                          album, albumArtist,
                          datetime.datetime.fromtimestamp(song.length),
-                         os.path.join(searchPath, imagePath) if imagePath else None,
+                         MediaInfo.searchImage(path),
                          year)
 
     # comparators

@@ -79,7 +79,7 @@ class MainWindow(QMainWindow):
         except:
             medias = None
         if medias:
-            self.medias = list(filter(lambda media: os.path.isfile(media.path), medias))
+            self.medias = list(filter(lambda media: media.verify(), medias))
             if len(medias) != len(self.medias):
                 Database.save(self.medias, MainWindow.MEDIAS_FILE)
             self.mediasAdded.emit(medias)
