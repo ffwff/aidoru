@@ -60,8 +60,6 @@ class PlayerWidget(QWidget):
 
             self.coverLabel = coverLabel = QLabel(coverLabelContainer)
             coverLabel.setAlignment(Qt.AlignCenter)
-            coverLabel.setMinimumSize(QSize(300, 300))
-            coverLabel.setMaximumSize(QSize(300, 300))
             coverLabelContainerL.addWidget(coverLabel)
             vboxLayout.addWidget(coverLabelContainer)
 
@@ -203,8 +201,10 @@ class PlayerWidget(QWidget):
                 self.albumLabel.setText(mediaInfo.title)
         if hasattr(self, "coverLabel"):
             pixmap = QPixmap.fromImage(QImage(mediaInfo.image)) \
-                .scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation)
+                .scaledToHeight(300, Qt.SmoothTransformation)
             self.coverLabel.setPixmap(pixmap)
+            self.coverLabel.resize(pixmap.size())
             size = QSize(self.coverLabel.width(), pixmap.height())
             self.coverLabelContainer.setMinimumSize(size)
-            self.coverLabelContainer.setMaximumSize(size)
+            self.coverLabelContainer.resize(size)
+            Application.mainWindow.resize(QSize(pixmap.width(), Application.mainWindow.height()))
