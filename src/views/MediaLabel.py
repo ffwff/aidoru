@@ -36,6 +36,8 @@ class MediaLabel(QLabel):
             self.setProperty("class", "active")
         else:
             self.setProperty("class", "")
+        self.style().unpolish(self)
+        self.style().polish(self)
 
     # events
     def mousePressEvent(self, e):

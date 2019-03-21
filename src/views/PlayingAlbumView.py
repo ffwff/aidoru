@@ -10,6 +10,7 @@ class PlayingAlbumView(QWidget):
 
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
+        self.path = None
         self.initUI()
         self.bindEvents()
 
@@ -81,6 +82,8 @@ class PlayingAlbumView(QWidget):
             mediaLabel.setActive(mediaLabel.media == mediaInfo)
 
     def populateAlbum(self, path):
+        if self.path == path: return
+        self.path = path
         self.scrollArea.show()
         self.mediaLabels.clear()
         clearLayout(self.mediaBoxL)
