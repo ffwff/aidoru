@@ -78,9 +78,7 @@ class PlayingAlbumView(QWidget):
         # album
         Application.mainWindow.populateAlbum(mediaInfo.path)
         for mediaLabel in self.mediaLabels:
-            if mediaLabel.media == mediaInfo:
-                mediaLabel.setActive(True)
-                break
+            mediaLabel.setActive(mediaLabel.media == mediaInfo)
 
     def populateAlbum(self, path):
         self.scrollArea.show()
