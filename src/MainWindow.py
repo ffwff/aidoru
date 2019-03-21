@@ -23,7 +23,8 @@ class MainWindow(QMainWindow):
     DEFAULT_SETTINGS = {
         "mediaLocation": os.path.normpath(os.path.expanduser("~/Music")),
         "fileWatch": True,
-        "redrawBackground": True
+        "redrawBackground": True,
+        "darkTheme": False
     }
     SETINGS_FILE = "settings.json"
     MEDIAS_FILE = "medias.pkl"
@@ -48,7 +49,7 @@ class MainWindow(QMainWindow):
         self.mode = None
 
         self.setMode(MainWindow.FULL_MODE)
-        self.setStyleSheet(Database.loadFile("style.css", "style.css"))
+        self.setStyles()
         if self.settings["redrawBackground"]:
             # workaround for qt themes with transparent backgrounds
             self.setProperty("class", "redraw-background")
@@ -98,6 +99,10 @@ class MainWindow(QMainWindow):
             self.mediaSelectionDialog.show()
         else:
             self.populateMediaThread()
+
+    def setStyles(self):
+        self.setStyleSheet(Database.loadFile("style.css",
+                           "style.css" if not self.settings["darkTheme"] else "dark.css"))
 
     def setMode(self, mode):
         if mode == self.mode: return

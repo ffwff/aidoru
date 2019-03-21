@@ -20,9 +20,13 @@ class SettingsView(QWidget):
 
         # ui options
         layoutw = QWidget()
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
         layoutw.setLayout(layout)
         vboxLayout.addWidget(layoutw)
+
+        self.darkThemeOption = QCheckBox("Dark theme")
+        self.darkThemeOption.setChecked(Application.mainWindow.settings["darkTheme"])
+        layout.addWidget(self.darkThemeOption)
 
         self.redrawBackgroundOption = QCheckBox("Redraw window background (requires restart)")
         self.redrawBackgroundOption.setChecked(Application.mainWindow.settings["redrawBackground"])
@@ -62,10 +66,22 @@ class SettingsView(QWidget):
 
     # events
     def bindEvents(self):
+        self.darkThemeOption.stateChanged.connect(self.darkThemeOptionChanged)
+        self.redrawBackgroundOption.stateChanged.connect(self.redrawBackgroundOptionChanged)
         self.musicLocationBrowse.clicked.connect(self.musicLocationBrowseClicked)
         self.musicRefreshButton.clicked.connect(lambda: self.refreshMedia(self.musicLocationInput.text()))
         self.fileWatcherOption.stateChanged.connect(self.fileWatcherOptionChanged)
-        self.redrawBackgroundOption.stateChanged.connect(self.redrawBackgroundOptionChanged)
+
+    def darkThemeOptionChanged(self):
+        mainWindow = Application.mainWindow
+        mainWindow.settings["darkTheme"] = self.darkThemeOption.isChecked()
+        mainWindow.saveSettings()
+        mainWindow.setStyles()
+
+    def redrawBackgroundOptionChanged(self):
+        mainWindow = Application.mainWindow
+        mainWindow.settings["redrawBackground"] = self.redrawBackgroundOption.isChecked()
+        mainWindow.saveSettings()
 
     def musicLocationBrowseClicked(self):
         self.fileDialog = dialog = QFileDialog()
@@ -87,8 +103,3 @@ class SettingsView(QWidget):
         mainWindow.settings["fileWatch"] = self.fileWatcherOption.isChecked()
         mainWindow.saveSettings()
         mainWindow.setWatchFiles()
-
-    def redrawBackgroundOptionChanged(self):
-        mainWindow = Application.mainWindow
-        mainWindow.settings["redrawBackground"] = self.redrawBackgroundOption.isChecked()
-        mainWindow.saveSettings()
