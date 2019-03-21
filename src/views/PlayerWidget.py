@@ -201,10 +201,10 @@ class PlayerWidget(QWidget):
                 self.albumLabel.setText(mediaInfo.title)
         if hasattr(self, "coverLabel"):
             pixmap = QPixmap.fromImage(QImage(mediaInfo.image)) \
-                .scaledToHeight(300, Qt.SmoothTransformation)
+                .scaledToWidth(300, Qt.SmoothTransformation)
             self.coverLabel.setPixmap(pixmap)
             self.coverLabel.resize(pixmap.size())
-            size = QSize(self.coverLabel.width(), pixmap.height())
+            size = QSize(pixmap.width(), self.coverLabel.height())
             self.coverLabelContainer.setMinimumSize(size)
             self.coverLabelContainer.resize(size)
-            Application.mainWindow.resize(QSize(pixmap.width(), Application.mainWindow.height()))
+            Application.mainWindow.resize(size)

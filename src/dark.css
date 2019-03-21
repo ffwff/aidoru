@@ -10,11 +10,12 @@ QPushButton, QLineEdit, QHeaderView {
 }
 QLineEdit, QPushButton {
     border: 1px solid rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.3);
     padding: 5px 10px;
     border-radius: 5px;
 }
 QPushButton:hover {
-    background: #9fabb3;
+    background: #778791;
     color: #fff;
 }
 QSlider::groove:horizontal {
@@ -102,7 +103,7 @@ QHeaderView::section:hover, ::item:selected{
     padding: 10px;
 }
 #media-player-menu *, #media-player-menu QPushButton{
-    background: rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.05);
 }
 #media-player-menu QPushButton:hover {
 background: #dae6ee;

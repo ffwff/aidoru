@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from src.Application import Application
 
-class SettingsView(QWidget):
+class SettingsForm(QWidget):
 
     def __init__(self):
         QWidget.__init__(self)
@@ -13,12 +13,14 @@ class SettingsView(QWidget):
     # ui
     def initUI(self):
         vboxLayout = QVBoxLayout()
-        self.setContentsMargins(100, 0, 100, 0)
+        vboxLayout.setContentsMargins(100, 20, 100, 0)
         self.setLayout(vboxLayout)
 
         vboxLayout.addStretch(1)
 
         # ui options
+        vboxLayout.addWidget(QLabel("User interface"))
+
         layoutw = QWidget()
         layout = QVBoxLayout()
         layoutw.setLayout(layout)
@@ -62,6 +64,18 @@ class SettingsView(QWidget):
         self.musicRefreshButton = musicRefreshButton = QPushButton("Refresh media listing")
         layout.addWidget(musicRefreshButton)
 
+        # updates
+        vboxLayout.addWidget(QLabel("Updates"))
+
+        layoutw = QWidget()
+        layout = QVBoxLayout()
+        layoutw.setLayout(layout)
+        vboxLayout.addWidget(layoutw)
+
+        self.checkUpdates = checkUpdates = QPushButton("Check for updates...")
+        checkUpdates.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        layout.addWidget(checkUpdates)
+
         vboxLayout.addStretch(2)
 
     # events
@@ -103,3 +117,11 @@ class SettingsView(QWidget):
         mainWindow.settings["fileWatch"] = self.fileWatcherOption.isChecked()
         mainWindow.saveSettings()
         mainWindow.setWatchFiles()
+
+class SettingsView(QScrollArea):
+
+    def __init__(self):
+        QScrollArea.__init__(self)
+        self.form = SettingsForm()
+        self.setWidget(self.form)
+        self.setWidgetResizable(True)
