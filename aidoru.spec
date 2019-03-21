@@ -1,5 +1,7 @@
 # -*- mode: python -*-
 
+import os
+
 block_cipher = None
 
 
@@ -29,7 +31,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=False)
+          console=("CONSOLE" in os.environ))
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
