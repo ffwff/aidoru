@@ -40,7 +40,7 @@ class PlayingAlbumView(QWidget):
         coverLabel.setMinimumSize(QSize(400, 400))
         coverLabel.setMaximumSize(QSize(400, 400))
         coverLabel.hide()
-        hboxLayout.addWidget(coverLabel)
+        hboxLayout.addWidget(coverLabel,Qt.AlignTop)
 
         # media box
         self.scrollArea = scrollArea = QScrollArea()
@@ -48,7 +48,7 @@ class PlayingAlbumView(QWidget):
         scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scrollArea.setMinimumSize(QSize(310, 300))
         scrollArea.hide()
-        hboxLayout.addWidget(scrollArea)
+        hboxLayout.addWidget(scrollArea,Qt.AlignTop)
 
         mediaBox = QWidget()
         mediaBox.setProperty("class", "media-box")
