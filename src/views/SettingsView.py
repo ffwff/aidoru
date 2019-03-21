@@ -85,6 +85,7 @@ class SettingsForm(QWidget):
         self.musicLocationBrowse.clicked.connect(self.musicLocationBrowseClicked)
         self.musicRefreshButton.clicked.connect(lambda: self.refreshMedia(self.musicLocationInput.text()))
         self.fileWatcherOption.stateChanged.connect(self.fileWatcherOptionChanged)
+        self.checkUpdates.clicked.connect(Application.update)
 
     def darkThemeOptionChanged(self):
         mainWindow = Application.mainWindow
