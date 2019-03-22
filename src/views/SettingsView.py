@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from src.Application import Application
+from src import __version__
 
 class SettingsForm(QWidget):
 
@@ -68,9 +69,11 @@ class SettingsForm(QWidget):
         vboxLayout.addWidget(QLabel("Updates"))
 
         layoutw = QWidget()
-        layout = QVBoxLayout()
+        layout = QHBoxLayout()
         layoutw.setLayout(layout)
         vboxLayout.addWidget(layoutw)
+
+        layout.addWidget(QLabel("version " + __version__))
 
         self.checkUpdates = checkUpdates = QPushButton("Check for updates...")
         checkUpdates.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
