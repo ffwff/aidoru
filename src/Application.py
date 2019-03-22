@@ -19,7 +19,7 @@ class Application(QApplication):
     def update():
         execPath = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
         if os.path.isdir(os.path.join(execPath, ".git")):
-            updateProcess = QProcess()
+            Application.updateProcess = updateProcess = QProcess()
             updateProcess.setWorkingDirectory(execPath)
             updateProcess.start("git", ["git", "pull"])
             def finished(exitCode, exitStatus):
