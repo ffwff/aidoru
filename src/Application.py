@@ -17,8 +17,7 @@ class Application(QApplication):
         return QApplication.exec()
 
     def update():
-        execPath = os.path.join(os.path.dirname(__file__), "..")
-        print(execPath)
+        execPath = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
         if os.path.isdir(os.path.join(execPath, ".git")):
             updateProcess = QProcess()
             updateProcess.setWorkingDirectory(execPath)
@@ -32,23 +31,26 @@ class Application(QApplication):
             try:
                 release = urlopen("https://raw.githubusercontent.com/ffwff/aidoru/master/release.txt").read().decode("utf-8").strip()
             except:
-                pass
+                return
             version, url = release.split(" ")
             if __version__ != version:
                 updateProcess = QProcess()
                 updateProcess.startDetached("powershell.exe", ["powershell", "-Command",
-"""
+r"""
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 function Unzip {
     param([string]$zipfile, [string]$outpath)
     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath)
 }
+[Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
 $file=New-TemporaryFile
-$folder=New-TemporaryFile | %{ rm $_; mkdir $_ }
+$folder=New-TemporaryFile | %%{ rm $_; mkdir $_ }
 $path="%s"
-Invoke-WebRequest %s -OutFile $file
-Unzip file $folder
-xcopy $folder/aidoru $path /k /q /y /c /e
-%s
-""" % (url, execPath)])
+$url="%s"
+Invoke-WebRequest -Uri $url -OutFile $file
+Unzip $file $folder
+rm -r $path\* -Force
+xcopy "$folder\aidoru" $path /k /q /y /c /e
+Start-Process "%s"
+# """ % (execPath, url, sys.argv[0])])
                 sys.exit(0)
