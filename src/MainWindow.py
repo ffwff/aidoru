@@ -36,6 +36,7 @@ class MainWindow(QMainWindow):
         "mediaLocation": os.path.normpath(os.path.expanduser("~/Music")),
         "fileWatch": True,
         "redrawBackground": True,
+        "disableDecorations": False,
         "darkTheme": False
     }
     SETINGS_FILE = "settings.json"
@@ -60,7 +61,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("aidoru~~")
         self.mode = None
 
-
         self.setMode(MainWindow.FULL_MODE)
         self.setStyles()
         if self.settings["redrawBackground"]:
@@ -68,7 +68,7 @@ class MainWindow(QMainWindow):
             self.setProperty("class", "redraw-background")
             self.style().unpolish(self)
 
-        if os.sys.platform == "win32":
+        if os.sys.platform == "win32" and self.settings["disableDecorations"]:
             self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint)
             self.show()
             hwnd = wintypes.HWND(self.winId().__int__())
@@ -126,7 +126,7 @@ class MainWindow(QMainWindow):
             self.populateMediaThread()
 
     def nativeEvent(self, eventType, message):
-        if eventType == "windows_generic_MSG":
+        if eventType == "windows_generic_MSG" and self.settings["disableDecorations"]:
             msg = ctypes.wintypes.MSG.from_address(message.__int__())
             WM_NCCALCSIZE = 0x0083
             WM_NCHITTEST = 0x0084
