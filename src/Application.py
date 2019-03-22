@@ -52,5 +52,5 @@ Unzip $file $folder
 rm -r $path\* -Force
 xcopy "$folder\aidoru" $path /k /q /y /c /e
 Start-Process "%s"
-# """ % (execPath, url, sys.argv[0])])
+""" % (execPath, url, sys.argv[0])])
                 sys.exit(0)

@@ -126,6 +126,9 @@ class FileListTableWidget(QTableWidget):
     def mousePressEvent(self, e):
         QTableWidget.mousePressEvent(self, e)
         if self.hoverRow == -1: return
+        if  e.modifiers() & Qt.ControlModifier or \
+            e.modifiers() & Qt.ShiftModifier:
+            return
         index = self.indexAt(e.pos())
         mainWindow = Application.mainWindow
         if self.mediaRow:
@@ -140,6 +143,7 @@ class FileListView(QWidget):
         QWidget.__init__(self, parent)
         self.initUI()
         self.bindEvents()
+        self.mpos = None
 
     def initUI(self):
         vboxLayout = QVBoxLayout()
@@ -159,6 +163,7 @@ class FileListView(QWidget):
             self.tableWidget.mediasAdded(Application.mainWindow.medias)
             self.tableWidget.selectPlaying()
 
+    # events
     def bindEvents(self):
         Application.mainWindow.mediasAdded.connect(self.tableWidget.mediasAdded)
         Application.mainWindow.mediasDeleted.connect(self.tableWidget.mediasDeleted)

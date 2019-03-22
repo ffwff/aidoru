@@ -1,12 +1,14 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from .WindowDragger import WindowDragger
 from .FileListView import FileListView
 from .PlayingAlbumView import PlayingAlbumView
 from .SettingsView import SettingsView
 from .PlayerWidget import PlayerWidget
+from src.Application import Application
 
-class MediaPlayerMenu(QWidget):
+class MediaPlayerMenu(WindowDragger, QWidget):
 
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
