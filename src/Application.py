@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from PyQt5.QtNetwork import *
 from urllib.request import urlopen
 from src import __version__
 import sys
@@ -17,9 +18,11 @@ class Application(QApplication):
         return QApplication.exec()
 
     def update():
+        self = Application
         execPath = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+        from .views.UpdateDialog import UpdateDialog
         if os.path.isdir(os.path.join(execPath, ".git")):
-            Application.updateProcess = updateProcess = QProcess()
+            self.updateProcess = updateProcess = QProcess()
             updateProcess.setWorkingDirectory(execPath)
             updateProcess.start("git", ["git", "pull"])
             def finished(exitCode, exitStatus):
@@ -29,13 +32,22 @@ class Application(QApplication):
             updateProcess.finished.connect(finished)
         elif sys.platform == "win32":
             try:
-                release = urlopen("https://raw.githubusercontent.com/ffwff/aidoru/master/release.txt").read().decode("utf-8").strip()
+               release = urlopen("https://raw.githubusercontent.com/ffwff/aidoru/master/release.txt").read().decode("utf-8").strip()
             except:
                 return
             version, url = release.split(" ")
             if __version__ != version:
-                updateProcess = QProcess()
-                updateProcess.startDetached("powershell.exe", ["powershell", "-Command",
+                url = urlopen(url).geturl() # qt doesn't handle redirections
+                self.updateDialog = UpdateDialog()
+                self.updateDialog.show()
+                self.updateRequest = QNetworkRequest(QUrl(url))
+                
+                f = open(os.path.join(execPath, "aidoru.zip"), "wb")
+                def downloadRead():
+                    f.write(self.updateReply.readAll())
+                def finished():
+                    updateProcess = QProcess()
+                    updateProcess.startDetached("powershell.exe", ["powershell.exe", "-Command",
 r"""
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 function Unzip {
@@ -43,14 +55,18 @@ function Unzip {
     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath)
 }
 [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
-$file=New-TemporaryFile
 $folder=New-TemporaryFile | %%{ rm $_; mkdir $_ }
 $path="%s"
-$url="%s"
-Invoke-WebRequest -Uri $url -OutFile $file
-Unzip $file $folder
+Unzip $path\aidoru.zip $folder
 rm -r $path\* -Force
 xcopy "$folder\aidoru" $path /k /q /y /c /e
 Start-Process "%s"
-""" % (execPath, url, sys.argv[0])])
-                sys.exit(0)
+""" % (execPath, sys.argv[0])])
+                    sys.exit(0)
+                
+                self.networkManager = QNetworkAccessManager()
+                self.updateReply = reply = self.networkManager.get(self.updateRequest)
+                reply.downloadProgress.connect(self.updateDialog.downloadProgress)
+                reply.finished.connect(finished)
+                reply.readyRead.connect(downloadRead)
+                
