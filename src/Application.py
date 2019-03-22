@@ -41,7 +41,7 @@ class Application(QApplication):
                 self.updateDialog = UpdateDialog()
                 self.updateDialog.show()
                 self.updateRequest = QNetworkRequest(QUrl(url))
-                
+
                 f = open(os.path.join(execPath, "aidoru.zip"), "wb")
                 def downloadRead():
                     f.write(self.updateReply.readAll())
@@ -54,19 +54,18 @@ function Unzip {
     param([string]$zipfile, [string]$outpath)
     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath)
 }
-[Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
 $folder=New-TemporaryFile | %%{ rm $_; mkdir $_ }
 $path="%s"
-Unzip $path\aidoru.zip $folder
-rm -r $path\* -Force
+echo "$path\aidoru.zip"
+Unzip "$path\aidoru.zip" $folder
 xcopy "$folder\aidoru" $path /k /q /y /c /e
 Start-Process "%s"
 """ % (execPath, sys.argv[0])])
                     sys.exit(0)
-                
+
                 self.networkManager = QNetworkAccessManager()
                 self.updateReply = reply = self.networkManager.get(self.updateRequest)
                 reply.downloadProgress.connect(self.updateDialog.downloadProgress)
                 reply.finished.connect(finished)
                 reply.readyRead.connect(downloadRead)
-                
+
