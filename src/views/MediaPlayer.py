@@ -13,6 +13,7 @@ class MediaPlayerMenu(WindowDragger, QWidget):
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
         self.setObjectName("media-player-menu")
+        self.mpos = None
         self.initUI()
         self.bindEvents()
 
