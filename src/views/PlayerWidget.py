@@ -3,8 +3,9 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtMultimedia import *
 from src.Application import Application
+from .WindowDragger import WindowDragger
 
-class PlayerWidget(QWidget):
+class PlayerWidget(WindowDragger, QWidget):
 
     # modes
     MAIN_MODE   = 0
@@ -151,6 +152,10 @@ class PlayerWidget(QWidget):
         media.error.connect(self.mediaError)
 
     # events
+    def mouseMoveEvent(self, event):
+        if not self.positionSlider.geometry().contains(event.pos()):
+            WindowDragger.mouseMoveEvent(self, event)
+
     # media
     def mediaError(self, e):
         print("error", e)
@@ -201,7 +206,7 @@ class PlayerWidget(QWidget):
                 self.albumLabel.setText(mediaInfo.title)
         if hasattr(self, "coverLabel"):
             pixmap = QPixmap.fromImage(QImage(mediaInfo.image)) \
-                .scaledToWidth(300, Qt.SmoothTransformation)
+                .scaledToWidth(320, Qt.SmoothTransformation)
             self.coverLabel.setPixmap(pixmap)
             self.coverLabel.resize(pixmap.size())
             size = QSize(pixmap.width(), self.coverLabel.height())
