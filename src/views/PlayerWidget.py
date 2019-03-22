@@ -16,6 +16,7 @@ class PlayerWidget(WindowDragger, QWidget):
         QWidget.__init__(self, parent)
 
         self.mode = mode
+        self.mpos = None
         self.setAcceptDrops(True)
         self.initUI()
 
