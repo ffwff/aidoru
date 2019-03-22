@@ -1,1 +1,1 @@
-20190322 https://github.com/ffwff/aidoru/releases/download/20190322b1/aidoru-win64.zip
+20190322b2 https://github.com/ffwff/aidoru/releases/download/20190322b2/aidoru-win64.zip
