@@ -7,7 +7,7 @@ class WindowDragger():
         self.mpos = event.pos()
 
     def mouseReleaseEvent(self, event):
-        del self.mpos
+        self.mpos = None
 
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton and self.mpos:
