@@ -8,6 +8,7 @@ import urllib.parse
 from .utils import getFileType, pathUp
 from .models.Database import Database
 from .models.MediaInfo import MediaInfo
+from .models.AlbumInfo import AlbumInfo
 from .views.PlayerWidget import PlayerWidget
 from .views.MediaPlayer import MediaPlayer
 from .views.MediaLocationSelectionDialog import MediaLocationSelectionDialog
@@ -50,7 +51,7 @@ class MainWindow(QMainWindow):
 
         self.media = QMediaPlayer()
         self.mediaInfo = None
-        self.album = []
+        self.albums = {}
         self.albumPath = ""
         self.medias = [] # medias in scan directory
         self.settings = Database.load(MainWindow.SETINGS_FILE, True,
@@ -68,16 +69,20 @@ class MainWindow(QMainWindow):
             self.setProperty("class", "redraw-background")
             self.style().unpolish(self)
 
-        if os.sys.platform == "win32" and self.settings["disableDecorations"]:
-            self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint)
-            self.show()
-            hwnd = wintypes.HWND(self.winId().__int__())
-            winprop = user32.GetWindowLongW(hwnd, GWL_STYLE)
-            WS_MAXIMIZEBOX=0x00010000
-            WS_THICKFRAME=0x00040000
-            WS_CAPTION=0x00C00000
-            user32.SetWindowLongW(hwnd, GWL_STYLE, winprop | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CAPTION)
-            QtWin.extendFrameIntoClientArea(self, 1,1,1,1)
+        if self.settings["disableDecorations"]:
+            if os.sys.platform == "win32":
+                self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint)
+                self.show()
+                hwnd = wintypes.HWND(self.winId().__int__())
+                winprop = user32.GetWindowLongW(hwnd, GWL_STYLE)
+                WS_MAXIMIZEBOX=0x00010000
+                WS_THICKFRAME=0x00040000
+                WS_CAPTION=0x00C00000
+                user32.SetWindowLongW(hwnd, GWL_STYLE, winprop | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CAPTION)
+                QtWin.extendFrameIntoClientArea(self, 1,1,1,1)
+            else:
+                self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
+                self.show()
         else:
             self.show()
 
@@ -106,6 +111,13 @@ class MainWindow(QMainWindow):
             medias = None
         if medias:
             self.medias = list(filter(lambda media: media.verify(), medias))
+            for mediaInfo in medias:
+                dpath = pathUp(mediaInfo.path)
+                if mediaInfo.album:
+                    if dpath not in self.albums:
+                        self.albums[dpath] = AlbumInfo(mediaInfo)
+                    self.albums[dpath].medias.append(mediaInfo)
+            self.sortAlbums()
             if len(medias) != len(self.medias):
                 Database.save(self.medias, MainWindow.MEDIAS_FILE)
             self.mediasAdded.emit(medias)
@@ -131,6 +143,7 @@ class MainWindow(QMainWindow):
             WM_NCCALCSIZE = 0x0083
             WM_NCHITTEST = 0x0084
             if msg.message == WM_NCCALCSIZE:
+                # don't draw titlebars please!
                 return True, 0
             elif msg.message == WM_NCHITTEST:
                 # LOWORD = x, HIWORD = y
@@ -145,6 +158,7 @@ class MainWindow(QMainWindow):
                 HTBOTTOMLEFT = 16
                 HTBOTTOMRIGHT = 17
                 BORDER = 3
+
                 vresult = hresult = None
                 if geo.left() <= x < geo.left()+BORDER:
                     hresult = HTLEFT
@@ -161,7 +175,6 @@ class MainWindow(QMainWindow):
                 if hresult == HTRIGHT and vresult == HTBOTTOM: return True, HTBOTTOMRIGHT
                 if hresult: return True, hresult
                 if vresult: return True, vresult
-            #return retval, result
         return QMainWindow.nativeEvent(self, eventType, message)
 
     def setStyles(self):
@@ -187,7 +200,7 @@ class MainWindow(QMainWindow):
         # reemit events to redraw ui
         def emitAll():
             self.albumPath = ""
-            if self.album: self.albumChanged.emit(self.album)
+            #if self.album: self.albumChanged.emit(self.album)
             if self.mediaInfo: self.songInfoChanged.emit(self.mediaInfo)
             self.media.durationChanged.emit(self.media.duration())
             self.media.positionChanged.emit(self.media.position())
@@ -233,19 +246,25 @@ class MainWindow(QMainWindow):
                 self.setSong(text[7:])
 
     # album
-    albumChanged = pyqtSignal(list)
+    albumChanged = pyqtSignal(AlbumInfo)
     def populateAlbum(self, path):
         if self.albumPath == path: return
-        self.album.clear()
-        search_path = pathUp(path)
-        for f in os.listdir(search_path):
-            fpath = os.path.join(search_path, f)
-            if os.path.isfile(fpath) and getFileType(fpath) == "audio":
-                mediaInfo = MediaInfo.fromFile(fpath)
-                self.album.append(mediaInfo)
-        self.album.sort()
+        if path in self.albums:
+            self.album = self.albums[path]
+        else:
+            self.album = AlbumInfo(path)
+            for f in os.listdir(search_path):
+                fpath = os.path.join(search_path, f)
+                if os.path.isfile(fpath) and getFileType(fpath) == "audio":
+                    mediaInfo = MediaInfo.fromFile(fpath)
+                    self.album.medias.append(mediaInfo)
+            self.album.medias.sort()
         self.albumChanged.emit(self.album)
         self.albumPath = path
+        ''''
+        self.album.clear()
+        search_path = pathUp(path)
+        '''
 
     def mediaStatusChanged(self, status):
         if status == QMediaPlayer.EndOfMedia:
@@ -292,9 +311,15 @@ class MainWindow(QMainWindow):
             elif os.access(fpath, os.R_OK) and getFileType(fpath) == "audio":
                 try:
                     mediaInfo = MediaInfo.fromFile(fpath)
+                    dpath = pathUp(mediaInfo.path)
+                    if mediaInfo.album:
+                        if dpath not in self.albums:
+                            self.albums[dpath] = AlbumInfo(mediaInfo)
+                        self.albums[dpath].medias.append(mediaInfo)
                     batch.append(mediaInfo)
                 except OSError:
                     pass
+        self.sortAlbums()
         self.medias.extend(batch)
         self.mediasAdded.emit(batch)
 
@@ -315,6 +340,11 @@ class MainWindow(QMainWindow):
         self.mediasDeleted.emit(deleted)
         self.setWatchFiles()
         QTimer.singleShot(0, self.populateMediaThread)
+
+    # albums
+    def sortAlbums(self):
+        for album in self.albums.values():
+            album.medias.sort()
 
     # file watcher
     def setWatchFiles(self):
