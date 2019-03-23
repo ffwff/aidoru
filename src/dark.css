@@ -18,16 +18,16 @@ QPushButton:hover {
     background: #778791;
     color: #fff;
 }
-QSlider::groove:horizontal {
+QSlider::groove {
     height: 6px;
     background: rgba(0, 0, 0, 0.2);
     margin: 0 0;
 }
-QSlider::sub-page:horizontal {
+QSlider::sub-page {
     background: #9fabb3;
     border-radius: 4px;
 }
-QSlider::handle:horizontal {
+QSlider::handle {
     background: #778791;
     width: 6px;
 }

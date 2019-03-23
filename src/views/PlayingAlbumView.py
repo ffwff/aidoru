@@ -3,14 +3,13 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from .PlayerWidget import PlayerWidget
 from .MediaLabel import MediaLabel
-from src.utils import clearLayout
+from src.utils import clearLayout, pathUp
 from src.Application import Application
 
 class PlayingAlbumView(QWidget):
 
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
-        self.path = None
         self.initUI()
         self.bindEvents()
 
@@ -69,7 +68,7 @@ class PlayingAlbumView(QWidget):
     def songInfoChanged(self, mediaInfo):
         # song info
         if mediaInfo.image:
-            self.coverLabel.setPixmap(QPixmap.fromImage(QImage(mediaInfo.image)).scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation))
+            self.coverLabel.setPixmap(QPixmap(mediaInfo.image).scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation))
             self.coverLabel.show()
         else:
             self.coverLabel.hide()
@@ -77,17 +76,15 @@ class PlayingAlbumView(QWidget):
         self.albumArtistLabel.setText(mediaInfo.albumArtist)
 
         # album
-        Application.mainWindow.populateAlbum(mediaInfo.path)
+        Application.mainWindow.populateAlbum(pathUp(mediaInfo.path))
         for mediaLabel in self.mediaLabels:
             mediaLabel.setActive(mediaLabel.media == mediaInfo)
 
-    def populateAlbum(self, path):
-        if self.path == path: return
-        self.path = path
+    def populateAlbum(self, album):
         self.scrollArea.show()
         self.mediaLabels.clear()
         clearLayout(self.mediaBoxL)
-        for mediaInfo in Application.mainWindow.album:
+        for mediaInfo in album.medias:
             mediaLabel = MediaLabel(mediaInfo, self)
             self.mediaBoxL.addWidget(mediaLabel)
             self.mediaLabels.append(mediaLabel)

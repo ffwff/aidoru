@@ -206,8 +206,7 @@ class PlayerWidget(WindowDragger, QWidget):
             else:
                 self.albumLabel.setText(mediaInfo.title)
         if hasattr(self, "coverLabel"):
-            pixmap = QPixmap.fromImage(QImage(mediaInfo.image)) \
-                .scaledToWidth(320, Qt.SmoothTransformation)
+            pixmap = QPixmap(mediaInfo.image).scaledToWidth(320, Qt.SmoothTransformation)
             self.coverLabel.setPixmap(pixmap)
             self.coverLabel.resize(pixmap.size())
             size = QSize(pixmap.width(), self.coverLabel.height())
