@@ -253,18 +253,14 @@ class MainWindow(QMainWindow):
             self.album = self.albums[path]
         else:
             self.album = AlbumInfo(path)
-            for f in os.listdir(search_path):
-                fpath = os.path.join(search_path, f)
+            for f in os.listdir(path):
+                fpath = os.path.join(path, f)
                 if os.path.isfile(fpath) and getFileType(fpath) == "audio":
                     mediaInfo = MediaInfo.fromFile(fpath)
                     self.album.medias.append(mediaInfo)
             self.album.medias.sort()
         self.albumChanged.emit(self.album)
         self.albumPath = path
-        ''''
-        self.album.clear()
-        search_path = pathUp(path)
-        '''
 
     def mediaStatusChanged(self, status):
         if status == QMediaPlayer.EndOfMedia:

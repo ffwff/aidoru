@@ -9,6 +9,9 @@ QPushButton, QLineEdit, QHeaderView {
     color: rgb(153, 170, 181);
     background: #f3f3f3;
 }
+QLineEdit {
+    color: #000;
+}
 QLineEdit, QPushButton {
     border: 1px solid rgba(0, 0, 0, 0.2);
     padding: 5px 10px;
