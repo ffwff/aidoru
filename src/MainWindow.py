@@ -278,12 +278,12 @@ class MainWindow(QMainWindow):
         if self.mode == MainWindow.FULL_MODE and self.centralWidget().mode != MediaPlayer.PLAYING_ALBUM_MODE:
             self.nextSongArray(self.medias, 1)
         elif self.album:
-            self.nextSongArray(self.album, 1)
+            self.nextSongArray(self.album.medias, 1)
     def prevSong(self):
         if self.mode == MainWindow.FULL_MODE and self.centralWidget().mode != MediaPlayer.PLAYING_ALBUM_MODE:
             self.nextSongArray(self.medias, -1)
         elif self.album:
-            self.nextSongArray(self.album, -1)
+            self.nextSongArray(self.album.medias, -1)
 
     def nextSongArray(self, array, delta):
         idx = self.songIndex(array)
