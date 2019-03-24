@@ -51,6 +51,7 @@ class MainWindow(QMainWindow):
 
         self.media = QMediaPlayer()
         self.mediaInfo = None
+        self.album = None
         self.albums = {}
         self.albumPath = ""
         self.medias = [] # medias in scan directory
@@ -333,6 +334,7 @@ class MainWindow(QMainWindow):
     def repopulateMedias(self):
         deleted = self.medias
         self.medias = []
+        self.albums = {}
         self.mediasDeleted.emit(deleted)
         self.setWatchFiles()
         QTimer.singleShot(0, self.populateMediaThread)

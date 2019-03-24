@@ -27,7 +27,7 @@ class SettingsForm(QWidget):
         layoutw.setLayout(layout)
         vboxLayout.addWidget(layoutw)
 
-        self.disableDecorationsOption = QCheckBox("Disable window decorations (Windows only, requires restart)")
+        self.disableDecorationsOption = QCheckBox("Disable window decorations (requires restart)")
         self.disableDecorationsOption.setChecked(Application.mainWindow.settings["disableDecorations"])
         layout.addWidget(self.disableDecorationsOption)
 
