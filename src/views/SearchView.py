@@ -54,12 +54,19 @@ class SearchView(QWidget):
 
     def __init__(self):
         QWidget.__init__(self)
+        self.setObjectName("search-view")
         self.initUI()
         self.bindEvents()
 
     def initUI(self):
+        clayout = QVBoxLayout()
+        clayout.setContentsMargins(0,0,0,0)
+        clayout.setSpacing(0)
+        self.setLayout(clayout)
+        container = QWidget()
+        clayout.addWidget(container)
         vlayout = QVBoxLayout()
-        self.setLayout(vlayout)
+        container.setLayout(vlayout)
 
         self.searchBox = searchBox = QLineEdit()
         vlayout.addWidget(searchBox)
