@@ -9,7 +9,7 @@ a = Analysis(['aidoru.py'],
              pathex=[],
              binaries=[],
              datas=[
-                ('src/style.css', 'src'),
+                ('src/*.css', 'src'),
                 ('icons/*', 'icons')
              ],
              hiddenimports=[],
