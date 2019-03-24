@@ -135,3 +135,7 @@ background: #dae6ee;
     background: #9fabb3;
     color: #fff;
 }
+/* search */
+#search-view >QWidget {
+background: #f3f3f3;
+}
