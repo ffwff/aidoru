@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from src.models.Settings import settings
 from src.Application import Application
 from src import __version__
 
@@ -28,15 +29,15 @@ class SettingsForm(QWidget):
         vboxLayout.addWidget(layoutw)
 
         self.disableDecorationsOption = QCheckBox("Disable window decorations (requires restart)")
-        self.disableDecorationsOption.setChecked(Application.mainWindow.settings["disableDecorations"])
+        self.disableDecorationsOption.setChecked(settings.disableDecorations)
         layout.addWidget(self.disableDecorationsOption)
 
         self.darkThemeOption = QCheckBox("Dark theme")
-        self.darkThemeOption.setChecked(Application.mainWindow.settings["darkTheme"])
+        self.darkThemeOption.setChecked(settings.darkTheme)
         layout.addWidget(self.darkThemeOption)
 
         self.redrawBackgroundOption = QCheckBox("Redraw window background (requires restart)")
-        self.redrawBackgroundOption.setChecked(Application.mainWindow.settings["redrawBackground"])
+        self.redrawBackgroundOption.setChecked(settings.redrawBackground)
         layout.addWidget(self.redrawBackgroundOption)
 
         # media location
@@ -48,7 +49,7 @@ class SettingsForm(QWidget):
         vboxLayout.addWidget(layoutw)
 
         self.musicLocationInput = musicLocationInput = QLineEdit()
-        musicLocationInput.setText(Application.mainWindow.settings["mediaLocation"])
+        musicLocationInput.setText(settings.mediaLocation)
         layout.addWidget(musicLocationInput)
 
         self.musicLocationBrowse = musicLocationBrowse = QPushButton("Browse...")
@@ -61,7 +62,7 @@ class SettingsForm(QWidget):
 
         # file watcher
         self.fileWatcherOption = QCheckBox("Watch file changes in this directory")
-        self.fileWatcherOption.setChecked(Application.mainWindow.settings["fileWatch"])
+        self.fileWatcherOption.setChecked(settings.fileWatch)
         layout.addWidget(self.fileWatcherOption)
 
         layout.addStretch()
@@ -117,42 +118,32 @@ class SettingsForm(QWidget):
         self.checkUpdates.clicked.connect(Application.update)
 
     def darkThemeOptionChanged(self):
-        mainWindow = Application.mainWindow
-        mainWindow.settings["darkTheme"] = self.darkThemeOption.isChecked()
-        mainWindow.saveSettings()
-        mainWindow.setStyles()
+        settings.darkTheme = self.darkThemeOption.isChecked()
+        Application.mainWindow.setStyles()
 
     def disableDecorationsOptionChanged(self):
-        mainWindow = Application.mainWindow
-        mainWindow.settings["disableDecorations"] = self.disableDecorationsOption.isChecked()
-        mainWindow.saveSettings()
-        mainWindow.setStyles()
+        settings.disableDecorations = self.disableDecorationsOption.isChecked()
+        Application.mainWindow.setStyles()
 
     def redrawBackgroundOptionChanged(self):
-        mainWindow = Application.mainWindow
-        mainWindow.settings["redrawBackground"] = self.redrawBackgroundOption.isChecked()
-        mainWindow.saveSettings()
+        settings.redrawBackground = self.redrawBackgroundOption.isChecked()
 
     def musicLocationBrowseClicked(self):
         self.fileDialog = dialog = QFileDialog()
-        dialog.setDirectory(Application.mainWindow.settings["mediaLocation"])
+        dialog.setDirectory(settings.mediaLocation)
         dialog.setFileMode(QFileDialog.Directory)
         dialog.setOption(QFileDialog.ShowDirsOnly, True)
         dialog.fileSelected.connect(self.refreshMedia)
         dialog.show()
 
     def refreshMedia(self, dpath):
-        mainWindow = Application.mainWindow
-        mainWindow.settings["mediaLocation"] = dpath
+        settings.mediaLocation = dpath
         self.musicLocationInput.setText(dpath)
-        mainWindow.saveSettings()
-        mainWindow.repopulateMedias()
+        Application.mainWindow.repopulateMedias()
 
     def fileWatcherOptionChanged(self):
-        mainWindow = Application.mainWindow
-        mainWindow.settings["fileWatch"] = self.fileWatcherOption.isChecked()
-        mainWindow.saveSettings()
-        mainWindow.setWatchFiles()
+        settings.fileWatch = self.fileWatcherOption.isChecked()
+        Application.mainWindow.setWatchFiles()
 
 class SettingsView(QScrollArea):
 
