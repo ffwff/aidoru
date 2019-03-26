@@ -6,6 +6,7 @@ import sys
 import os
 import urllib.parse
 from .utils import getFileType, pathUp
+from .models.Settings import settings
 from .models.Database import Database
 from .models.MediaInfo import MediaInfo
 from .models.AlbumInfo import AlbumInfo
@@ -32,15 +33,7 @@ class MainWindow(QMainWindow):
     MINI_MODE = 1
     MICRO_MODE = 2
 
-    # settings
-    DEFAULT_SETTINGS = {
-        "mediaLocation": os.path.normpath(os.path.expanduser("~/Music")),
-        "fileWatch": True,
-        "redrawBackground": True,
-        "disableDecorations": False,
-        "darkTheme": False
-    }
-    SETINGS_FILE = "settings.json"
+    # files
     MEDIAS_FILE = "medias.pkl"
 
     # main
@@ -55,8 +48,6 @@ class MainWindow(QMainWindow):
         self.albums = {}
         self.albumPath = ""
         self.medias = [] # medias in scan directory
-        self.settings = Database.load(MainWindow.SETINGS_FILE, True,
-                                      MainWindow.DEFAULT_SETTINGS)
         self.setWatchFiles()
 
     def initUI(self):
@@ -65,12 +56,12 @@ class MainWindow(QMainWindow):
 
         self.setMode(MainWindow.FULL_MODE)
         self.setStyles()
-        if self.settings["redrawBackground"]:
+        if settings.redrawBackground:
             # workaround for qt themes with transparent backgrounds
             self.setProperty("class", "redraw-background")
             self.style().unpolish(self)
 
-        if self.settings["disableDecorations"]:
+        if settings.disableDecorations:
             if os.sys.platform == "win32":
                 self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint)
                 self.show()
@@ -122,11 +113,11 @@ class MainWindow(QMainWindow):
             if len(medias) != len(self.medias):
                 Database.save(self.medias, MainWindow.MEDIAS_FILE)
             self.mediasAdded.emit(medias)
-            if self.settings["fileWatch"]:
+            if settings.fileWatch:
                 for media in self.medias:
                     self.fsWatcher.addPath(pathUp(media.path))
                     self.fsWatcher.addPath(media.path)
-        elif not os.path.isdir(self.settings["mediaLocation"]):
+        elif not os.path.isdir(settings.mediaLocation):
             self.hide()
             self.mediaSelectionDialog = MediaLocationSelectionDialog()
             def delMediaSelection():
@@ -139,7 +130,7 @@ class MainWindow(QMainWindow):
             self.populateMediaThread()
 
     def nativeEvent(self, eventType, message):
-        if eventType == "windows_generic_MSG" and self.settings["disableDecorations"]:
+        if eventType == "windows_generic_MSG" and settings.disableDecorations:
             msg = ctypes.wintypes.MSG.from_address(message.__int__())
             WM_NCCALCSIZE = 0x0083
             WM_NCHITTEST = 0x0084
@@ -180,7 +171,7 @@ class MainWindow(QMainWindow):
 
     def setStyles(self):
         self.setStyleSheet(Database.loadFile("style.css",
-                           "style.css" if not self.settings["darkTheme"] else "dark.css"))
+                           "style.css" if not settings.darkTheme else "dark.css"))
 
     def setMode(self, mode):
         if mode == self.mode: return
@@ -299,7 +290,7 @@ class MainWindow(QMainWindow):
         batch = []
         ls = list(map(lambda f: os.path.join(path, f), os.listdir(path)))
         if not ls: return
-        if self.settings["fileWatch"]:
+        if settings.fileWatch:
             self.fsWatcher.addPath(path)
             self.fsWatcher.addPaths(ls)
         for fpath in ls:
@@ -324,7 +315,7 @@ class MainWindow(QMainWindow):
         class ProcessMediaThread(QThread):
 
             def run(self_):
-                self.populateMedias(self.settings["mediaLocation"])
+                self.populateMedias(settings.mediaLocation)
                 Database.save(self.medias, MainWindow.MEDIAS_FILE)
                 del self._thread
 
@@ -346,7 +337,7 @@ class MainWindow(QMainWindow):
 
     # file watcher
     def setWatchFiles(self):
-        if self.settings["fileWatch"]:
+        if settings.fileWatch:
             self.fsWatcher = QFileSystemWatcher()
             if self.medias:
                 for media in self.medias:
@@ -391,10 +382,6 @@ class MainWindow(QMainWindow):
                 continue
             self.medias.append(mediaInfo)
             self.mediasAdded.emit([mediaInfo])
-
-    # settings
-    def saveSettings(self):
-        Database.save(self.settings, MainWindow.SETINGS_FILE, True)
 
     # misc
     def onCtrlF(self):

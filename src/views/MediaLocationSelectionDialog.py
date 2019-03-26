@@ -1,8 +1,8 @@
+import os
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-import os
-from src.Application import Application
+from src.models.Settings import settings
 
 class MediaLocationSelectionDialog(QWidget):
 
@@ -28,7 +28,7 @@ class MediaLocationSelectionDialog(QWidget):
         layout.addWidget(label, 1, 0, 1, 2)
 
         self.musicLocationInput = musicLocationInput = QLineEdit()
-        musicLocationInput.setText(Application.mainWindow.settings["mediaLocation"])
+        musicLocationInput.setText(settings.mediaLocation)
         layout.addWidget(musicLocationInput, 2, 0)
 
         self.musicLocationBrowse = musicLocationBrowse = QPushButton("Browse...")
@@ -39,7 +39,7 @@ class MediaLocationSelectionDialog(QWidget):
         layout.setRowStretch(3,1)
 
         self.okButton = QPushButton("OK")
-        self.okButton.setEnabled(os.path.isdir(Application.mainWindow.settings["mediaLocation"]))
+        self.okButton.setEnabled(os.path.isdir(settings.mediaLocation))
         layout.addWidget(self.okButton, 4, 0, 1, 2, Qt.AlignRight)
 
     # events
@@ -48,7 +48,7 @@ class MediaLocationSelectionDialog(QWidget):
 
     def musicLocationBrowseClicked(self):
         self.fileDialog = dialog = QFileDialog()
-        dialog.setDirectory(Application.mainWindow.settings["mediaLocation"])
+        dialog.setDirectory(settings.mediaLocation)
         dialog.setFileMode(QFileDialog.Directory)
         dialog.setOption(QFileDialog.ShowDirsOnly, True)
         dialog.fileSelected.connect(self.refreshMedia)
@@ -56,10 +56,8 @@ class MediaLocationSelectionDialog(QWidget):
 
     def refreshMedia(self, dpath):
         if os.path.isdir(dpath):
-            mainWindow = Application.mainWindow
-            mainWindow.settings["mediaLocation"] = dpath
+            settings.mediaLocation = dpath
             self.musicLocationInput.setText(dpath)
-            mainWindow.saveSettings()
             self.okButton.setEnabled(True)
         else:
             self.okButton.setEnabled(False)
