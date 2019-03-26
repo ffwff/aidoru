@@ -11,10 +11,18 @@ class Application(QApplication):
     def __init__(self, argv):
         QApplication.__init__(self, argv)
 
-    def exec(self):
+    def exec(_):
+        self = Application
+
+        from src.modules import modules
+        self.modules = []
+        for module in modules:
+            self.modules.append(module())
+
         from src.MainWindow import MainWindow
-        Application.mainWindow = MainWindow()
-        Application.mainWindow.initUI()
+        self.mainWindow = MainWindow()
+        self.mainWindow.initUI()
+
         return QApplication.exec()
 
     def update():
