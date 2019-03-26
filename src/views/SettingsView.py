@@ -83,6 +83,27 @@ class SettingsForm(QWidget):
         checkUpdates.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         layout.addWidget(checkUpdates)
 
+        # modules
+        vboxLayout.addWidget(QLabel("Modules"))
+
+        layoutw = QWidget()
+        layout = QVBoxLayout()
+        layoutw.setLayout(layout)
+        vboxLayout.addWidget(layoutw)
+
+        for module in Application.modules:
+            checkbox = QCheckBox(module.name)
+            def stateChanged(state):
+                if state == Qt.Unchecked:
+                    module.disable()
+                else:
+                    module.enable()
+                checkbox.blockSignals(True)
+                checkbox.setCheckState(Qt.Checked if module.enabled else Qt.Unchecked)
+                checkbox.blockSignals(False)
+            checkbox.stateChanged.connect(stateChanged)
+            layout.addWidget(checkbox)
+
         vboxLayout.addStretch(2)
 
     # events
