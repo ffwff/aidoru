@@ -99,9 +99,13 @@ class SettingsForm(QWidget):
                     module.disable()
                 else:
                     module.enable()
+                settings.modules[module.id] = module.enabled
+                settings.save()
                 checkbox.blockSignals(True)
                 checkbox.setCheckState(Qt.Checked if module.enabled else Qt.Unchecked)
                 checkbox.blockSignals(False)
+            print(module.enabled)
+            checkbox.setCheckState(Qt.Checked if module.enabled else Qt.Unchecked)
             checkbox.stateChanged.connect(stateChanged)
             layout.addWidget(checkbox)
 
