@@ -41,17 +41,24 @@ class MprisService(dbus.service.Object):
             artist = [mediaInfo.artist]
         else:
             artist = [mediaInfo.artist, mediaInfo.albumArtist]
+        metadata = {
+            'mpris:trackId': '/0',
+            'xesam:artist': artist,
+            'xesam:title': mediaInfo.title,
+            'xesam:album': mediaInfo.album
+        }
+        if mediaInfo.image:
+            metadata['mpris:artUrl'] = mediaInfo.image
         props = dbus.Dictionary({
-            'Metadata': dbus.Dictionary({
-                'mpris:trackId': '/0',
-                'mpris:artUrl': mediaInfo.image,
-                'xesam:artist': artist,
-                'xesam:title': mediaInfo.title,
-                'xesam:album': mediaInfo.album
-            }, signature='sv')
+            'Metadata': dbus.Dictionary(metadata, signature='sv')
         }, signature='sv')
         self._player_properties.update(props)
         self.PropertiesChanged('org.mpris.MediaPlayer2.Player', props, [])
+
+    # signals
+    @dbus.service.signal(dbus.PROPERTIES_IFACE, signature='sa{sv}as')
+    def PropertiesChanged(self, interface, changed_properties, invalidated_properties=[]):
+        pass
 
     # methods
     @dbus.service.method('org.mpris.MediaPlayer2.Player')
@@ -85,7 +92,6 @@ class MprisService(dbus.service.Object):
 
     @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
-        print(interface)
         if interface == "org.mpris.MediaPlayer2":
             return self._properties
         elif interface == "org.mpris.MediaPlayer2.Player":
@@ -94,7 +100,7 @@ class MprisService(dbus.service.Object):
 class MprisModule(BaseModule):
 
     def __init__(self):
-        BaseModule.__init__(self, "MPRIS integration for Linux")
+        BaseModule.__init__(self, "mpris", "MPRIS integration for Linux")
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
     def enable(self):

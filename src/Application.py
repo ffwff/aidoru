@@ -3,6 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtNetwork import *
 from urllib.request import urlopen
 from src import __version__
+from src.models.Settings import settings
 import sys
 import os
 
@@ -21,8 +22,12 @@ class Application(QApplication):
 
         from src.MainWindow import MainWindow
         self.mainWindow = MainWindow()
-        self.mainWindow.initUI()
 
+        for module in self.modules:
+            if module.id in settings.modules and settings.modules[module.id]:
+                module.enable()
+
+        self.mainWindow.initUI()
         return QApplication.exec()
 
     def update():
