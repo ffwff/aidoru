@@ -169,6 +169,11 @@ class MainWindow(QMainWindow):
                 if vresult: return True, vresult
         return QMainWindow.nativeEvent(self, eventType, message)
 
+    windowShow = pyqtSignal()
+    def showEvent(self, event):
+        QMainWindow.showEvent(self, event)
+        self.windowShow.emit()
+
     def setStyles(self):
         self.setStyleSheet(Database.loadFile("style.css",
                            "style.css" if not settings.darkTheme else "dark.css"))
