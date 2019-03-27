@@ -3,10 +3,11 @@ import os
 modules = []
 
 # platform specific
-## linux
 if os.sys.platform == "linux":
     from .mpris import MprisModule
     modules.extend([ MprisModule ])
-
-## macOS
-## windows
+elif os.sys.platform == "win32":
+    from .taskpreview import TaskPreviewModule
+    modules.extend([ TaskPreviewModule ])
+elif os.sys.platform == "darwin":
+    pass
