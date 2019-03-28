@@ -18,7 +18,11 @@ if os.sys.platform == "linux":
 elif os.sys.platform == "win32":
 
     from .taskpreview import TaskPreviewModule
-    modules.extend([ TaskPreviewModule ])
+    from .keyboardshortcuts import KeyboardShortcutsModule
+    modules.extend([
+        TaskPreviewModule,
+        KeyboardShortcutsModule
+    ])
 
 elif os.sys.platform == "darwin":
     pass
