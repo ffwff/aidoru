@@ -1,5 +1,6 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtMultimedia import QMediaPlayer
+from PyQt5.QtCore import *
 from src.Application import Application
 from src.modules.module import BaseModule
 import os
@@ -91,10 +92,12 @@ class LinuxModule:
     def enable(self):
         BaseModule.enable(self)
         Application.mainWindow.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
+        Application.mainWindow.show()
 
     def disable(self):
         BaseModule.disable(self)
         Application.mainWindow.setWindowFlags(Qt.Window)
+        Application.mainWindow.show()
 
 if os.sys.platform == "win32":
     DisableWindowDecorationsModule = WindowsModule
