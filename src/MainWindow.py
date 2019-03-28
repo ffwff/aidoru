@@ -14,18 +14,6 @@ from .views.PlayerWidget import PlayerWidget
 from .views.MediaPlayer import MediaPlayer
 from .views.MediaLocationSelectionDialog import MediaLocationSelectionDialog
 
-if os.sys.platform == "win32":
-    from PyQt5.QtWinExtras import *
-    import struct
-    import ctypes
-    import ctypes.wintypes as wintypes
-    user32 = ctypes.WinDLL('user32')
-    user32.GetWindowLongW.restype = wintypes.DWORD
-    user32.GetWindowLongW.argtype = [wintypes.HWND, ctypes.c_int]
-    user32.SetWindowLongW.restype = wintypes.DWORD
-    user32.SetWindowLongW.argtype = [wintypes.HWND, ctypes.c_int, wintypes.DWORD]
-    GWL_STYLE = -16
-
 class MainWindow(QMainWindow):
 
     # modes
@@ -50,6 +38,7 @@ class MainWindow(QMainWindow):
         self.medias = [] # medias in scan directory
         self.setWatchFiles()
 
+    initUIDone = pyqtSignal()
     def initUI(self):
         self.setWindowTitle("aidoru~~")
         self.mode = None
@@ -61,22 +50,8 @@ class MainWindow(QMainWindow):
             self.setProperty("class", "redraw-background")
             self.style().unpolish(self)
 
-        if settings.disableDecorations:
-            if os.sys.platform == "win32":
-                self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint)
-                self.show()
-                hwnd = wintypes.HWND(self.winId().__int__())
-                winprop = user32.GetWindowLongW(hwnd, GWL_STYLE)
-                WS_MAXIMIZEBOX=0x00010000
-                WS_THICKFRAME=0x00040000
-                WS_CAPTION=0x00C00000
-                user32.SetWindowLongW(hwnd, GWL_STYLE, winprop | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CAPTION)
-                QtWin.extendFrameIntoClientArea(self, 1,1,1,1)
-            else:
-                self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
-                self.show()
-        else:
-            self.show()
+        self.initUIDone.emit()
+        self.show()
 
         # events
         self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
@@ -129,44 +104,11 @@ class MainWindow(QMainWindow):
         else:
             self.populateMediaThread()
 
+    nativeEventHandlers = []
     def nativeEvent(self, eventType, message):
-        if eventType == "windows_generic_MSG" and settings.disableDecorations:
-            msg = ctypes.wintypes.MSG.from_address(message.__int__())
-            WM_NCCALCSIZE = 0x0083
-            WM_NCHITTEST = 0x0084
-            if msg.message == WM_NCCALCSIZE:
-                # don't draw titlebars please!
-                return True, 0
-            elif msg.message == WM_NCHITTEST:
-                # LOWORD = x, HIWORD = y
-                x, y = struct.unpack('hh', msg.lParam.to_bytes(4, 'little')) # x86 is little endian
-                geo = self.geometry()
-                HTLEFT = 10
-                HTRIGHT = 11
-                HTTOP = 12
-                HTTOPLEFT = 13
-                HTTOPRIGHT = 14
-                HTBOTTOM = 15
-                HTBOTTOMLEFT = 16
-                HTBOTTOMRIGHT = 17
-                BORDER = 3
-
-                vresult = hresult = None
-                if geo.left() <= x < geo.left()+BORDER:
-                    hresult = HTLEFT
-                elif geo.right()-BORDER <= x < geo.right():
-                    hresult = HTRIGHT
-                if geo.top() <= y < geo.top()+BORDER:
-                    vresult = HTTOP
-                elif geo.bottom()-BORDER <= y < geo.bottom():
-                    vresult = HTBOTTOM
-
-                if hresult == HTLEFT  and vresult == HTTOP:    return True, HTTOPLEFT
-                if hresult == HTRIGHT and vresult == HTTOP:    return True, HTTOPRIGHT
-                if hresult == HTLEFT  and vresult == HTBOTTOM: return True, HTBOTTOMLEFT
-                if hresult == HTRIGHT and vresult == HTBOTTOM: return True, HTBOTTOMRIGHT
-                if hresult: return True, hresult
-                if vresult: return True, vresult
+        for handler in MainWindow.nativeEventHandlers:
+            result = handler(eventType, message)
+            if result: return result
         return QMainWindow.nativeEvent(self, eventType, message)
 
     windowShow = pyqtSignal()
