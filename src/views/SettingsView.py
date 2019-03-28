@@ -3,6 +3,7 @@ from PyQt5.QtCore import *
 from src.models.Settings import settings
 from src.Application import Application
 from src import __version__
+from functools import partial
 
 class SettingsForm(QWidget):
 
@@ -94,7 +95,7 @@ class SettingsForm(QWidget):
 
         for module in Application.modules:
             checkbox = QCheckBox(module.name)
-            def stateChanged(state):
+            def stateChanged(module, state):
                 if state == Qt.Unchecked:
                     module.disable()
                 else:
@@ -104,9 +105,8 @@ class SettingsForm(QWidget):
                 checkbox.blockSignals(True)
                 checkbox.setCheckState(Qt.Checked if module.enabled else Qt.Unchecked)
                 checkbox.blockSignals(False)
-            print(module.enabled)
             checkbox.setCheckState(Qt.Checked if module.enabled else Qt.Unchecked)
-            checkbox.stateChanged.connect(stateChanged)
+            checkbox.stateChanged.connect(partial(stateChanged, module))
             layout.addWidget(checkbox)
 
         vboxLayout.addStretch(2)
