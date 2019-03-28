@@ -26,11 +26,18 @@ class WindowsModule:
         BaseModule.enable(self)
         Application.mainWindow.hide()
         self.initUIDone()
+        self.nativeEventIdx = len(Application.mainWindow.nativeEventHandlers)
         Application.mainWindow.nativeEventHandlers.append(self.nativeEventHandler)
         Application.mainWindow.initUIDone.connect(self.initUIDone)
 
     def disable(self):
         BaseModule.disable(self)
+        mainWindow = Application.mainWindow
+        mainWindow.hide()
+        mainWindow.setWindowFlags(Qt.Window)
+        del mainWindow.nativeEventHandlers[self.nativeEventIdx]
+        mainWindow.initUIDone.disconnect(self.initUIDone)
+        mainWindow.show()
 
     # events
     def initUIDone(self):
