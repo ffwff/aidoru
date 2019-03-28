@@ -23,6 +23,8 @@ class WindowsModule:
 
     def enable(self):
         BaseModule.enable(self)
+        Application.mainWindow.hide()
+        self.nativeEventHandler()
         Application.mainWindow.nativeEventHandlers.append(self.nativeEventHandler)
         Application.mainWindow.initUIDone.connect(self.initUIDone)
 
@@ -53,7 +55,7 @@ class WindowsModule:
             elif msg.message == WM_NCHITTEST:
                 # LOWORD = x, HIWORD = y
                 x, y = struct.unpack('hh', msg.lParam.to_bytes(4, 'little')) # x86 is little endian
-                geo = Application.MainWindow.geometry()
+                geo = Application.mainWindow.geometry()
                 HTLEFT = 10
                 HTRIGHT = 11
                 HTTOP = 12
