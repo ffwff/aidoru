@@ -20,11 +20,11 @@ class WindowsModule:
 
     def __init__(self):
         BaseModule.__init__(self, "nowindecorations", "Disable window decorations (requires restart)")
-        Application.mainWindow.nativeEventHandlers.append(self.nativeEventHandler)
-        Application.mainWindow.initUIDone.connect(self.initUIDone)
 
     def enable(self):
         BaseModule.enable(self)
+        Application.mainWindow.nativeEventHandlers.append(self.nativeEventHandler)
+        Application.mainWindow.initUIDone.connect(self.initUIDone)
 
     def disable(self):
         BaseModule.disable(self)
