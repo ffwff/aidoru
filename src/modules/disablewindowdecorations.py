@@ -24,7 +24,7 @@ class WindowsModule:
     def enable(self):
         BaseModule.enable(self)
         Application.mainWindow.hide()
-        self.nativeEventHandler()
+        self.initUIDone()
         Application.mainWindow.nativeEventHandlers.append(self.nativeEventHandler)
         Application.mainWindow.initUIDone.connect(self.initUIDone)
 
