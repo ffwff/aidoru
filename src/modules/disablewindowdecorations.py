@@ -1,6 +1,7 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QDesktopWidget
 from src.Application import Application
 from src.modules.module import BaseModule
 import os
@@ -51,6 +52,11 @@ class WindowsModule:
         WS_CAPTION=0x00C00000
         user32.SetWindowLongW(hwnd, GWL_STYLE, winprop | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CAPTION)
         QtWin.extendFrameIntoClientArea(mainWindow, 1,1,1,1)
+
+        qr = mainWindow.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        mainWindow.move(qr.topLeft())
 
     def nativeEventHandler(self, eventType, message):
         if eventType == "windows_generic_MSG":
