@@ -16,7 +16,8 @@ class MediaInfo(object):
                        pos=0,
                        title="", artist="",
                        album="", albumArtist="",
-                       duration=0, image=None, year=0):
+                       duration=datetime.datetime.fromtimestamp(0),
+                       image=None, year=0):
         self.path = path
         self.pos = pos
         self.title = title if title else path
@@ -59,7 +60,10 @@ class MediaInfo(object):
         return True
 
     def fromFile(path):
-        song = taglib.File(path)
+        try:
+            song = taglib.File(path)
+        except OSError:
+            return MediaInfo(QUrl.fromLocalFile(path).toString(), 0, os.path.basename(path))
         artist = song.tags["ARTIST"][0] if "ARTIST" in song.tags else ""
         title = song.tags["TITLE"][0] if "TITLE" in song.tags else os.path.basename(path)
 

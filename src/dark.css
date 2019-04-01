@@ -5,8 +5,12 @@ QWidget {
     color: #fff;
 }
 /* widgets */
-QPushButton, QLineEdit, QHeaderView {
+QPushButton, QLineEdit {
     color: rgb(153, 170, 181);
+    background: #f3f3f3;
+}
+QLineEdit {
+    color: #fff;
 }
 QLineEdit, QPushButton {
     border: 1px solid rgba(0, 0, 0, 0.2);
@@ -15,19 +19,19 @@ QLineEdit, QPushButton {
     border-radius: 5px;
 }
 QPushButton:hover {
-    background: #778791;
+    background: #9fabb3;
     color: #fff;
 }
-QSlider::groove {
+QSlider::groove:horizontal {
     height: 6px;
     background: rgba(0, 0, 0, 0.2);
     margin: 0 0;
 }
-QSlider::sub-page {
+QSlider::sub-page:horizontal {
     background: #9fabb3;
     border-radius: 4px;
 }
-QSlider::handle {
+QSlider::handle:horizontal {
     background: #778791;
     width: 6px;
 }
@@ -36,27 +40,27 @@ QScrollArea{
 }
 QScrollArea { background: transparent; }
 QScrollArea > QWidget > QWidget { background: transparent; }
-QScrollArea > QWidget > QScrollBar { background: transparent; }
+QScrollArea > QWidget > QScrollBar { background: #fff; }
 QScrollBar{
-    background: transparent;
+    background: rgba(0,0,0,0.2);
     width: 8px;
 }
 QScrollBar::handle {
     background:#9fabb3;
 }
 QTableWidget{
-    background: rgba(0,0,0,0.2);
+    background-color: rgba(0,0,0,0.0);
     alternate-background-color: rgba(0,0,0,0.1);
     border: 0 none;
 }
-QTableWidget>QWidget {
+QHeaderView::section, QHeaderView::section:last:hover {
     background: transparent;
 }
-QHeaderView::section, QHeaderView::section:last:hover {
-    background: rgba(0,0,0,0.4);
+QHeaderView::section {
+    font-weight: bold;
     color: #fff;
     border: 0 none;
-    border-bottom: 1px solid rgba(0,0,0,0.3);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
     padding: 5px;
 }
 QHeaderView::section:hover, ::item:selected{
@@ -106,22 +110,17 @@ QHeaderView::section:hover, ::item:selected{
     padding: 10px;
 }
 #media-player-menu *, #media-player-menu QPushButton{
-    background: rgba(0,0,0,0.05);
+    background: transparent;
 }
 #media-player-menu QPushButton:hover {
 background: #dae6ee;
 }
-.widget-mode >* {
-    background: rgba(0,0,0,0.1);
-    padding: 10px 5px;
-}
-.widget-mode QLabel {
-    padding-top: 15px;
-    padding-bottom: 0;
+.widget-mode #album-label {
+    font-size: 8px;
+    height: 10px;
 }
 .widget-mode QPushButton {
-    padding-top: 0;
-    padding: 10px 5px;
+    padding: 0 5px;
 }
 /* playing album view */
 .album-label { font-size: 24px; }
@@ -132,8 +131,4 @@ background: #dae6ee;
 .media-box QLabel:hover, .media-box QLabel.active {
     background: #9fabb3;
     color: #fff;
-}
-/* search */
-#search-view > QWidget {
-background: rgba(0,0,0,0.5);
 }

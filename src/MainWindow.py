@@ -248,11 +248,7 @@ class MainWindow(QMainWindow):
             if os.path.isdir(fpath):
                 self.populateMedias(fpath)
             elif os.access(fpath, os.R_OK) and getFileType(fpath) == "audio":
-                try:
-                    mediaInfo = MediaInfo.fromFile(fpath)
-                except OSError as e:
-                    print(e)
-                    continue
+                mediaInfo = MediaInfo.fromFile(fpath)
                 dpath = pathUp(mediaInfo.path)
                 if mediaInfo.album:
                     if dpath not in self.albums:

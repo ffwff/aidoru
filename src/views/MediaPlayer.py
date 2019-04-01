@@ -67,8 +67,11 @@ class MediaPlayer(QWidget):
         layout.setSpacing(0)
         layout.setColumnStretch(1, 1)
 
+        self.playerWidget = PlayerWidget(self, PlayerWidget.WIDGET_MODE)
+        layout.addWidget(self.playerWidget, 0, 1, 1, 1)
+        
         self.menu = MediaPlayerMenu(self)
-        layout.addWidget(self.menu, 0, 0)
+        layout.addWidget(self.menu, 0, 0, 2, 1)
 
         self.fileListView = FileListView()
         self.playingAlbumView = PlayingAlbumView()
@@ -76,10 +79,7 @@ class MediaPlayer(QWidget):
 
         self.mode = MediaPlayer.FILE_LIST_MODE
         self.view = self.fileListView
-        layout.addWidget(self.view, 0, 1)
-
-        self.playerWidget = PlayerWidget(self, PlayerWidget.WIDGET_MODE)
-        layout.addWidget(self.playerWidget, 1, 0, 1, 2)
+        layout.addWidget(self.view, 1, 1)
 
     def setMode(self, mode):
         if mode == self.mode: return False

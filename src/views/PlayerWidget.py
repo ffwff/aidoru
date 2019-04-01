@@ -41,9 +41,11 @@ class PlayerWidget(WindowDragger, QWidget):
 
         # song info
         self.positionSlider = slider = QSlider(Qt.Horizontal)
+        slider.setObjectName("position-slider")
         slider.setTracking(True)
 
-        self.albumLabel = albumLabel = QLabel("no title")
+        self.albumLabel = albumLabel = QLabel("not playing")
+        albumLabel.setObjectName("album-label")
         albumLabel.setAlignment(Qt.AlignCenter)
 
         if self.mode == PlayerWidget.MAIN_MODE:
@@ -56,8 +58,8 @@ class PlayerWidget(WindowDragger, QWidget):
             self.coverLabelContainer = coverLabelContainer = QWidget(self)
             coverLabelContainer.setObjectName("cover-label")
             coverLabelContainerL = QHBoxLayout(self)
-            coverLabelContainerL.setSpacing(0)
             coverLabelContainerL.setContentsMargins(0, 0, 0, 0)
+            coverLabelContainerL.setSpacing(0)
             coverLabelContainer.setLayout(coverLabelContainerL)
 
             self.coverLabel = coverLabel = QLabel(coverLabelContainer)
@@ -68,7 +70,6 @@ class PlayerWidget(WindowDragger, QWidget):
             vboxLayout.addWidget(slider)
             vboxLayout.addStretch()
             vboxLayout.addWidget(albumLabel)
-            albumLabel.setObjectName("album-label")
             vboxLayout.addWidget(artistLabel)
             artistLabel.setObjectName("artist-label")
 
@@ -77,6 +78,8 @@ class PlayerWidget(WindowDragger, QWidget):
         buttonsWidget.setProperty("class", "buttons-widget")
 
         buttonsLayout = QHBoxLayout(self)
+        buttonsLayout.setContentsMargins(10, 0, 10, 0)
+        buttonsLayout.setSpacing(0)
         buttonsWidget.setLayout(buttonsLayout)
 
         self.backButton = backButton = QPushButton(QIcon("./icons/media-skip-backward"), "")
@@ -106,14 +109,24 @@ class PlayerWidget(WindowDragger, QWidget):
 
         # widget mode - separated because it's fundamentally different
         if self.mode == PlayerWidget.WIDGET_MODE:
-            vboxLayout.addWidget(albumLabel)
+            vboxLayout.setContentsMargins(0,0,0,5)
             vboxLayout.addWidget(buttonsWidget)
 
             buttonsLayout.addWidget(backButton)
             buttonsLayout.addWidget(ppButton)
             buttonsLayout.addWidget(forwardButton)
 
-            buttonsLayout.addWidget(slider)
+            layoutw = QWidget()
+            layoutw.setMinimumSize(QSize(0,50))
+            layoutw.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            layout = QVBoxLayout()
+            layout.setContentsMargins(10,16,10,0)
+            layout.setSpacing(0)
+            layoutw.setLayout(layout)
+            buttonsLayout.addWidget(layoutw)
+
+            layout.addWidget(slider)
+            layout.addWidget(albumLabel)
 
             self.volumeButton = volumeButton = QPushButton()
             buttonsLayout.addWidget(volumeButton)

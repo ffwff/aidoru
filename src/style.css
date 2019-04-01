@@ -5,7 +5,7 @@ QWidget {
     color: #000;
 }
 /* widgets */
-QPushButton, QLineEdit, QHeaderView {
+QPushButton, QLineEdit {
     color: rgb(153, 170, 181);
     background: #f3f3f3;
 }
@@ -53,7 +53,10 @@ QTableWidget{
     border: 0 none;
 }
 QHeaderView::section, QHeaderView::section:last:hover {
-    background: #f3f3f3;
+    background: #fff;
+}
+QHeaderView::section {
+    font-weight: bold;
     border: 0 none;
     border-bottom: 1px solid #e8e9ea;
     color: #7e7e7e;
@@ -112,18 +115,12 @@ QHeaderView::section:hover, ::item:selected{
 #media-player-menu QPushButton:hover {
 background: #dae6ee;
 }
-.widget-mode >* {
-    background: #fdfdfd;
-    padding: 10px 5px;
-}
-.widget-mode QLabel {
-    border-top: 1px solid #b1b1b1;
-    padding-top: 15px;
-    padding-bottom: 0;
+.widget-mode #album-label {
+    font-size: 8px;
+    height: 10px;
 }
 .widget-mode QPushButton {
-    padding-top: 0;
-    padding: 10px 5px;
+    padding: 0 5px;
 }
 /* playing album view */
 .album-label { font-size: 24px; }
@@ -134,8 +131,4 @@ background: #dae6ee;
 .media-box QLabel:hover, .media-box QLabel.active {
     background: #9fabb3;
     color: #fff;
-}
-/* search */
-#search-view >QWidget {
-background: #f3f3f3;
 }
