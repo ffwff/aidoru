@@ -76,7 +76,7 @@ class SearchView(QWidget):
         self.searchBox = searchBox = QLineEdit()
         layout.addWidget(searchBox)
 
-        self.openButton = QPushButton(QIcon("./icons/find"), "open")
+        self.openButton = QPushButton("Open")
         layout.addWidget(self.openButton)
 
         #
