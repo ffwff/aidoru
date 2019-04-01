@@ -134,7 +134,7 @@ class FileListTableWidget(QTableWidget):
         if self.mediaRow:
             if mainWindow.mediaInfo and self.mediaRow[index.row()] == mainWindow.mediaInfo:
                 return
-            mainWindow.setSong(self.mediaRow[index.row()].path)
+            mainWindow.setSong(self.mediaRow[index.row()])
 
 
 class FileListView(QWidget):

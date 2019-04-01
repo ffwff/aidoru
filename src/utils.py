@@ -17,3 +17,11 @@ def getFileType(f):
     mime = mimeDatabase.mimeTypesForFileName(f)
     if not mime: return ""
     return mime[0].name().split("/")[0]
+
+def imageMimetypeToExt(mimetype):
+    if mimetype == "image/jpg":    return ".jpg"
+    elif mimetype == "image/jpeg": return ".jpeg"
+    elif mimetype == "image/png":  return ".png"
+    elif mimetype == "image/bmp":  return ".bmp"
+    elif mimetype == "image/gif":  return ".gif"
+    return ""

@@ -41,4 +41,4 @@ class MediaLabel(QLabel):
 
     # events
     def mousePressEvent(self, e):
-        Application.mainWindow.setSong(self.media.path)
+        Application.mainWindow.setSong(self.media)

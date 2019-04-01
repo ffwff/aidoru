@@ -4,7 +4,7 @@ import datetime
 import taglib
 import os
 from hashlib import md5
-from src.utils import getFileType, pathUp
+from src.utils import getFileType, pathUp, imageMimetypeToExt
 from src.models.Database import Database
 
 @total_ordering
@@ -30,12 +30,7 @@ class MediaInfo(object):
     def searchImage(path, song=None):
         if song and song.picture:
             picture = song.picture
-            if picture.mimetype == "image/jpg": ext = ".jpg"
-            elif picture.mimetype == "image/jpeg": ext = ".jpeg"
-            elif picture.mimetype == "image/png": ext = ".png"
-            elif picture.mimetype == "image/bmp": ext = ".bmp"
-            elif picture.mimetype == "image/gif": ext = ".gif"
-            else: ext = ""
+            ext = imageMimetypeToExt(picture.mimetype)
             dataHash = md5(picture.data).hexdigest()
             fpath = os.path.join(MediaInfo.IMAGE_CACHE, dataHash + ext)
             if os.path.isfile(fpath): return fpath

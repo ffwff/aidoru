@@ -48,7 +48,7 @@ class AlbumLabel(QWidget):
         layout.addWidget(self.artistLabel)
 
     def mousePressEvent(self, event):
-        Application.mainWindow.setSong(self.album.medias[0].path)
+        Application.mainWindow.setSong(self.album.medias[0])
 
 class SearchView(QWidget):
 

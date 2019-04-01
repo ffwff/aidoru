@@ -5,6 +5,7 @@ from PyQt5.QtMultimedia import *
 import sys
 import os
 import urllib.parse
+import datetime
 from .utils import getFileType, pathUp
 from .models.Settings import settings
 from .models.Database import Database
@@ -156,15 +157,18 @@ class MainWindow(QMainWindow):
     # song info
     songInfoChanged = pyqtSignal(MediaInfo)
 
-    def setSong(self, path):
-        self.setSongInfo(path)
+    def setSong(self, info):
+        if isinstance(info, str):
+            self.setSongInfo(info)
+        elif isinstance(info, MediaInfo):
+            self.mediaInfo = info
+            self.songInfoChanged.emit(self.mediaInfo)
         mediaContent = QMediaContent(QUrl(self.mediaInfo.path))
         self.media.setMedia(mediaContent)
         self.media.play()
         self.media.stateChanged.emit(self.media.state())
 
     def setSongInfo(self, path):
-        print(path)
         if path.startswith("file://"):
             self.mediaInfo = MediaInfo.fromFile(path[7:])
         else:
@@ -173,7 +177,7 @@ class MainWindow(QMainWindow):
 
     def durationChanged(self, duration):
         if duration:
-            self.mediaInfo.duration = duration
+            self.mediaInfo.duration = datetime.datetime.fromtimestamp(duration)
             self.songInfoChanged.emit(self.mediaInfo)
 
     # dnd
@@ -228,7 +232,7 @@ class MainWindow(QMainWindow):
         idx = self.songIndex(array)
         if idx == -1: return
         if 0 <= idx+delta < len(array):
-            self.setSong(array[idx+delta].path)
+            self.setSong(array[idx+delta])
 
     # files
     mediasAdded = pyqtSignal(list)
