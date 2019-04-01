@@ -55,6 +55,7 @@ class MainWindow(QMainWindow):
 
         # events
         self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
+        self.media.durationChanged.connect(self.durationChanged)
 
         QShortcut(QKeySequence("Ctrl+Q"), self).activated \
             .connect(sys.exit)
@@ -82,7 +83,7 @@ class MainWindow(QMainWindow):
                 dpath = pathUp(mediaInfo.path)
                 if mediaInfo.album:
                     if dpath not in self.albums:
-                        self.albums[dpath] = AlbumInfo(mediaInfo)
+                        self.albums[dpath] = AlbumInfo(mediaInfo, False)
                     self.albums[dpath].medias.append(mediaInfo)
             self.sortAlbums()
             if len(medias) != len(self.medias):
@@ -156,18 +157,24 @@ class MainWindow(QMainWindow):
     songInfoChanged = pyqtSignal(MediaInfo)
 
     def setSong(self, path):
-        path = urllib.parse.unquote(path.strip())
-        if not os.path.isfile(path):
-            return
-        mediaContent = QMediaContent(QUrl.fromLocalFile(path))
+        self.setSongInfo(path)
+        mediaContent = QMediaContent(QUrl(self.mediaInfo.path))
         self.media.setMedia(mediaContent)
         self.media.play()
-        self.setSongInfo(path)
         self.media.stateChanged.emit(self.media.state())
 
     def setSongInfo(self, path):
-        self.mediaInfo = MediaInfo.fromFile(path)
+        print(path)
+        if path.startswith("file://"):
+            self.mediaInfo = MediaInfo.fromFile(path[7:])
+        else:
+            self.mediaInfo = MediaInfo(path)
         self.songInfoChanged.emit(self.mediaInfo)
+
+    def durationChanged(self, duration):
+        if duration:
+            self.mediaInfo.duration = duration
+            self.songInfoChanged.emit(self.mediaInfo)
 
     # dnd
     def dragEnterEvent(self, e):
@@ -179,27 +186,20 @@ class MainWindow(QMainWindow):
     def dropEvent(self, e):
         text = e.mimeData().text()
         if text.startswith("file://"):
-            if os.name == 'nt': # NT paths goes like file:///C:\
-                self.setSong(text[8:])
-            else:
-                self.setSong(text[7:])
+            self.setSong(text)
 
     # album
     albumChanged = pyqtSignal(AlbumInfo)
-    def populateAlbum(self, path):
-        if self.albumPath == path: return
-        if path in self.albums:
-            self.album = self.albums[path]
+    def populateAlbum(self, info): # TODO
+        if not info.path.startswith("file://"): return
+        albumPath = pathUp(info.path)
+        if albumPath in self.albums:
+            newAlbum = self.albums[albumPath]
         else:
-            self.album = AlbumInfo(path)
-            for f in os.listdir(path):
-                fpath = os.path.join(path, f)
-                if os.path.isfile(fpath) and getFileType(fpath) == "audio":
-                    mediaInfo = MediaInfo.fromFile(fpath)
-                    self.album.medias.append(mediaInfo)
-            self.album.medias.sort()
-        self.albumChanged.emit(self.album)
-        self.albumPath = path
+            newAlbum = AlbumInfo(info)
+        if newAlbum != self.album:
+            self.album = newAlbum
+            self.albumChanged.emit(self.album)
 
     def mediaStatusChanged(self, status):
         if status == QMediaPlayer.EndOfMedia:
@@ -246,14 +246,15 @@ class MainWindow(QMainWindow):
             elif os.access(fpath, os.R_OK) and getFileType(fpath) == "audio":
                 try:
                     mediaInfo = MediaInfo.fromFile(fpath)
-                    dpath = pathUp(mediaInfo.path)
-                    if mediaInfo.album:
-                        if dpath not in self.albums:
-                            self.albums[dpath] = AlbumInfo(mediaInfo)
-                        self.albums[dpath].medias.append(mediaInfo)
-                    batch.append(mediaInfo)
-                except OSError:
-                    pass
+                except OSError as e:
+                    print(e)
+                    continue
+                dpath = pathUp(mediaInfo.path)
+                if mediaInfo.album:
+                    if dpath not in self.albums:
+                        self.albums[dpath] = AlbumInfo(mediaInfo, False)
+                    self.albums[dpath].medias.append(mediaInfo)
+                batch.append(mediaInfo)
         self.sortAlbums()
         self.medias.extend(batch)
         self.mediasAdded.emit(batch)

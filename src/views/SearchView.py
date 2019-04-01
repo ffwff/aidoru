@@ -68,9 +68,18 @@ class SearchView(QWidget):
         vlayout = QVBoxLayout()
         container.setLayout(vlayout)
 
-        self.searchBox = searchBox = QLineEdit()
-        vlayout.addWidget(searchBox)
+        layoutw = QWidget()
+        layout = QHBoxLayout()
+        layoutw.setLayout(layout)
+        vlayout.addWidget(layoutw)
 
+        self.searchBox = searchBox = QLineEdit()
+        layout.addWidget(searchBox)
+
+        self.openButton = QPushButton(QIcon("./icons/find"), "open")
+        layout.addWidget(self.openButton)
+
+        #
         self.albumScroll = scrollArea = QScrollArea()
         scrollArea.hide()
         scrollArea.setMinimumSize(QSize(0, 200))
@@ -88,6 +97,7 @@ class SearchView(QWidget):
     # events
     def bindEvents(self):
         self.searchBox.textChanged.connect(self.textChanged)
+        self.openButton.clicked.connect(self.openButtonClicked)
 
     def textChanged(self, text):
         self.parentWidget().tableWidget.filterText = text
@@ -115,6 +125,10 @@ class SearchView(QWidget):
                 except StopIteration:
                     self.albumLayout.addStretch()
             iteration()
+
+    def openButtonClicked(self):
+        print(self.searchBox.text())
+        Application.mainWindow.setSong(self.searchBox.text())
 
     # album events
     def eventFilter(self, obj, event):

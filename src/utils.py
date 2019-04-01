@@ -2,6 +2,8 @@ import os
 from PyQt5.QtCore import QMimeDatabase
 
 def pathUp(path):
+    if path.startswith("file://"):
+        return os.path.normpath(os.path.join(path[7:], ".."))
     return os.path.normpath(os.path.join(path, ".."))
 
 def clearLayout(layout):

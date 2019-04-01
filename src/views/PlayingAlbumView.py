@@ -76,7 +76,7 @@ class PlayingAlbumView(QWidget):
         self.albumArtistLabel.setText(mediaInfo.albumArtist)
 
         # album
-        Application.mainWindow.populateAlbum(pathUp(mediaInfo.path))
+        Application.mainWindow.populateAlbum(mediaInfo)
         for mediaLabel in self.mediaLabels:
             mediaLabel.setActive(mediaLabel.media == mediaInfo)
 

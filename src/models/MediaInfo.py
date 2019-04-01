@@ -1,3 +1,4 @@
+from PyQt5.QtCore import QUrl
 from functools import total_ordering
 import datetime
 import taglib
@@ -11,10 +12,14 @@ class MediaInfo(object):
 
     IMAGE_CACHE = os.path.join(Database.BASE, "cache")
 
-    def __init__(self, path, pos, title, artist, album, albumArtist, duration, image, year=0):
-        self.path = os.path.normpath(path)
+    def __init__(self, path,
+                       pos=0,
+                       title="", artist="",
+                       album="", albumArtist="",
+                       duration=0, image=None, year=0):
+        self.path = path
         self.pos = pos
-        self.title = title
+        self.title = title if title else path
         self.artist = artist
         self.album = album
         self.albumArtist = albumArtist
@@ -82,7 +87,7 @@ class MediaInfo(object):
         try: year = int(song.tags["DATE"][0])
         except: year = -1
 
-        return MediaInfo(path, pos, title, artist,
+        return MediaInfo(QUrl.fromLocalFile(path).toString(), pos, title, artist,
                          album, albumArtist,
                          datetime.datetime.fromtimestamp(song.length),
                          MediaInfo.searchImage(path, song),
