@@ -49,6 +49,9 @@ QTableWidget{
     alternate-background-color: rgba(0,0,0,0.1);
     border: 0 none;
 }
+QTableWidget>QWidget {
+    background: transparent;
+}
 QHeaderView::section, QHeaderView::section:last:hover {
     background: rgba(0,0,0,0.4);
     color: #fff;
@@ -131,6 +134,6 @@ background: #dae6ee;
     color: #fff;
 }
 /* search */
-#search-view >QWidget {
+#search-view > QWidget {
 background: rgba(0,0,0,0.5);
 }
