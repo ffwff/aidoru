@@ -79,6 +79,10 @@ class SearchView(QWidget):
         self.openButton = QPushButton("Open")
         layout.addWidget(self.openButton)
 
+        self.navbarPadding = QWidget() # HACK
+        #self.navbarPadding.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        layout.addWidget(self.navbarPadding)
+
         #
         self.albumScroll = scrollArea = QScrollArea()
         scrollArea.hide()
@@ -98,6 +102,12 @@ class SearchView(QWidget):
     def bindEvents(self):
         self.searchBox.textChanged.connect(self.textChanged)
         self.openButton.clicked.connect(self.openButtonClicked)
+
+    def resizeEvent(self, event):
+        mediaPlayer = Application.mainWindow.centralWidget()
+        size = QSize(mediaPlayer.windowDecorations.width(), 0)
+        self.navbarPadding.setMinimumSize(size)
+        self.navbarPadding.resize(size)
 
     def textChanged(self, text):
         self.parentWidget().tableWidget.filterText = text

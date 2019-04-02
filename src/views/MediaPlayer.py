@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from sys import exit
 from .WindowDragger import WindowDragger
 from .FileListView import FileListView
 from .PlayingAlbumView import PlayingAlbumView
@@ -68,8 +69,8 @@ class MediaPlayer(QWidget):
         layout.setColumnStretch(1, 1)
 
         self.playerWidget = PlayerWidget(self, PlayerWidget.WIDGET_MODE)
-        layout.addWidget(self.playerWidget, 0, 1, 1, 1)
-        
+        layout.addWidget(self.playerWidget, 1, 1, 1, 1)
+
         self.menu = MediaPlayerMenu(self)
         layout.addWidget(self.menu, 0, 0, 2, 1)
 
@@ -79,7 +80,33 @@ class MediaPlayer(QWidget):
 
         self.mode = MediaPlayer.FILE_LIST_MODE
         self.view = self.fileListView
-        layout.addWidget(self.view, 1, 1)
+        layout.addWidget(self.view, 0, 1)
+
+        # window decorations
+        self.windowDecorations = QWidget(self)
+        self.windowDecorations.setObjectName("window-decorations")
+        self.windowDecorations.resize(QSize(0, 24))
+        layout = QHBoxLayout()
+        self.windowDecorations.setLayout(layout)
+
+        self.minimizeButton = QPushButton(QIcon("./icons/window-minimize.svg"), "", self)
+        self.minimizeButton.clicked.connect(lambda: Application.mainWindow.setWindowState(Qt.WindowMinimized))
+        layout.addWidget(self.minimizeButton)
+
+        self.maximizeButton = QPushButton(QIcon("./icons/window-maximize.svg"), "", self)
+        self.maximizeButton.clicked.connect(lambda: Application.mainWindow.setWindowState(Qt.WindowMaximized))
+        layout.addWidget(self.maximizeButton)
+
+        self.closeButton = QPushButton(QIcon("./icons/window-close.svg"), "", self)
+        self.closeButton.clicked.connect(lambda: exit(0))
+        layout.addWidget(self.closeButton)
+
+        width = 0
+        for child in self.windowDecorations.children():
+            if isinstance(child, QPushButton):
+                child.resize(QSize(24,24))
+                width += child.width()
+        self.windowDecorations.resize(QSize(width, 24))
 
     def setMode(self, mode):
         if mode == self.mode: return False
@@ -99,3 +126,9 @@ class MediaPlayer(QWidget):
     #events
     def bindEvents(self):
         pass
+
+    def resizeEvent(self, event):
+        self.updateCloseButton()
+
+    def updateCloseButton(self):
+        self.windowDecorations.move(QPoint(self.size().width() - self.windowDecorations.width(), 0))

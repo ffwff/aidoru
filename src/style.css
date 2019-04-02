@@ -43,6 +43,7 @@ QScrollArea > QWidget > QScrollBar { background: #fff; }
 QScrollBar{
     background: #f3f3f3;
     width: 8px;
+    border-top: 25px solid #fff;
 }
 QScrollBar::handle {
     background:#9fabb3;
@@ -61,6 +62,8 @@ QHeaderView::section {
     border-bottom: 1px solid #e8e9ea;
     color: #7e7e7e;
     padding: 5px;
+    height: 14px;
+    min-width: 50px;
 }
 QHeaderView::section:hover, ::item:selected{
     background: #778791;
@@ -131,4 +134,8 @@ background: #dae6ee;
 .media-box QLabel:hover, .media-box QLabel.active {
     background: #9fabb3;
     color: #fff;
+}
+#window-decorations QPushButton {
+    background: transparent;
+    border: 0 none;
 }
