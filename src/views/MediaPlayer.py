@@ -87,25 +87,27 @@ class MediaPlayer(QWidget):
         self.windowDecorations.setObjectName("window-decorations")
         self.windowDecorations.resize(QSize(0, 24))
         layout = QHBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(0)
         self.windowDecorations.setLayout(layout)
 
-        self.minimizeButton = QPushButton(QIcon("./icons/window-minimize.svg"), "", self)
+        self.minimizeButton = QPushButton(QIcon("./icons/window-minimize.svg"), "")
         self.minimizeButton.clicked.connect(lambda: Application.mainWindow.setWindowState(Qt.WindowMinimized))
         layout.addWidget(self.minimizeButton)
 
-        self.maximizeButton = QPushButton(QIcon("./icons/window-maximize.svg"), "", self)
+        self.maximizeButton = QPushButton(QIcon("./icons/window-maximize.svg"), "")
         self.maximizeButton.clicked.connect(lambda: Application.mainWindow.setWindowState(Qt.WindowMaximized))
         layout.addWidget(self.maximizeButton)
 
-        self.closeButton = QPushButton(QIcon("./icons/window-close.svg"), "", self)
+        self.closeButton = QPushButton(QIcon("./icons/window-close.svg"), "")
         self.closeButton.clicked.connect(lambda: exit(0))
         layout.addWidget(self.closeButton)
 
         width = 0
-        for child in self.windowDecorations.children():
-            if isinstance(child, QPushButton):
-                child.resize(QSize(24,24))
-                width += child.width()
+        for i in range(layout.count()):
+            child = layout.itemAt(i).widget()
+            child.resize(QSize(24,24))
+            width += child.width()
         self.windowDecorations.resize(QSize(width, 24))
 
     def setMode(self, mode):
@@ -131,4 +133,6 @@ class MediaPlayer(QWidget):
         self.updateCloseButton()
 
     def updateCloseButton(self):
-        self.windowDecorations.move(QPoint(self.size().width() - self.windowDecorations.width(), 0))
+        self.windowDecorations.move(QPoint(
+            self.size().width() - self.windowDecorations.width() - 8,
+            4))

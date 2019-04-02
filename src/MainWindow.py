@@ -140,8 +140,9 @@ class MainWindow(QMainWindow):
 
         # reemit events to redraw ui
         def emitAll():
+            self.mediasAdded.emit(self.medias)
             self.albumPath = ""
-            #if self.album: self.albumChanged.emit(self.album)
+            if self.album: self.albumChanged.emit(self.album)
             if self.mediaInfo: self.songInfoChanged.emit(self.mediaInfo)
             self.media.durationChanged.emit(self.media.duration())
             self.media.positionChanged.emit(self.media.position())

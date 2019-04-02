@@ -60,16 +60,20 @@ class SearchView(QWidget):
 
     def initUI(self):
         clayout = QVBoxLayout()
-        clayout.setContentsMargins(0,0,0,0)
+        clayout.setContentsMargins(15,5,5,0)
         clayout.setSpacing(0)
         self.setLayout(clayout)
         container = QWidget()
         clayout.addWidget(container)
+
         vlayout = QVBoxLayout()
+        vlayout.setContentsMargins(0,0,0,0)
+        vlayout.setSpacing(0)
         container.setLayout(vlayout)
 
         layoutw = QWidget()
         layout = QHBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
         layoutw.setLayout(layout)
         vlayout.addWidget(layoutw)
 
