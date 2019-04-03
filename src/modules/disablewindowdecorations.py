@@ -18,7 +18,7 @@ if os.sys.platform == "win32":
     user32.SetWindowLongW.argtype = [wintypes.HWND, ctypes.c_int, wintypes.DWORD]
     GWL_STYLE = -16
 
-class WindowsModule:
+class WindowsModule(BaseModule):
 
     def __init__(self):
         BaseModule.__init__(self, "nowindecorations", "Disable window decorations (requires restart)")
@@ -97,7 +97,7 @@ class WindowsModule:
                 if hresult: return True, hresult
                 if vresult: return True, vresult
 
-class LinuxModule:
+class LinuxModule(BaseModule):
 
     def __init__(self):
         BaseModule.__init__(self, "nowindecorations", "Disable window decorations")

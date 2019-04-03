@@ -9,6 +9,8 @@ import os
 
 class Application(QApplication):
 
+    moduleChanged = pyqtSignal(tuple)
+
     def __init__(self, argv):
         QApplication.__init__(self, argv)
 
@@ -22,12 +24,12 @@ class Application(QApplication):
 
         from src.MainWindow import MainWindow
         self.mainWindow = MainWindow()
+        self.mainWindow.initUI()
 
         for module in self.modules:
             if module.id in settings.modules and settings.modules[module.id]:
                 module.enable()
 
-        self.mainWindow.initUI()
         return QApplication.exec()
 
     def update():

@@ -127,7 +127,11 @@ class MediaPlayer(QWidget):
 
     #events
     def bindEvents(self):
-        pass
+        from src.modules.disablewindowdecorations import DisableWindowDecorationsModule
+        DisableWindowDecorationsModule.connect(self.windowDecorationsChanged)
+
+    def windowDecorationsChanged(self, enabled):
+        self.windowDecorations.setVisible(enabled)
 
     def resizeEvent(self, event):
         self.updateCloseButton()

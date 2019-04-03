@@ -1,4 +1,5 @@
 import os
+from PyQt5.QtCore import pyqtSignal
 from .Database import Database
 
 class Settings(object):
@@ -13,6 +14,9 @@ class Settings(object):
         "modules": {}
     }
     SETINGS_FILE = "settings.json"
+
+    # signals
+    changed = pyqtSignal(tuple)
 
     def __init__(self):
         self._dict = Database.load(Settings.SETINGS_FILE, True,

@@ -136,6 +136,6 @@ background: #dae6ee;
 }
 
 #window-decorations QPushButton {
-background: transparent;
-border: 0 none;
+    background: transparent;
+    border: 0 none;
 }

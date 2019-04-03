@@ -29,10 +29,6 @@ class SettingsForm(QWidget):
         layoutw.setLayout(layout)
         vboxLayout.addWidget(layoutw)
 
-        self.disableDecorationsOption = QCheckBox("Disable window decorations (requires restart)")
-        self.disableDecorationsOption.setChecked(settings.disableDecorations)
-        layout.addWidget(self.disableDecorationsOption)
-
         self.darkThemeOption = QCheckBox("Dark theme")
         self.darkThemeOption.setChecked(settings.darkTheme)
         layout.addWidget(self.darkThemeOption)
@@ -115,7 +111,6 @@ class SettingsForm(QWidget):
     # events
     def bindEvents(self):
         self.darkThemeOption.stateChanged.connect(self.darkThemeOptionChanged)
-        self.disableDecorationsOption.stateChanged.connect(self.disableDecorationsOptionChanged)
         self.redrawBackgroundOption.stateChanged.connect(self.redrawBackgroundOptionChanged)
         self.musicLocationBrowse.clicked.connect(self.musicLocationBrowseClicked)
         self.musicRefreshButton.clicked.connect(lambda: self.refreshMedia(self.musicLocationInput.text()))
@@ -124,10 +119,6 @@ class SettingsForm(QWidget):
 
     def darkThemeOptionChanged(self):
         settings.darkTheme = self.darkThemeOption.isChecked()
-        Application.mainWindow.setStyles()
-
-    def disableDecorationsOptionChanged(self):
-        settings.disableDecorations = self.disableDecorationsOption.isChecked()
         Application.mainWindow.setStyles()
 
     def redrawBackgroundOptionChanged(self):

@@ -118,6 +118,9 @@ QHeaderView::section:hover, ::item:selected{
 #media-player-menu QPushButton:hover {
 background: #dae6ee;
 }
+.widget-mode > QWidget {
+    border-top: 1px solid #b1b1b1;
+}
 .widget-mode #album-label {
     font-size: 8px;
     height: 10px;
