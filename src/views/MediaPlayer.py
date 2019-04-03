@@ -134,5 +134,5 @@ class MediaPlayer(QWidget):
 
     def updateCloseButton(self):
         self.windowDecorations.move(QPoint(
-            self.size().width() - self.windowDecorations.width() - 8,
-            4))
+            self.size().width() - self.windowDecorations.width() - 4,
+            5))

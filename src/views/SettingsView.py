@@ -157,3 +157,4 @@ class SettingsView(QScrollArea):
         self.form = SettingsForm()
         self.setWidget(self.form)
         self.setWidgetResizable(True)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)

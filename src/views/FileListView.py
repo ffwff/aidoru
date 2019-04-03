@@ -39,6 +39,8 @@ class FileListTableWidget(QTableWidget):
         self.sortRev = False
         self.filterText = ""
 
+        #self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
     def selectPlaying(self):
         if not self.mediaRow: return
         try:
@@ -156,8 +158,14 @@ class FileListView(QWidget):
         vboxLayout.addWidget(self.searchView)
 
         self.tableWidget = tableWidget = FileListTableWidget()
+        tableWidget.resizeEvent = self.tableResizeEvent
         tableWidget.setAlternatingRowColors(True)
-        vboxLayout.addWidget(tableWidget)
+        tableWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        vboxLayout.addWidget(tableWidget, 1)
+
+        self.scrollBar = tableWidget.verticalScrollBar()
+        self.scrollBar.setParent(self)
+        self.scrollBar.show()
 
         if Application.mainWindow.medias:
             self.tableWidget.mediasAdded(Application.mainWindow.medias)
@@ -168,3 +176,12 @@ class FileListView(QWidget):
         Application.mainWindow.mediasAdded.connect(self.tableWidget.mediasAdded)
         Application.mainWindow.mediasDeleted.connect(self.tableWidget.mediasDeleted)
         Application.mainWindow.songInfoChanged.connect(self.tableWidget.selectPlaying)
+
+    def tableResizeEvent(self, event):
+        QTableWidget.resizeEvent(self.tableWidget, event)
+        WIDTH = self.scrollBar.sizeHint().width()
+        self.scrollBar.setGeometry(QRect(
+            self.tableWidget.width()-WIDTH,
+            self.tableWidget.y()+self.tableWidget.horizontalHeader().height(),
+            WIDTH, self.tableWidget.height()-self.tableWidget.horizontalHeader().height()
+        ))

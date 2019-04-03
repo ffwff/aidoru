@@ -41,12 +41,12 @@ QScrollArea { background: transparent; }
 QScrollArea > QWidget > QWidget { background: transparent; }
 QScrollArea > QWidget > QScrollBar { background: #fff; }
 QScrollBar{
-    background: #f3f3f3;
+    background: transparent;
     width: 8px;
-    /*border-top: 27px solid #fff;*/
 }
 QScrollBar::handle {
     background:#9fabb3;
+    min-height: 20px;
 }
 QTableWidget{
     background: #fff;
@@ -62,7 +62,7 @@ QHeaderView::section {
     border-bottom: 1px solid #e8e9ea;
     color: #7e7e7e;
     padding: 5px;
-    height: 20px;
+    height: 25px;
     min-width: 50px;
 }
 QHeaderView::section:hover, ::item:selected{

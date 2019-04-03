@@ -62,6 +62,8 @@ QHeaderView::section {
     border: 0 none;
     border-bottom: 1px solid rgba(0,0,0,0.1);
     padding: 5px;
+    height: 25px;
+    min-width: 50px;
 }
 QHeaderView::section:hover, ::item:selected{
     background: #778791;
@@ -131,4 +133,9 @@ background: #dae6ee;
 .media-box QLabel:hover, .media-box QLabel.active {
     background: #9fabb3;
     color: #fff;
+}
+
+#window-decorations QPushButton {
+background: transparent;
+border: 0 none;
 }
