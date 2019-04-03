@@ -41,7 +41,7 @@ QScrollArea { background: transparent; }
 QScrollArea > QWidget > QWidget { background: transparent; }
 QScrollArea > QWidget > QScrollBar { background: #fff; }
 QScrollBar{
-    background: transparent;
+    background: white;
     width: 8px;
 }
 QScrollBar::handle {
