@@ -39,7 +39,7 @@ class FileListTableWidget(QTableWidget):
         self.sortRev = False
         self.filterText = ""
 
-        #self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
     def selectPlaying(self):
         if not self.mediaRow: return
@@ -85,14 +85,17 @@ class FileListTableWidget(QTableWidget):
     # data manip
     def sortAndFilter(self):
         if self.filterText:
-            self.mediaRow = list(filter(lambda media: self.filterText in media.title.lower(), Application.mainWindow.medias))
+            self.mediaRow = list(filter(lambda media: self.filterText.lower() in media.title.lower(), Application.mainWindow.medias))
         else:
             self.mediaRow = Application.mainWindow.medias
-        self.mediaRow.sort(key=attrgetter(self.sortKey), reverse=self.sortRev)
 
         self.clearContents()
         self.nrows = 0
         self.setRowCount(0)
+        if not self.mediaRow: return
+
+        self.mediaRow = sorted(self.mediaRow, key=attrgetter(self.sortKey), reverse=self.sortRev)
+
         self.mediasAdded(self.mediaRow, False)
         self.selectPlaying()
 
@@ -160,7 +163,6 @@ class FileListView(QWidget):
         self.tableWidget = tableWidget = FileListTableWidget()
         tableWidget.resizeEvent = self.tableResizeEvent
         tableWidget.setAlternatingRowColors(True)
-        tableWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         vboxLayout.addWidget(tableWidget, 1)
 
         self.scrollBar = tableWidget.verticalScrollBar()

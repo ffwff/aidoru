@@ -1,5 +1,7 @@
 import os
 from PyQt5.QtCore import QMimeDatabase
+from PyQt5.QtWidgets import QGraphicsDropShadowEffect
+from PyQt5.QtGui import QColor
 
 def pathUp(path):
     if path.startswith("file://"):
@@ -25,3 +27,11 @@ def imageMimetypeToExt(mimetype):
     elif mimetype == "image/bmp":  return ".bmp"
     elif mimetype == "image/gif":  return ".gif"
     return ""
+
+def dropShadow():
+    effect = QGraphicsDropShadowEffect()
+    effect.setBlurRadius(20)
+    effect.setXOffset(0)
+    effect.setYOffset(5)
+    effect.setColor(QColor(0, 0, 0, 50))
+    return effect

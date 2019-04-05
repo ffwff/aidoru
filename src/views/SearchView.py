@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from src.Application import Application
-from src.utils import clearLayout
+from src.utils import clearLayout, dropShadow
 
 class AlbumLabel(QWidget):
 
@@ -12,10 +12,12 @@ class AlbumLabel(QWidget):
         self.initUI()
 
     def initUI(self):
-        size = QSize(150, 200)
+        size = QSize(165, 200)
         self.setMinimumSize(size)
         self.setMaximumSize(size)
         self.resize(size)
+
+        width = 150
 
         layout = QVBoxLayout(self)
         layout.setSpacing(0)
@@ -23,7 +25,9 @@ class AlbumLabel(QWidget):
 
         self.coverLabelContainer = coverLabelContainer = QWidget(self)
         coverLabelContainer.setObjectName("cover-label")
-        coverLabelContainer.setMinimumSize(QSize(self.width(), self.width()))
+        coverLabelContainer.setMinimumSize(QSize(width, width))
+        coverLabelContainer.setMaximumSize(QSize(width, width))
+        coverLabelContainer.setGraphicsEffect(dropShadow())
         coverLabelContainerL = QHBoxLayout(coverLabelContainer)
         coverLabelContainerL.setSpacing(0)
         coverLabelContainerL.setContentsMargins(0, 0, 0, 0)
@@ -32,9 +36,12 @@ class AlbumLabel(QWidget):
 
         if self.album.image:
             self.coverLabel = coverLabel = QLabel(self)
-            pixmap = QPixmap(self.album.image).scaledToWidth(self.width(), Qt.SmoothTransformation)
+            pixmap = QPixmap(self.album.image)
+            if pixmap.width() >= pixmap.height():
+                pixmap = pixmap.scaledToWidth(width, Qt.SmoothTransformation)
+            else:
+                pixmap = pixmap.scaledToHeight(width, Qt.SmoothTransformation)
             coverLabel.setPixmap(pixmap)
-            coverLabel.resize(pixmap.size())
             coverLabel.setAlignment(Qt.AlignCenter)
             coverLabelContainerL.addWidget(coverLabel)
 

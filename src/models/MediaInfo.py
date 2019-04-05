@@ -53,7 +53,7 @@ class MediaInfo(object):
             return None
 
     def verify(self):
-        if not os.path.isfile(self.path):
+        if self.path.startswith("file://") and not os.path.isfile(self.path[7:]):
             return False
         if self.image and not os.path.isfile(self.image):
             self.image = MediaInfo.searchImage(self.path)

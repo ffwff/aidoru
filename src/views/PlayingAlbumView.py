@@ -3,7 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from .PlayerWidget import PlayerWidget
 from .MediaLabel import MediaLabel
-from src.utils import clearLayout, pathUp
+from src.utils import clearLayout, pathUp, dropShadow
 from src.Application import Application
 
 class PlayingAlbumView(QWidget):
@@ -37,8 +37,11 @@ class PlayingAlbumView(QWidget):
         hbox.setLayout(hboxLayout)
 
         self.coverLabel = coverLabel = QLabel()
-        coverLabel.setMinimumSize(QSize(400, 400))
-        coverLabel.setMaximumSize(QSize(400, 400))
+        coverLabel.setGraphicsEffect(dropShadow())
+        size = QSize(400 + coverLabel.graphicsEffect().blurRadius()*2,
+                     400 + coverLabel.graphicsEffect().blurRadius()*2)
+        coverLabel.setMinimumSize(size)
+        coverLabel.setMaximumSize(size)
         coverLabel.hide()
         hboxLayout.addWidget(coverLabel,Qt.AlignTop)
 
@@ -68,7 +71,7 @@ class PlayingAlbumView(QWidget):
     def songInfoChanged(self, mediaInfo):
         # song info
         if mediaInfo.image:
-            self.coverLabel.setPixmap(QPixmap(mediaInfo.image).scaledToWidth(self.coverLabel.width(), Qt.SmoothTransformation))
+            self.coverLabel.setPixmap(QPixmap(mediaInfo.image).scaledToWidth(400, Qt.SmoothTransformation))
             self.coverLabel.show()
         else:
             self.coverLabel.hide()
