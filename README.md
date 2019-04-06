@@ -14,6 +14,12 @@ You must install Qt5 library, taglib headers (`libtag1-dev` in Ubuntu) and pytho
 pip3 install --user -r requirements.txt
 ```
 
+You can then run `aidoru.py` directly or by invoking python3:
+
+```
+python3 ./aidoru.py
+```
+
 ***Linux users***, if this line:
 
 ```
