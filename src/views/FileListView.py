@@ -4,6 +4,7 @@ from operator import attrgetter
 from .PlayingAlbumView import PlayingAlbumView
 from .SearchView import SearchView
 from src.Application import Application
+from src.utils import dropShadow
 
 # file list view
 class FileListTableItemDelegate(QStyledItemDelegate):
@@ -27,6 +28,7 @@ class FileListTableWidget(QTableWidget):
         self.setHorizontalHeaderLabels(["Duration", "Name", "Artist", "Album", "Album artist", "Year", ""])
         self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents) # dur
         self.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents) # year
+        self.horizontalHeader().setGraphicsEffect(dropShadow())
         self.horizontalHeader().sectionClicked.connect(self.headerClicked)
         self.setEditTriggers(QAbstractItemView.NoEditTriggers);
         self.setShowGrid(False)

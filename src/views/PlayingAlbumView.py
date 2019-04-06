@@ -5,6 +5,7 @@ from .PlayerWidget import PlayerWidget
 from .MediaLabel import MediaLabel
 from src.utils import clearLayout, pathUp, dropShadow
 from src.Application import Application
+import sys
 
 class PlayingAlbumView(QWidget):
 
@@ -37,13 +38,20 @@ class PlayingAlbumView(QWidget):
         hbox.setLayout(hboxLayout)
 
         self.coverLabel = coverLabel = QLabel()
+        self.coverRatio = 0
         coverLabel.setGraphicsEffect(dropShadow())
-        size = QSize(400 + coverLabel.graphicsEffect().blurRadius()*2,
-                     400 + coverLabel.graphicsEffect().blurRadius()*2)
-        coverLabel.setMinimumSize(size)
-        coverLabel.setMaximumSize(size)
+        size = QSize(300 + coverLabel.graphicsEffect().blurRadius()*2,
+                     300 + coverLabel.graphicsEffect().blurRadius()*2)
+        coverLabel.resize(size)
+        def resizeEvent(event):
+            if not self.isVisible() or coverLabel.height() == 0:
+                return
+            if abs((coverLabel.width() / coverLabel.height()) - self.coverRatio) > sys.float_info.epsilon:
+                x = coverLabel.height()
+                coverLabel.resize(QSize(self.coverRatio*x, x))
+        coverLabel.resizeEvent = resizeEvent
         coverLabel.hide()
-        hboxLayout.addWidget(coverLabel,Qt.AlignTop)
+        hboxLayout.addWidget(coverLabel,Qt.AlignRight)
 
         # media box
         self.scrollArea = scrollArea = QScrollArea()
@@ -71,7 +79,9 @@ class PlayingAlbumView(QWidget):
     def songInfoChanged(self, mediaInfo):
         # song info
         if mediaInfo.image:
-            self.coverLabel.setPixmap(QPixmap(mediaInfo.image).scaledToWidth(400, Qt.SmoothTransformation))
+            pixmap = QPixmap(mediaInfo.image).scaledToWidth(400, Qt.SmoothTransformation)
+            self.coverLabel.setPixmap(pixmap)
+            self.coverRatio = pixmap.width() / pixmap.height()
             self.coverLabel.show()
         else:
             self.coverLabel.hide()

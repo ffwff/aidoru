@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtMultimedia import *
 from src.Application import Application
+from src.utils import dropShadow, dropShadowUp
 from .WindowDragger import WindowDragger
 
 class PlayerWidget(WindowDragger, QWidget):
@@ -109,9 +110,10 @@ class PlayerWidget(WindowDragger, QWidget):
 
         # widget mode - separated because it's fundamentally different
         if self.mode == PlayerWidget.WIDGET_MODE:
-            vboxLayout.setContentsMargins(0,0,0,5)
+            vboxLayout.addStretch()
             vboxLayout.addWidget(buttonsWidget)
 
+            buttonsLayout.setContentsMargins(0,0,5,5)
             buttonsLayout.addWidget(backButton)
             buttonsLayout.addWidget(ppButton)
             buttonsLayout.addWidget(forwardButton)
@@ -136,6 +138,10 @@ class PlayerWidget(WindowDragger, QWidget):
             volumeSlider.setMaximum(100)
             volumeSlider.setValue(100)
             buttonsLayout.addWidget(volumeSlider)
+
+            buttonsWidget.setGraphicsEffect(dropShadowUp())
+            buttonsWidget.setFixedHeight(buttonsWidget.sizeHint().height())
+            self.setFixedHeight(buttonsWidget.sizeHint().height()+buttonsWidget.graphicsEffect().blurRadius())
 
     def setMode(self, mode):
         self.mode = mode

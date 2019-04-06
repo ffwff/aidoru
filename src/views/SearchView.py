@@ -103,11 +103,20 @@ class SearchView(QWidget):
         scrollArea.installEventFilter(self)
         vlayout.addWidget(scrollArea)
 
-        layoutw = QWidget(scrollArea)
-        scrollArea.setWidget(layoutw)
-        self.albumLayout = layout = QHBoxLayout(layoutw)
-        layoutw.setLayout(layout)
-        layout.setContentsMargins(0,0,0,0)
+        self.albumContainer = QWidget(scrollArea)
+        scrollArea.setWidget(self.albumContainer)
+
+        self.nchild = 0
+        self.albumLabels = []
+
+    # album add
+    def addAlbumLabel(self, albumLabel):
+        albumLabel.setParent(self.albumContainer)
+        albumLabel.move(QPoint(self.nchild*albumLabel.width(), 0))
+        self.albumLabels.append(albumLabel)
+        self.nchild += 1
+        self.albumContainer.setMinimumSize(self.nchild*albumLabel.width(), 0)
+        albumLabel.show()
 
     # events
     def bindEvents(self):
@@ -124,27 +133,31 @@ class SearchView(QWidget):
         self.parentWidget().tableWidget.filterText = text
         self.parentWidget().tableWidget.sortAndFilter()
 
-        clearLayout(self.albumLayout)
+        self.nchild = 0
+        for albumLabel in self.albumLabels:
+            albumLabel.deleteLater()
+        self.albumLabels.clear()
+
         albums = [v for k, v in Application.mainWindow.albums.items() if text in v.title.lower()]
         if not albums:
             self.albumScroll.hide()
             return
         self.albumScroll.show()
         albums.sort()
+
         if len(albums) <= 5:
             for album in albums:
-                self.albumLayout.addWidget(AlbumLabel(self, album))
-            self.albumLayout.addStretch()
+                self.addAlbumLabel(AlbumLabel(self, album))
         else:
             albums = iter(albums)
             def iteration():
                 if self.searchBox.text() != text:
                     return
                 try:
-                    self.albumLayout.addWidget(AlbumLabel(self, next(albums)))
+                    self.addAlbumLabel(AlbumLabel(self, next(albums)))
                     QTimer.singleShot(1, iteration)
                 except StopIteration:
-                    self.albumLayout.addStretch()
+                    return
             iteration()
 
     def openButtonClicked(self):

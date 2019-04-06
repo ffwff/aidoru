@@ -23,7 +23,7 @@ QPushButton:hover {
 }
 QSlider::groove:horizontal {
     height: 6px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(127, 127, 127, 0.2);
     margin: 0 0;
 }
 QSlider::sub-page:horizontal {
@@ -41,7 +41,7 @@ QScrollArea { background: transparent; }
 QScrollArea > QWidget > QWidget { background: transparent; }
 QScrollArea > QWidget > QScrollBar { background: #fff; }
 QScrollBar{
-    background: white;
+    background: transparent;
     width: 8px;
 }
 QScrollBar::handle {
@@ -91,6 +91,9 @@ QHeaderView::section:hover, ::item:selected{
 .micro-mode #artist-label {
     font-size: 12px;
 }
+.widget-mode .buttons-widget {
+    background: white;
+}
 .buttons-widget QPushButton {
     width: 24px;
     height: 24px;
@@ -118,9 +121,6 @@ QHeaderView::section:hover, ::item:selected{
 #media-player-menu QPushButton:hover {
 background: #dae6ee;
 }
-.widget-mode > QWidget {
-    border-top: 1px solid #b1b1b1;
-}
 .widget-mode #album-label {
     font-size: 8px;
     height: 10px;
@@ -134,8 +134,12 @@ background: #dae6ee;
 .media-box QLabel{
     padding: 5px;
 }
-.media-box QLabel:hover, .media-box QLabel.active {
+.media-box QLabel:hover {
     background: #9fabb3;
+    color: #fff;
+}
+.media-box QLabel.active {
+    background: #778791;
     color: #fff;
 }
 #window-decorations QPushButton {
