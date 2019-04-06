@@ -38,8 +38,8 @@ def dropShadow():
 
 def dropShadowUp():
     effect = QGraphicsDropShadowEffect()
-    effect.setBlurRadius(15)
+    effect.setBlurRadius(10)
     effect.setXOffset(0)
-    effect.setYOffset(-5)
+    effect.setYOffset(-3)
     effect.setColor(QColor(0, 0, 0, 25))
     return effect

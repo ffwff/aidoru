@@ -82,7 +82,6 @@ class MediaPlayer(QWidget):
         self.view = self.fileListView
         layout.addWidget(self.view, 0, 1)
 
-        # window decorations
         self.windowDecorations = QWidget(self)
         self.windowDecorations.setObjectName("window-decorations")
         self.windowDecorations.resize(QSize(0, 24))
@@ -109,6 +108,7 @@ class MediaPlayer(QWidget):
             child.resize(QSize(24,24))
             width += child.width()
         self.windowDecorations.resize(QSize(width, 24))
+        self.windowDecorations.raise_()
 
     def setMode(self, mode):
         if mode == self.mode: return False
@@ -134,9 +134,17 @@ class MediaPlayer(QWidget):
         self.windowDecorations.setVisible(enabled)
 
     def resizeEvent(self, event):
-        self.updateCloseButton()
-
-    def updateCloseButton(self):
         self.windowDecorations.move(QPoint(
             self.size().width() - self.windowDecorations.width() - 4,
             5))
+
+    def mousePressEvent(self, event):
+        # HACK: qt doesn't allow redirect mouse events for buttons in "background" widgets
+        for btn in self.windowDecorations.children():
+            if isinstance(btn, QPushButton):
+                x = self.windowDecorations.x() + btn.x()
+                y = self.windowDecorations.y() + btn.y()
+                if x <= event.x() <= x+btn.width() and \
+                   y <= event.y() <= x+btn.height():
+                    btn.click()
+                    return

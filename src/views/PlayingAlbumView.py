@@ -5,7 +5,6 @@ from .PlayerWidget import PlayerWidget
 from .MediaLabel import MediaLabel
 from src.utils import clearLayout, pathUp, dropShadow
 from src.Application import Application
-import sys
 
 class PlayingAlbumView(QWidget):
 
@@ -38,18 +37,9 @@ class PlayingAlbumView(QWidget):
         hbox.setLayout(hboxLayout)
 
         self.coverLabel = coverLabel = QLabel()
+        self.coverPixmap = None
         self.coverRatio = 0
         coverLabel.setGraphicsEffect(dropShadow())
-        size = QSize(300 + coverLabel.graphicsEffect().blurRadius()*2,
-                     300 + coverLabel.graphicsEffect().blurRadius()*2)
-        coverLabel.resize(size)
-        def resizeEvent(event):
-            if not self.isVisible() or coverLabel.height() == 0:
-                return
-            if abs((coverLabel.width() / coverLabel.height()) - self.coverRatio) > sys.float_info.epsilon:
-                x = coverLabel.height()
-                coverLabel.resize(QSize(self.coverRatio*x, x))
-        coverLabel.resizeEvent = resizeEvent
         coverLabel.hide()
         hboxLayout.addWidget(coverLabel,Qt.AlignRight)
 
@@ -57,7 +47,7 @@ class PlayingAlbumView(QWidget):
         self.scrollArea = scrollArea = QScrollArea()
         scrollArea.setWidgetResizable(True)
         scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scrollArea.setMinimumSize(QSize(310, 300))
+        scrollArea.setMinimumSize(QSize(310, 350))
         scrollArea.hide()
         hboxLayout.addWidget(scrollArea,Qt.AlignTop)
 
@@ -71,6 +61,15 @@ class PlayingAlbumView(QWidget):
 
         vboxLayout.addStretch(1)
 
+    def resizeEvent(self, event):
+        if not self.coverPixmap or self.coverLabel.height() == 0:
+            return
+        h = min(self.coverPixmap.height(), self.parentWidget().height()*0.5)
+        w = self.coverRatio*h
+        self.coverLabel.setPixmap(self.coverPixmap.scaledToHeight(h, Qt.SmoothTransformation))
+        self.coverLabel.resize(w, h)
+        self.coverLabel.move(QPoint(self.coverLabel.parentWidget().width()-self.scrollArea.width()-w-20, 0))
+
     def bindEvents(self):
         mainWindow = Application.mainWindow
         mainWindow.albumChanged.connect(self.populateAlbum)
@@ -79,7 +78,7 @@ class PlayingAlbumView(QWidget):
     def songInfoChanged(self, mediaInfo):
         # song info
         if mediaInfo.image:
-            pixmap = QPixmap(mediaInfo.image).scaledToWidth(400, Qt.SmoothTransformation)
+            self.coverPixmap = pixmap = QPixmap(mediaInfo.image)
             self.coverLabel.setPixmap(pixmap)
             self.coverRatio = pixmap.width() / pixmap.height()
             self.coverLabel.show()

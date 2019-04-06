@@ -92,7 +92,7 @@ QHeaderView::section:hover, ::item:selected{
     font-size: 12px;
 }
 .widget-mode .buttons-widget {
-    background: white;
+    background: #fdfdfd;
 }
 .buttons-widget QPushButton {
     width: 24px;
@@ -115,7 +115,7 @@ QHeaderView::section:hover, ::item:selected{
     padding: 10px;
 }
 #media-player-menu *, #media-player-menu QPushButton{
-    background: #f3f3f3;
+    background: #fafafa;
     border-right: 1px solid #eef1f4;
 }
 #media-player-menu QPushButton:hover {

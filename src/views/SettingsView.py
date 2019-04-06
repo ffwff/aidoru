@@ -99,11 +99,12 @@ class SettingsForm(QWidget):
                     module.enable()
                 settings.modules[module.id] = module.enabled
                 settings.save()
+            def moduleStateChanged(checkbox, state):
                 checkbox.blockSignals(True)
-                checkbox.setCheckState(Qt.Checked if module.enabled else Qt.Unchecked)
+                checkbox.setCheckState(Qt.Checked if state else Qt.Unchecked)
                 checkbox.blockSignals(False)
-            checkbox.setCheckState(Qt.Checked if module.enabled else Qt.Unchecked)
             checkbox.stateChanged.connect(partial(stateChanged, (checkbox, module)))
+            module.connect(partial(moduleStateChanged, checkbox))
             layout.addWidget(checkbox)
 
         vboxLayout.addStretch(2)

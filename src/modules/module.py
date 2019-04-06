@@ -6,7 +6,8 @@ class BaseModule:
         self.enabled = False
 
         self.__class__._cbs = set()
-        def connect(fn):
+        def connect(*args):
+            fn = args[-1]
             fn(self.enabled)
             self.__class__._cbs.add(fn)
         self.__class__.connect = connect
