@@ -61,10 +61,10 @@ class PlayingAlbumView(QWidget):
 
         vboxLayout.addStretch(1)
 
-    def resizeEvent(self, event):
+    def windowResizeEvent(self):
         if not self.coverPixmap or self.coverLabel.height() == 0:
             return
-        h = min(self.coverPixmap.height(), self.parentWidget().height()*0.5)
+        h = min(self.coverPixmap.height(), Application.mainWindow.height()*0.5)
         w = self.coverRatio*h
         self.coverLabel.setPixmap(self.coverPixmap.scaledToHeight(h, Qt.SmoothTransformation))
         self.coverLabel.resize(w, h)
@@ -72,6 +72,7 @@ class PlayingAlbumView(QWidget):
 
     def bindEvents(self):
         mainWindow = Application.mainWindow
+        mainWindow.windowResized.connect(self.windowResizeEvent)
         mainWindow.albumChanged.connect(self.populateAlbum)
         mainWindow.songInfoChanged.connect(self.songInfoChanged)
 
@@ -79,9 +80,11 @@ class PlayingAlbumView(QWidget):
         # song info
         if mediaInfo.image:
             self.coverPixmap = pixmap = QPixmap(mediaInfo.image)
-            self.coverLabel.setPixmap(pixmap)
-            self.coverRatio = pixmap.width() / pixmap.height()
-            self.coverLabel.show()
+            if pixmap.height() == 0: self.coverPixmap = None
+            else:
+                self.coverLabel.setPixmap(pixmap)
+                self.coverRatio = pixmap.width() / pixmap.height()
+                self.coverLabel.show()
         else:
             self.coverLabel.hide()
         self.albumLabel.setText(mediaInfo.album)

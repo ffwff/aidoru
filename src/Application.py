@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtNetwork import *
+from PyQt5.QtGui import QIcon
 from urllib.request import urlopen
 from src import __version__
 from src.models.Settings import settings
@@ -13,6 +14,8 @@ class Application(QApplication):
 
     def __init__(self, argv):
         QApplication.__init__(self, argv)
+        self.setApplicationName("aidoru music player")
+        self.setWindowIcon(QIcon("./icons/icon.ico"))
 
     def exec(_):
         self = Application

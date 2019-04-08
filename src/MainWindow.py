@@ -57,6 +57,8 @@ class MainWindow(QMainWindow):
         # events
         self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
         self.media.durationChanged.connect(self.durationChanged)
+        self.media.volumeChanged.connect(self.volumeChanged)
+        self.media.setVolume(settings.volume)
 
         QShortcut(QKeySequence("Ctrl+Q"), self).activated \
             .connect(sys.exit)
@@ -117,6 +119,11 @@ class MainWindow(QMainWindow):
     def showEvent(self, event):
         QMainWindow.showEvent(self, event)
         self.windowShow.emit()
+
+    windowResized = pyqtSignal()
+    def resizeEvent(self, event):
+        QMainWindow.resizeEvent(self, event)
+        self.windowResized.emit()
 
     def setStyles(self):
         self.setStyleSheet(Database.loadFile("style.css",
@@ -234,6 +241,9 @@ class MainWindow(QMainWindow):
         if idx == -1: return
         if 0 <= idx+delta < len(array):
             self.setSong(array[idx+delta])
+
+    def volumeChanged(self, volume):
+        settings.volume = volume
 
     # files
     mediasAdded = pyqtSignal(list)

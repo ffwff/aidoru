@@ -17,7 +17,7 @@ class AlbumLabel(QWidget):
         self.setMaximumSize(size)
         self.resize(size)
 
-        width = 150
+        width = 140
 
         layout = QVBoxLayout(self)
         layout.setSpacing(0)
@@ -25,25 +25,26 @@ class AlbumLabel(QWidget):
 
         self.coverLabelContainer = coverLabelContainer = QWidget(self)
         coverLabelContainer.setObjectName("cover-label")
-        coverLabelContainer.setMinimumSize(QSize(width, width))
-        coverLabelContainer.setMaximumSize(QSize(width, width))
-        coverLabelContainer.setGraphicsEffect(dropShadow())
-        coverLabelContainerL = QHBoxLayout(coverLabelContainer)
-        coverLabelContainerL.setSpacing(0)
-        coverLabelContainerL.setContentsMargins(0, 0, 0, 0)
-        coverLabelContainer.setLayout(coverLabelContainerL)
+        coverLabelContainer.setMinimumSize(QSize(width+15, width+15))
         layout.addWidget(coverLabelContainer)
 
+        coverLabelBg = QLabel(coverLabelContainer)
+
+        self.coverLabel = coverLabel = QLabel(coverLabelContainer)
         if self.album.image:
-            self.coverLabel = coverLabel = QLabel(self)
             pixmap = QPixmap(self.album.image)
-            if pixmap.width() >= pixmap.height():
+            if pixmap.width() == 0 or pixmap.height() == 0:
+                pixmap = QIcon("./icons/album.svg").pixmap(QSize(width, width))
+            elif pixmap.width() >= pixmap.height():
                 pixmap = pixmap.scaledToWidth(width, Qt.SmoothTransformation)
             else:
                 pixmap = pixmap.scaledToHeight(width, Qt.SmoothTransformation)
-            coverLabel.setPixmap(pixmap)
-            coverLabel.setAlignment(Qt.AlignCenter)
-            coverLabelContainerL.addWidget(coverLabel)
+        else:
+            pixmap = QIcon("./icons/album.svg").pixmap(QSize(width, width))
+        coverLabel.setPixmap(pixmap)
+        coverLabel.setGraphicsEffect(dropShadow())
+        coverLabel.move(coverLabelContainer.width()//2 - pixmap.width()//2,
+                        coverLabelContainer.height()//2 - pixmap.height()//2)
 
         self.titleLabel = QLabel(self.album.title, self)
         self.titleLabel.setMaximumSize(QSize(self.width(), self.titleLabel.height()))
@@ -120,10 +121,11 @@ class SearchView(QWidget):
 
     # events
     def bindEvents(self):
+        Application.mainWindow.windowResized.connect(self.windowResizeEvent)
         self.searchBox.textChanged.connect(self.textChanged)
         self.openButton.clicked.connect(self.openButtonClicked)
 
-    def resizeEvent(self, event):
+    def windowResizeEvent(self):
         mediaPlayer = Application.mainWindow.centralWidget()
         size = QSize(mediaPlayer.windowDecorations.width(), 0)
         self.navbarPadding.setMinimumSize(size)

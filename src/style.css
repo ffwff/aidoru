@@ -18,7 +18,7 @@ QLineEdit, QPushButton {
     border-radius: 5px;
 }
 QPushButton:hover {
-    background: #9fabb3;
+    background: #a9c5e4;
     color: #fff;
 }
 QSlider::groove:horizontal {
@@ -27,11 +27,11 @@ QSlider::groove:horizontal {
     margin: 0 0;
 }
 QSlider::sub-page:horizontal {
-    background: #9fabb3;
+    background: #a9c5e4;
     border-radius: 4px;
 }
 QSlider::handle:horizontal {
-    background: #778791;
+    background: #7fa8d6;
     width: 6px;
 }
 QScrollArea{
@@ -45,7 +45,7 @@ QScrollBar{
     width: 8px;
 }
 QScrollBar::handle {
-    background:#9fabb3;
+    background:#a9c5e4;
     min-height: 20px;
 }
 QTableWidget{
@@ -66,19 +66,16 @@ QHeaderView::section {
     min-width: 50px;
 }
 QHeaderView::section:hover, ::item:selected{
-    background: #778791;
+    background: #7fa8d6;
     color: #fff;
 }
 ::item:hover {
-    background: #9fabb3;
+    background: #a9c5e4;
     color: #fff;
 }
 /* main mode */
 .main-mode QSlider, .micro-mode QSlider{
     margin-top:-7px;
-}
-#cover-label {
-    background: #000;
 }
 #album-label {
     font-size: 16px;
@@ -103,7 +100,8 @@ QHeaderView::section:hover, ::item:selected{
     padding: 0;
 }
 #volume-slider {
-    max-width: 100%;
+    max-width: 100px;
+    min-width: 100px;
 }
 /* media player */
 #media-player-menu QPushButton {
@@ -135,11 +133,11 @@ background: #dae6ee;
     padding: 5px;
 }
 .media-box QLabel:hover {
-    background: #9fabb3;
+    background: #a9c5e4;
     color: #fff;
 }
 .media-box QLabel.active {
-    background: #778791;
+    background: #7fa8d6;
     color: #fff;
 }
 #window-decorations QPushButton {

@@ -31,6 +31,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
+          icon='icons/icon.ico',
           console=("CONSOLE" in os.environ))
 coll = COLLECT(exe,
                a.binaries,

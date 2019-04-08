@@ -11,7 +11,8 @@ class Settings(object):
         "redrawBackground": True,
         "disableDecorations": False,
         "darkTheme": False,
-        "modules": {}
+        "modules": {},
+        "volume": 100
     }
     SETINGS_FILE = "settings.json"
 

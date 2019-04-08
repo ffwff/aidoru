@@ -136,7 +136,7 @@ class PlayerWidget(WindowDragger, QWidget):
             volumeSlider.setObjectName("volume-slider")
             volumeSlider.setMinimum(0)
             volumeSlider.setMaximum(100)
-            volumeSlider.setValue(100)
+            volumeSlider.setValue(Application.mainWindow.media.volume())
             buttonsLayout.addWidget(volumeSlider)
 
             buttonsWidget.setGraphicsEffect(dropShadowUp())
@@ -155,6 +155,7 @@ class PlayerWidget(WindowDragger, QWidget):
         ## pos slider
         media.durationChanged.connect(self.durationChanged)
         media.positionChanged.connect(self.positionChanged)
+        media.volumeChanged.connect(self.volumeChanged)
         self.positionSlider.valueChanged.connect(self.positionSliderChanged)
 
         # controls button
@@ -191,6 +192,12 @@ class PlayerWidget(WindowDragger, QWidget):
 
     def positionSliderChanged(self, position):
         Application.mainWindow.media.setPosition(position)
+
+    ## volume slider
+    def volumeChanged(self, volume):
+        self.volumeSlider.blockSignals(True)
+        self.volumeSlider.setValue(volume)
+        self.volumeSlider.blockSignals(False)
 
     ## controls
     def stateChanged(self, state):
