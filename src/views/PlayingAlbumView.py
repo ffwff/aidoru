@@ -40,6 +40,7 @@ class PlayingAlbumView(QWidget):
         self.coverPixmap = None
         self.coverRatio = 0
         coverLabel.setGraphicsEffect(dropShadow())
+        coverLabel.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         coverLabel.hide()
         hboxLayout.addWidget(coverLabel,Qt.AlignRight)
 
@@ -84,6 +85,7 @@ class PlayingAlbumView(QWidget):
             else:
                 self.coverLabel.setPixmap(pixmap)
                 self.coverRatio = pixmap.width() / pixmap.height()
+                self.windowResizeEvent()
                 self.coverLabel.show()
         else:
             self.coverLabel.hide()
