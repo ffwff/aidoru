@@ -19,7 +19,7 @@ QLineEdit, QPushButton {
     border-radius: 5px;
 }
 QPushButton:hover {
-    background: #9fabb3;
+    background: #a9c5e4;
     color: #fff;
 }
 QSlider::groove:horizontal {
@@ -28,11 +28,11 @@ QSlider::groove:horizontal {
     margin: 0 0;
 }
 QSlider::sub-page:horizontal {
-    background: #9fabb3;
+    background: #a9c5e4;
     border-radius: 4px;
 }
 QSlider::handle:horizontal {
-    background: #778791;
+    background: #7fa8d6;
     width: 6px;
 }
 QScrollArea{
@@ -46,7 +46,7 @@ QScrollBar{
     width: 8px;
 }
 QScrollBar::handle {
-    background:#9fabb3;
+    background:#a9c5e4;
 }
 QTableWidget{
     background-color: rgba(0,0,0,0.0);
@@ -66,11 +66,11 @@ QHeaderView::section {
     min-width: 50px;
 }
 QHeaderView::section:hover, ::item:selected{
-    background: #778791;
+    background: #7fa8d6;
     color: #fff;
 }
 ::item:hover {
-    background: #9fabb3;
+    background: #a9c5e4;
     color: #fff;
 }
 /* main mode */
@@ -131,7 +131,7 @@ background: #dae6ee;
     padding: 5px;
 }
 .media-box QLabel:hover, .media-box QLabel.active {
-    background: #9fabb3;
+    background: #a9c5e4;
     color: #fff;
 }
 
