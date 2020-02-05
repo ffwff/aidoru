@@ -1,4 +1,4 @@
-<h1 align="center"><a href="https://fw.neocities.org/aidoru.html">aidoru</a></h1>
+<h1 align="center"><a href="https://fw.neocities.org/aidoru">aidoru</a></h1>
 
 <p align="center">a qt music player in python</p>
 
