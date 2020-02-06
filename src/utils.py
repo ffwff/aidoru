@@ -2,6 +2,7 @@ import os
 from PyQt5.QtCore import QMimeDatabase
 from PyQt5.QtWidgets import QGraphicsDropShadowEffect
 from PyQt5.QtGui import QColor
+import re
 
 def pathUp(path):
     if path.startswith("file://"):
@@ -43,3 +44,6 @@ def dropShadowUp():
     effect.setYOffset(-3)
     effect.setColor(QColor(0, 0, 0, 25))
     return effect
+
+def highlightText(text, sub):
+    return re.sub("(%s)" % re.escape(sub), r"<b>\1</b>", text, flags=re.IGNORECASE)

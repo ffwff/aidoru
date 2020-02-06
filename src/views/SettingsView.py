@@ -22,7 +22,7 @@ class SettingsForm(QWidget):
         vboxLayout.addStretch(1)
 
         # ui options
-        vboxLayout.addWidget(QLabel("User interface"))
+        vboxLayout.addWidget(QLabel("<b>User interface</b>"))
 
         layoutw = QWidget()
         layout = QVBoxLayout()
@@ -38,7 +38,7 @@ class SettingsForm(QWidget):
         layout.addWidget(self.redrawBackgroundOption)
 
         # media location
-        vboxLayout.addWidget(QLabel("Media Location"))
+        vboxLayout.addWidget(QLabel("<b>Media Location</b>"))
 
         layoutw = QWidget()
         layout = QHBoxLayout()
@@ -68,7 +68,7 @@ class SettingsForm(QWidget):
         layout.addWidget(musicRefreshButton)
 
         # updates
-        vboxLayout.addWidget(QLabel("Updates"))
+        vboxLayout.addWidget(QLabel("<b>Updates</b>"))
 
         layoutw = QWidget()
         layout = QHBoxLayout()
@@ -82,7 +82,7 @@ class SettingsForm(QWidget):
         layout.addWidget(checkUpdates)
 
         # modules
-        vboxLayout.addWidget(QLabel("Modules"))
+        vboxLayout.addWidget(QLabel("<b>Modules</b>"))
 
         layoutw = QWidget()
         layout = QVBoxLayout()

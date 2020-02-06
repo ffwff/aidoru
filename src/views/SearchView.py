@@ -2,16 +2,16 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from src.Application import Application
-from src.utils import clearLayout, dropShadow
+from src.utils import clearLayout, dropShadow, highlightText
 
 class AlbumLabel(QWidget):
 
-    def __init__(self, parent, album):
+    def __init__(self, parent, album, highlight=None):
         QWidget.__init__(self, parent)
         self.album = album
-        self.initUI()
+        self.initUI(highlight)
 
-    def initUI(self):
+    def initUI(self, highlight=None):
         size = QSize(165, 200)
         self.setMinimumSize(size)
         self.setMaximumSize(size)
@@ -46,7 +46,10 @@ class AlbumLabel(QWidget):
         coverLabel.move(coverLabelContainer.width()//2 - pixmap.width()//2,
                         coverLabelContainer.height()//2 - pixmap.height()//2)
 
-        self.titleLabel = QLabel(self.album.title, self)
+        if highlight != None:
+          self.titleLabel = QLabel(highlightText(self.album.title, highlight), self)
+        else:
+          self.titleLabel = QLabel(self.album.title, self)
         self.titleLabel.setMaximumSize(QSize(self.width(), self.titleLabel.height()))
         layout.addWidget(self.titleLabel)
 
@@ -95,7 +98,6 @@ class SearchView(QWidget):
         #self.navbarPadding.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         layout.addWidget(self.navbarPadding)
 
-        #
         self.albumScroll = scrollArea = QScrollArea()
         scrollArea.hide()
         scrollArea.setMinimumSize(QSize(0, 200))
@@ -149,14 +151,14 @@ class SearchView(QWidget):
 
         if len(albums) <= 5:
             for album in albums:
-                self.addAlbumLabel(AlbumLabel(self, album))
+                self.addAlbumLabel(AlbumLabel(self, album, text))
         else:
             albums = iter(albums)
             def iteration():
                 if self.searchBox.text() != text:
                     return
                 try:
-                    self.addAlbumLabel(AlbumLabel(self, next(albums)))
+                    self.addAlbumLabel(AlbumLabel(self, next(albums), text))
                     QTimer.singleShot(1, iteration)
                 except StopIteration:
                     return

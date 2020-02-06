@@ -44,6 +44,9 @@ QScrollBar{
     background: transparent;
     width: 8px;
 }
+QScrollBar::add-line, QScrollBar::sub-line {
+  background: transparent;
+}
 QScrollBar::handle {
     background:#a9c5e4;
     min-height: 20px;

@@ -4,7 +4,7 @@ from operator import attrgetter
 from .PlayingAlbumView import PlayingAlbumView
 from .SearchView import SearchView
 from src.Application import Application
-from src.utils import dropShadow
+from src.utils import dropShadow, highlightText
 
 # file list view
 class FileListTableItemDelegate(QStyledItemDelegate):
@@ -36,10 +36,12 @@ class FileListTableWidget(QTableWidget):
 
         self.hoverRow = -1
         self.nrows = 0
-        self.mediaRow = []
         self.sortKey = "title"
         self.sortRev = False
         self.filterText = ""
+        self.mediaRow = []
+        
+        self.mediaBatch = 0
 
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
@@ -52,37 +54,37 @@ class FileListTableWidget(QTableWidget):
             pass
 
     # add item
-    def addMedia(self, mediaInfo, append=True):
+    def addMedia(self, mediaInfo, highlight=None):
         if not mediaInfo: return
         self.setRowCount(self.nrows+1)
         self.setItem(self.nrows, 0, QTableWidgetItem(mediaInfo.duration.strftime("%M:%S")))
-        self.setItem(self.nrows, 1, QTableWidgetItem(mediaInfo.title))
+        if highlight != None:
+            self.setCellWidget(self.nrows, 1, QLabel(highlightText(mediaInfo.title, highlight)))
+        else:
+            self.setItem(self.nrows, 1, QTableWidgetItem(mediaInfo.title))
         self.setItem(self.nrows, 2, QTableWidgetItem(mediaInfo.artist))
         self.setItem(self.nrows, 3, QTableWidgetItem(mediaInfo.album))
         self.setItem(self.nrows, 4, QTableWidgetItem(mediaInfo.albumArtist))
         self.setItem(self.nrows, 5, QTableWidgetItem(str(mediaInfo.year) if mediaInfo.year != -1 else ""))
         self.setItem(self.nrows, 6, QTableWidgetItem("")) # filler
         self.setRowHeight(self.nrows, 40)
-        if append: self.mediaRow.append(mediaInfo)
         self.nrows += 1
 
     def mediasAdded(self, medias, append=True):
-        for media in medias:
-            self.addMedia(media, append)
-
-    def mediasDeleted(self, medias):
-        removed = []
-        for i, m in enumerate(self.mediaRow):
-            for m_ in medias:
-                if m.path == m_.path:
-                    removed.append(m)
-                    break
-        for media in removed:
-            self.mediaRow.remove(media)
-        self.clearContents()
-        self.nrows = 0
-        self.setRowCount(0)
-        self.mediasAdded(self.mediaRow, False)
+        if append:
+          self.mediaRow += medias
+        medias = iter(medias)
+        self.mediaBatch += 1
+        batchNo = self.mediaBatch
+        def iteration():
+            if self.mediaBatch != batchNo:
+                return
+            try:
+                self.addMedia(next(medias))
+                QTimer.singleShot(1, iteration)
+            except StopIteration:
+                return
+        iteration()
 
     # data manip
     def sortAndFilter(self):
@@ -96,10 +98,8 @@ class FileListTableWidget(QTableWidget):
         self.setRowCount(0)
         if not self.mediaRow: return
 
-        self.mediaRow = sorted(self.mediaRow, key=attrgetter(self.sortKey), reverse=self.sortRev)
-
+        self.mediaRow.sort(key=attrgetter(self.sortKey), reverse=self.sortRev)
         self.mediasAdded(self.mediaRow, False)
-        self.selectPlaying()
 
     # events
     def headerClicked(self, index):
@@ -178,7 +178,7 @@ class FileListView(QWidget):
     # events
     def bindEvents(self):
         Application.mainWindow.mediasAdded.connect(self.tableWidget.mediasAdded)
-        Application.mainWindow.mediasDeleted.connect(self.tableWidget.mediasDeleted)
+        Application.mainWindow.mediasUpdated.connect(self.tableWidget.sortAndFilter)
         Application.mainWindow.songInfoChanged.connect(self.tableWidget.selectPlaying)
 
     def tableResizeEvent(self, event):
