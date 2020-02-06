@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
 
     initUIDone = pyqtSignal()
     def initUI(self):
-        self.setWindowTitle("aidoru~~")
+        self.setWindowTitle("aidoru")
         self.mode = None
 
         self.setMode(MainWindow.FULL_MODE)

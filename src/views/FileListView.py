@@ -58,7 +58,7 @@ class FileListTableWidget(QTableWidget):
         if not mediaInfo: return
         self.setRowCount(self.nrows+1)
         self.setItem(self.nrows, 0, QTableWidgetItem(mediaInfo.duration.strftime("%M:%S")))
-        if highlight != None:
+        if highlight:
             self.setCellWidget(self.nrows, 1, QLabel(highlightText(mediaInfo.title, highlight)))
         else:
             self.setItem(self.nrows, 1, QTableWidgetItem(mediaInfo.title))
@@ -70,7 +70,7 @@ class FileListTableWidget(QTableWidget):
         self.setRowHeight(self.nrows, 40)
         self.nrows += 1
 
-    def mediasAdded(self, medias, append=True):
+    def mediasAdded(self, medias, append=True, highlight=None):
         if append:
           self.mediaRow += medias
         medias = iter(medias)
@@ -80,7 +80,7 @@ class FileListTableWidget(QTableWidget):
             if self.mediaBatch != batchNo:
                 return
             try:
-                self.addMedia(next(medias))
+                self.addMedia(next(medias), highlight)
                 QTimer.singleShot(1, iteration)
             except StopIteration:
                 return
@@ -99,7 +99,7 @@ class FileListTableWidget(QTableWidget):
         if not self.mediaRow: return
 
         self.mediaRow.sort(key=attrgetter(self.sortKey), reverse=self.sortRev)
-        self.mediasAdded(self.mediaRow, False)
+        self.mediasAdded(self.mediaRow, False, self.filterText)
 
     # events
     def headerClicked(self, index):
