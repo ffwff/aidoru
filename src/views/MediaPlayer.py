@@ -145,6 +145,6 @@ class MediaPlayer(QWidget):
                 x = self.windowDecorations.x() + btn.x()
                 y = self.windowDecorations.y() + btn.y()
                 if x <= event.x() <= x+btn.width() and \
-                   y <= event.y() <= x+btn.height():
+                   y <= event.y() <= y+btn.height():
                     btn.click()
                     return
