@@ -18,7 +18,7 @@ QLineEdit, QPushButton {
     border-radius: 5px;
 }
 QPushButton:hover {
-    background: #a9c5e4;
+    background: ACCENT;
     color: #fff;
 }
 QSlider::groove:horizontal {
@@ -27,11 +27,11 @@ QSlider::groove:horizontal {
     margin: 0 0;
 }
 QSlider::sub-page:horizontal {
-    background: #a9c5e4;
+    background: ACCENT;
     border-radius: 4px;
 }
 QSlider::handle:horizontal {
-    background: #7fa8d6;
+    background: ACCENTDEEP;
     width: 6px;
 }
 QScrollArea{
@@ -48,7 +48,7 @@ QScrollBar::add-line, QScrollBar::sub-line {
   background: transparent;
 }
 QScrollBar::handle {
-    background:#a9c5e4;
+    background:ACCENT;
     min-height: 20px;
 }
 QTableWidget{
@@ -69,11 +69,11 @@ QHeaderView::section {
     min-width: 50px;
 }
 QHeaderView::section:hover, ::item:selected{
-    background: #7fa8d6;
+    background: ACCENTMID;
     color: #fff;
 }
 ::item:hover {
-    background: #a9c5e4;
+    background: ACCENT;
     color: #fff;
 }
 /* main mode */
@@ -136,11 +136,11 @@ background: #dae6ee;
     padding: 5px;
 }
 .media-box QLabel:hover {
-    background: #a9c5e4;
+    background: ACCENT;
     color: #fff;
 }
 .media-box QLabel.active {
-    background: #7fa8d6;
+    background: ACCENTDEEP;
     color: #fff;
 }
 #window-decorations QPushButton {

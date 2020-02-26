@@ -125,8 +125,11 @@ class MainWindow(QMainWindow):
         self.windowResized.emit()
 
     def setStyles(self):
-        self.setStyleSheet(Database.loadFile("style.css",
-                           "dark.css" if settings.darkTheme else "style.css"))
+        stylesheet = Database.loadFile("style.css", "dark.css" if settings.darkTheme else "style.css")
+        stylesheet = stylesheet.replace("ACCENTDEEP", settings.accentDeep) \
+                      .replace("ACCENTMID", settings.accentMid)    \
+                      .replace("ACCENT", settings.accent)
+        self.setStyleSheet(stylesheet)
 
     def setMode(self, mode):
         if mode == self.mode: return
@@ -195,9 +198,13 @@ class MainWindow(QMainWindow):
             e.ignore()
 
     def dropEvent(self, e):
-        text = e.mimeData().text()
-        if text.startswith("file://"):
-            self.setSong(text)
+        if e.mimeData().hasUrls():
+            url = e.mimeData().urls()[0].url()
+            self.setSong(url)
+        elif e.mimeData().hasText():
+            text = e.mimeData().text()
+            if text.startswith("file://"):
+                self.setSong(text)
 
     # album
     albumChanged = pyqtSignal(AlbumInfo)
@@ -223,24 +230,29 @@ class MainWindow(QMainWindow):
             return i
         except StopIteration:
             return -1
-
-    def nextSong(self):
-        if self.mode == MainWindow.FULL_MODE and self.centralWidget().mode != MediaPlayer.PLAYING_ALBUM_MODE:
-            self.nextSongArray(self.medias, 1)
-        elif self.album:
-            self.nextSongArray(self.album.medias, 1)
-    def prevSong(self):
-        if self.mode == MainWindow.FULL_MODE and self.centralWidget().mode != MediaPlayer.PLAYING_ALBUM_MODE:
-            self.nextSongArray(self.medias, -1)
-        elif self.album:
-            self.nextSongArray(self.album.medias, -1)
-
     def nextSongArray(self, array, delta):
         idx = self.songIndex(array)
         if idx == -1: return
         if 0 <= idx+delta < len(array):
             self.setSong(array[idx+delta])
 
+    def navigateSong(self, num):
+        if self.mode == MainWindow.FULL_MODE:
+            mode = self.centralWidget().mode
+            if mode == MediaPlayer.PLAYING_ALBUM_MODE:
+                self.nextSongArray(self.album.medias, num)
+            else:
+                self.nextSongArray(self.centralWidget().view.tableWidget.mediaRow, num)
+        elif self.album:
+            self.nextSongArray(self.album.medias, num)
+
+    def nextSong(self):
+        self.navigateSong(1)
+    def prevSong(self):
+        self.navigateSong(-1)
+
+
+    # volume
     def volumeChanged(self, volume):
         settings.volume = volume
 

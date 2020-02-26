@@ -12,7 +12,10 @@ class Settings(object):
         "disableDecorations": False,
         "darkTheme": False,
         "modules": {},
-        "volume": 100
+        "volume": 100,
+        "accent": "#a9c5e4",
+        "accentMid": "#7fa8d6",
+        "accentDeep": "#7fa8d6",
     }
     SETINGS_FILE = "settings.json"
 
