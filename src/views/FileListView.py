@@ -84,7 +84,9 @@ class FileListTableWidget(QTableWidget):
                 QTimer.singleShot(1, iteration)
             except:
                 return
-        iteration()
+        # wait for the previous set of iteration
+        # to finish before firing another one
+        QTimer.singleShot(2, iteration)
 
     # data manip
     def sortAndFilter(self):
@@ -96,7 +98,10 @@ class FileListTableWidget(QTableWidget):
         self.clearContents()
         self.nrows = 0
         self.setRowCount(0)
-        if not self.mediaRow: return
+        if not self.mediaRow:
+            self.mediaBatch += 1
+            QTimer.singleShot(2, lambda: self.clearContents())
+            return
 
         self.mediaRow.sort(key=attrgetter(self.sortKey), reverse=self.sortRev)
         self.mediasAdded(self.mediaRow, False, self.filterText)
