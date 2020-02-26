@@ -94,8 +94,8 @@ class SearchView(QWidget):
         self.openButton = QPushButton("Open")
         layout.addWidget(self.openButton)
 
-        self.navbarPadding = QWidget() # HACK
-        #self.navbarPadding.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        # HACK to pad the search bar
+        self.navbarPadding = QWidget()
         layout.addWidget(self.navbarPadding)
 
         self.albumScroll = scrollArea = QScrollArea()
@@ -165,7 +165,6 @@ class SearchView(QWidget):
             iteration()
 
     def openButtonClicked(self):
-        print(self.searchBox.text())
         Application.mainWindow.setSong(self.searchBox.text())
 
     # album events
@@ -184,6 +183,7 @@ class SearchView(QWidget):
         if self.parentWidget().parentWidget().mode == MediaPlayer.FILE_LIST_MODE:
             self.setVisible(not self.isVisible())
         else:
+            self.windowResizeEvent()
             self.parentWidget().parentWidget().setMode(MediaPlayer.FILE_LIST_MODE)
             self.show()
         if self.isVisible():

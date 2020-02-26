@@ -126,7 +126,7 @@ class MainWindow(QMainWindow):
 
     def setStyles(self):
         self.setStyleSheet(Database.loadFile("style.css",
-                           "style.css" if not settings.darkTheme else "dark.css"))
+                           "dark.css" if settings.darkTheme else "style.css"))
 
     def setMode(self, mode):
         if mode == self.mode: return

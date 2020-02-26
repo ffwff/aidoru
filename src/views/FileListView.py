@@ -82,7 +82,7 @@ class FileListTableWidget(QTableWidget):
             try:
                 self.addMedia(next(medias), highlight)
                 QTimer.singleShot(1, iteration)
-            except StopIteration:
+            except:
                 return
         iteration()
 
