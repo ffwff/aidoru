@@ -7,7 +7,7 @@ from src.Application import Application
 from src.utils import dropShadow, highlightText
 import re
 
-FILTER_REGEX = re.compile(r'(artist|album|aartist)\:"((?:[^"\\]|\\.)*)"', re.IGNORECASE)
+FILTER_REGEX = re.compile(r'\b(artist|album|aartist)\:"((?:[^"\\]|\\.)*)"', re.IGNORECASE)
 
 # file list view
 class FileListTableItemDelegate(QStyledItemDelegate):
@@ -97,6 +97,7 @@ class FileListTableWidget(QTableWidget):
         if self.filterText:
             self.specialFilter = True
             matches = FILTER_REGEX.findall(self.filterText)
+            print(matches)
             if matches:
                 matches = list(map(lambda m: (m[0], m[1].lower()), matches))
                 def func(media):
