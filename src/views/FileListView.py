@@ -5,6 +5,9 @@ from .PlayingAlbumView import PlayingAlbumView
 from .SearchView import SearchView
 from src.Application import Application
 from src.utils import dropShadow, highlightText
+import re
+
+FILTER_REGEX = re.compile(r'(artist|album|aartist)\:"((?:[^"\\]|\\.)*)"', re.IGNORECASE)
 
 # file list view
 class FileListTableItemDelegate(QStyledItemDelegate):
@@ -39,6 +42,7 @@ class FileListTableWidget(QTableWidget):
         self.sortKey = "title"
         self.sortRev = False
         self.filterText = ""
+        self.specialFilter = False
         self.mediaRow = []
         
         self.mediaBatch = 0
@@ -91,7 +95,26 @@ class FileListTableWidget(QTableWidget):
     # data manip
     def sortAndFilter(self):
         if self.filterText:
-            self.mediaRow = list(filter(lambda media: self.filterText.lower() in media.title.lower(), Application.mainWindow.medias))
+            self.specialFilter = True
+            matches = FILTER_REGEX.findall(self.filterText)
+            if matches:
+                matches = list(map(lambda m: (m[0], m[1].lower()), matches))
+                def func(media):
+                    for (key, value) in matches:
+                        if key == "artist":
+                            if value not in media.artist.lower():
+                                return False
+                        elif key == "album":
+                            if value not in media.album.lower():
+                                return False
+                        elif key == "aalbum":
+                            if value not in media.albumArtist.lower():
+                                return False
+                    return True
+                self.mediaRow = list(filter(func, Application.mainWindow.medias))
+            else:
+                self.specialFilter = False
+                self.mediaRow = list(filter(lambda media: self.filterText.lower() in media.title.lower(), Application.mainWindow.medias))
         else:
             self.mediaRow = Application.mainWindow.medias
 

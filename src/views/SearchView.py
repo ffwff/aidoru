@@ -137,6 +137,9 @@ class SearchView(QWidget):
         self.parentWidget().tableWidget.filterText = text
         self.parentWidget().tableWidget.sortAndFilter()
 
+        if self.parentWidget().tableWidget.specialFilter:
+            return
+
         self.nchild = 0
         for albumLabel in self.albumLabels:
             albumLabel.deleteLater()
