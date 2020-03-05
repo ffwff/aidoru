@@ -108,7 +108,7 @@ class FileListTableWidget(QTableWidget):
                         elif key == "album":
                             if value not in media.album.lower():
                                 return False
-                        elif key == "aalbum":
+                        elif key == "aartist":
                             if value not in media.albumArtist.lower():
                                 return False
                     return True
