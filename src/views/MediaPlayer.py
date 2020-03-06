@@ -62,6 +62,21 @@ class MediaPlayer(QWidget):
         self.bindEvents()
 
     def initUI(self):
+        self.background = QGraphicsScene(self)
+        self.background.setBackgroundBrush(Qt.black)
+        self.backgroundLabel = QGraphicsView(self.background, self)
+        self.backgroundItem = QGraphicsPixmapItem()
+        self.backgroundItem.setOpacity(0.6)
+        self.background.addItem(self.backgroundItem)
+        blur = QGraphicsBlurEffect()
+        blur.setBlurRadius(90)
+        self.backgroundItem.setGraphicsEffect(blur)
+
+        def resizeBg():
+            self.backgroundLabel.setGeometry(self.geometry())
+            self.backgroundLabel.fitInView(self.backgroundItem, Qt.IgnoreAspectRatio)
+        QTimer.singleShot(0, resizeBg)
+
         self.layout = layout = QGridLayout()
         self.setLayout(layout)
         layout.setContentsMargins(0,0,0,0)
@@ -126,17 +141,32 @@ class MediaPlayer(QWidget):
         return True
 
     #events
+
+    def setBackgroundFromPath(self, path):
+        self.backgroundItem.setPixmap(QPixmap(path).scaled(self.width(), self.height()))
+        self.resizeBg()
+
     def bindEvents(self):
         from src.modules.disablewindowdecorations import DisableWindowDecorationsModule
         DisableWindowDecorationsModule.connect(self.windowDecorationsChanged)
+        self.parent().songInfoChanged.connect(self.songInfoChanged)
+    
+    def songInfoChanged(self, info):
+        self.setBackgroundFromPath(info.image)
 
     def windowDecorationsChanged(self, enabled):
         self.windowDecorations.setVisible(enabled)
+
+    def resizeBg(self):
+        self.backgroundLabel.setGeometry(self.geometry())
+        self.backgroundLabel.fitInView(self.backgroundItem, Qt.IgnoreAspectRatio)
 
     def resizeEvent(self, event):
         self.windowDecorations.move(QPoint(
             self.size().width() - self.windowDecorations.width() - 4,
             5))
+        self.resizeBg()
+        # self.backgroundLabel.setPixmap(self.background.scaled(self.size()))
 
     def mousePressEvent(self, event):
         # HACK: qt doesn't allow redirect mouse events for buttons in "background" widgets

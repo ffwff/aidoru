@@ -130,6 +130,8 @@ class MainWindow(QMainWindow):
                       .replace("ACCENTMID", settings.accentMid)    \
                       .replace("ACCENT", settings.accent)
         self.setStyleSheet(stylesheet)
+        if self.mode == MainWindow.FULL_MODE:
+            self.centralWidget().backgroundLabel.setVisible(settings.darkTheme)
 
     def setMode(self, mode):
         if mode == self.mode: return

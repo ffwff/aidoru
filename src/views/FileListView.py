@@ -28,7 +28,7 @@ class FileListTableWidget(QTableWidget):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.verticalHeader().setVisible(False)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.setHorizontalHeaderLabels(["Duration", "Name", "Artist", "Album", "Album artist", "Year", ""])
+        self.setHorizontalHeaderLabels(["Time", "Name", "Artist", "Album", "Album artist", "Year", ""])
         self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents) # dur
         self.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents) # year
         self.horizontalHeader().setGraphicsEffect(dropShadow())

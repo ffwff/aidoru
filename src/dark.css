@@ -1,19 +1,14 @@
 QMainWindow {
-    background: #3f3f3f;
+    background:#000;
 }
 QWidget {
     color: #fff;
 }
 /* widgets */
 QPushButton, QLineEdit {
-    color: rgb(153, 170, 181);
-    background: #f3f3f3;
-}
-QLineEdit {
-    color: #000;
-}
-QLineEdit, QPushButton {
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    color:#fff;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.9);
     padding: 5px 10px;
     border-radius: 5px;
 }
@@ -56,8 +51,12 @@ QTableWidget{
     alternate-background-color: rgba(0,0,0,0.1);
     border: 0 none;
 }
+QHeaderView{
+    background:transparent
+}
 QHeaderView::section, QHeaderView::section:last:hover {
-    background: ACCENTMID;
+    /* background: ACCENTMID; */
+    background: transparent;
 }
 QHeaderView::section {
     font-weight: bold;
@@ -91,7 +90,7 @@ QHeaderView::section:hover, ::item:selected{
     font-size: 12px;
 }
 .widget-mode .buttons-widget {
-    background: #31363b;
+    background: transparent;
 }
 .buttons-widget QPushButton {
     width: 24px;
@@ -115,8 +114,7 @@ QHeaderView::section:hover, ::item:selected{
     padding: 10px;
 }
 #media-player-menu *, #media-player-menu QPushButton{
-    background: #232629;
-    border-right: 1px solid rgba(0,0,0,0.5);
+    background: transparent;
 }
 #media-player-menu QPushButton:hover {
 background: #dae6ee;
